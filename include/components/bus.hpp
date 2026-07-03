@@ -14,21 +14,29 @@
 
 class Bus {
 public:
+	// Lambda used as callback to prevent circular dependencies but allow bus to inflict penalties due to RAM/ROM speeds
 	using WaitCallback = std::function<void(CycleCount cycles)>;
 
 	Bus();
+
+	// Lambda is passed in here to allow for this
 	void set_wait_callback(WaitCallback callback);
 
+	// Abstracts behaviour to find storage device that is to respond to read/write to a given address
 	Store* system_area(SNESAddress address); 
 	Store* route(SNESAddress address);
 
+	// Read and write behaviours, abstracted as above
 	void write(Address addr, Byte value);
 	Byte read(Address addr);
+
+	void load_cartridge(const std::vector<Byte>& rom);
 
 private:
 	WaitCallback callback;
 	Byte data_bus;
 
+	// RAII used as the bus owns all of the stores
 	std::unique_ptr<OpenBus> open_bus;
 	std::unique_ptr<WRAM> wram;
 

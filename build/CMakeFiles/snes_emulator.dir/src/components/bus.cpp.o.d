@@ -102,7 +102,7 @@ CMakeFiles/snes_emulator.dir/src/components/bus.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
  /usr/include/c++/13/bits/std_abs.h \
- /home/kctb/Projects/Emulators/snes-emulator/include/components/common.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/misc/common.hpp \
  /usr/include/c++/13/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
@@ -188,6 +188,7 @@ CMakeFiles/snes_emulator.dir/src/components/bus.cpp.o: \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
+ /home/kctb/Projects/Emulators/snes-emulator/include/misc/options.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/stores/open_bus.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/stores/store.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/stores/wram.hpp \

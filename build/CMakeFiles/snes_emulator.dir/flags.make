@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/kctb/Projects/Emulators/snes-emulator/include/stores -I/home/kctb/Projects/Emulators/snes-emulator/include/components
+CXX_INCLUDES = -I/home/kctb/Projects/Emulators/snes-emulator/include/stores -I/home/kctb/Projects/Emulators/snes-emulator/include/components -I/home/kctb/Projects/Emulators/snes-emulator/include/misc
 
 CXX_FLAGS = 
 

@@ -83,24 +83,10 @@ CMakeFiles/snes_emulator.dir/src/components/bus.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/snes_emulator.dir/src/components/bus.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kctb/Projects/Emulators/snes-emulator/src/components/bus.cpp -o CMakeFiles/snes_emulator.dir/src/components/bus.cpp.s
 
-CMakeFiles/snes_emulator.dir/src/components/common.cpp.o: CMakeFiles/snes_emulator.dir/flags.make
-CMakeFiles/snes_emulator.dir/src/components/common.cpp.o: /home/kctb/Projects/Emulators/snes-emulator/src/components/common.cpp
-CMakeFiles/snes_emulator.dir/src/components/common.cpp.o: CMakeFiles/snes_emulator.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/snes_emulator.dir/src/components/common.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/snes_emulator.dir/src/components/common.cpp.o -MF CMakeFiles/snes_emulator.dir/src/components/common.cpp.o.d -o CMakeFiles/snes_emulator.dir/src/components/common.cpp.o -c /home/kctb/Projects/Emulators/snes-emulator/src/components/common.cpp
-
-CMakeFiles/snes_emulator.dir/src/components/common.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/snes_emulator.dir/src/components/common.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kctb/Projects/Emulators/snes-emulator/src/components/common.cpp > CMakeFiles/snes_emulator.dir/src/components/common.cpp.i
-
-CMakeFiles/snes_emulator.dir/src/components/common.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/snes_emulator.dir/src/components/common.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kctb/Projects/Emulators/snes-emulator/src/components/common.cpp -o CMakeFiles/snes_emulator.dir/src/components/common.cpp.s
-
 CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o: CMakeFiles/snes_emulator.dir/flags.make
 CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o: /home/kctb/Projects/Emulators/snes-emulator/src/components/ricoh_5a22.cpp
 CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o: CMakeFiles/snes_emulator.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o -MF CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o.d -o CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o -c /home/kctb/Projects/Emulators/snes-emulator/src/components/ricoh_5a22.cpp
 
 CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.i: cmake_force
@@ -114,7 +100,7 @@ CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.s: cmake_force
 CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: CMakeFiles/snes_emulator.dir/flags.make
 CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: /home/kctb/Projects/Emulators/snes-emulator/src/components/snes.cpp
 CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: CMakeFiles/snes_emulator.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o -MF CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o.d -o CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o -c /home/kctb/Projects/Emulators/snes-emulator/src/components/snes.cpp
 
 CMakeFiles/snes_emulator.dir/src/components/snes.cpp.i: cmake_force
@@ -125,10 +111,38 @@ CMakeFiles/snes_emulator.dir/src/components/snes.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/snes_emulator.dir/src/components/snes.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kctb/Projects/Emulators/snes-emulator/src/components/snes.cpp -o CMakeFiles/snes_emulator.dir/src/components/snes.cpp.s
 
+CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o: CMakeFiles/snes_emulator.dir/flags.make
+CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o: /home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp
+CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o: CMakeFiles/snes_emulator.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o -MF CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o.d -o CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o -c /home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp
+
+CMakeFiles/snes_emulator.dir/src/misc/common.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/snes_emulator.dir/src/misc/common.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp > CMakeFiles/snes_emulator.dir/src/misc/common.cpp.i
+
+CMakeFiles/snes_emulator.dir/src/misc/common.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/snes_emulator.dir/src/misc/common.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp -o CMakeFiles/snes_emulator.dir/src/misc/common.cpp.s
+
+CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o: CMakeFiles/snes_emulator.dir/flags.make
+CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o: /home/kctb/Projects/Emulators/snes-emulator/src/misc/rom_loader.cpp
+CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o: CMakeFiles/snes_emulator.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o -MF CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o.d -o CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o -c /home/kctb/Projects/Emulators/snes-emulator/src/misc/rom_loader.cpp
+
+CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kctb/Projects/Emulators/snes-emulator/src/misc/rom_loader.cpp > CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.i
+
+CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kctb/Projects/Emulators/snes-emulator/src/misc/rom_loader.cpp -o CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.s
+
 CMakeFiles/snes_emulator.dir/src/main.cpp.o: CMakeFiles/snes_emulator.dir/flags.make
 CMakeFiles/snes_emulator.dir/src/main.cpp.o: /home/kctb/Projects/Emulators/snes-emulator/src/main.cpp
 CMakeFiles/snes_emulator.dir/src/main.cpp.o: CMakeFiles/snes_emulator.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/snes_emulator.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/snes_emulator.dir/src/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/snes_emulator.dir/src/main.cpp.o -MF CMakeFiles/snes_emulator.dir/src/main.cpp.o.d -o CMakeFiles/snes_emulator.dir/src/main.cpp.o -c /home/kctb/Projects/Emulators/snes-emulator/src/main.cpp
 
 CMakeFiles/snes_emulator.dir/src/main.cpp.i: cmake_force
@@ -142,22 +156,24 @@ CMakeFiles/snes_emulator.dir/src/main.cpp.s: cmake_force
 # Object files for target snes_emulator
 snes_emulator_OBJECTS = \
 "CMakeFiles/snes_emulator.dir/src/components/bus.cpp.o" \
-"CMakeFiles/snes_emulator.dir/src/components/common.cpp.o" \
 "CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o" \
 "CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o" \
+"CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o" \
+"CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o" \
 "CMakeFiles/snes_emulator.dir/src/main.cpp.o"
 
 # External object files for target snes_emulator
 snes_emulator_EXTERNAL_OBJECTS =
 
 snes_emulator: CMakeFiles/snes_emulator.dir/src/components/bus.cpp.o
-snes_emulator: CMakeFiles/snes_emulator.dir/src/components/common.cpp.o
 snes_emulator: CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o
 snes_emulator: CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o
+snes_emulator: CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o
+snes_emulator: CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o
 snes_emulator: CMakeFiles/snes_emulator.dir/src/main.cpp.o
 snes_emulator: CMakeFiles/snes_emulator.dir/build.make
 snes_emulator: CMakeFiles/snes_emulator.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable snes_emulator"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable snes_emulator"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/snes_emulator.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

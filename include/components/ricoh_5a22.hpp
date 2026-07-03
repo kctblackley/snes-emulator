@@ -1,15 +1,18 @@
 #pragma once
-#include "bus.hpp"
+#include "component.hpp"
 
-class Ricoh5A22 {
+class Ricoh5A22 : public Component {
 public:
-	Ricoh5A22(Bus* bus);
+	explicit Ricoh5A22(Bus* bus);
 
-	void add_cycles(CycleCount cycles);
+	void add_cycles(CycleCount cycles) override;
 
-	void tick_component();
-	CycleCount get_cycle();
-	TickCount get_tick();
+	void tick_component() override;
+	CycleCount get_cycle() override;
+	TickCount get_tick() override;
+
+	void reset() override;
+	void initialise() override;
 
 private:
 	Bus* bus = nullptr;

@@ -16,5 +16,14 @@ TickCount Ricoh5A22::get_tick() {
 
 void Ricoh5A22::tick_component() { // when the component is ticked, it does a half tick in actuality
 	tick++;
-	this->add_cycles(RICOH_5A22_HALF_CYCLE);
+	bus->read(0x7FFFFF);
+	this->add_cycles(RICOH_5A22_CYCLE);
+}
+
+void Ricoh5A22::reset() {
+	return;
+}
+
+void Ricoh5A22::initialise() {
+	return;
 }

@@ -21,6 +21,14 @@ public:
 		return 0;
 	}
 
+	void load_cartridge(const std::vector<Byte>& cartridge) {
+		this->cartridge = cartridge;
+		for (const auto& c : cartridge) {
+			std::cout << std::hex << (int)c << " ";
+		}
+		std::cout << "\n";
+	}
+
 private:
 	std::vector<Byte> cartridge {};
 	SNESAddress address_bus;

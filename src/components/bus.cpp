@@ -55,7 +55,9 @@ Store* Bus::route(SNESAddress address) {
 		return system_area(address);
 		break;
 	case 2:
-		return system_area(address);
+		if (address.bank == 0x7E || address.bank == 0x7F) {
+			return wram.get();
+		}
 		break;
 	case 3:
 		return system_area(address);
@@ -90,4 +92,8 @@ Byte Bus::read(Address addr) {
 	}
 
 	return data_bus;
+}
+
+void Bus::load_cartridge(const std::vector<Byte>& rom) {
+	cartridge->load_cartridge(rom);
 }

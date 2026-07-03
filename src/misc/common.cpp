@@ -1,7 +1,7 @@
 #include "common.hpp"
 
 SNESAddress split_address(Address address) {
-	Bank bank = (address & 0xF0000) >> 16;
+	Bank bank = (address & 0xFF0000) >> 16;
 	Offset offset = address & 0xFFFF;
 	return {bank, offset};
 }

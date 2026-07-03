@@ -6,9 +6,19 @@ cmake_policy(SET CMP0009 NEW)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/home/kctb/Projects/Emulators/snes-emulator/src/components/*.cpp")
 set(OLD_GLOB
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/bus.cpp"
-  "/home/kctb/Projects/Emulators/snes-emulator/src/components/common.cpp"
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/ricoh_5a22.cpp"
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/snes.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# MISC_SOURCES at CMakeLists.txt:11 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "/home/kctb/Projects/Emulators/snes-emulator/src/misc/*.cpp")
+set(OLD_GLOB
+  "/home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp"
+  "/home/kctb/Projects/Emulators/snes-emulator/src/misc/rom_loader.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

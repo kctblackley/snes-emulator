@@ -1,5 +1,5 @@
-CMakeFiles/snes_emulator.dir/src/components/common.cpp.o: \
- /home/kctb/Projects/Emulators/snes-emulator/src/components/common.cpp \
+CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o: \
+ /home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp \
  /usr/include/stdc-predef.h \
  /home/kctb/Projects/Emulators/snes-emulator/include/misc/common.hpp \
  /usr/include/c++/13/cstdint \
@@ -172,4 +172,5 @@ CMakeFiles/snes_emulator.dir/src/components/common.cpp.o: \
  /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/vector \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc
+ /usr/include/c++/13/bits/vector.tcc \
+ /home/kctb/Projects/Emulators/snes-emulator/include/misc/options.hpp

@@ -154,30 +154,6 @@ src/components/bus.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/bus.cpp.s
 .PHONY : src/components/bus.cpp.s
 
-src/components/common.o: src/components/common.cpp.o
-.PHONY : src/components/common.o
-
-# target to build an object file
-src/components/common.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/common.cpp.o
-.PHONY : src/components/common.cpp.o
-
-src/components/common.i: src/components/common.cpp.i
-.PHONY : src/components/common.i
-
-# target to preprocess a source file
-src/components/common.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/common.cpp.i
-.PHONY : src/components/common.cpp.i
-
-src/components/common.s: src/components/common.cpp.s
-.PHONY : src/components/common.s
-
-# target to generate assembly for a file
-src/components/common.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/common.cpp.s
-.PHONY : src/components/common.cpp.s
-
 src/components/ricoh_5a22.o: src/components/ricoh_5a22.cpp.o
 .PHONY : src/components/ricoh_5a22.o
 
@@ -250,6 +226,54 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/misc/common.o: src/misc/common.cpp.o
+.PHONY : src/misc/common.o
+
+# target to build an object file
+src/misc/common.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o
+.PHONY : src/misc/common.cpp.o
+
+src/misc/common.i: src/misc/common.cpp.i
+.PHONY : src/misc/common.i
+
+# target to preprocess a source file
+src/misc/common.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/common.cpp.i
+.PHONY : src/misc/common.cpp.i
+
+src/misc/common.s: src/misc/common.cpp.s
+.PHONY : src/misc/common.s
+
+# target to generate assembly for a file
+src/misc/common.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/common.cpp.s
+.PHONY : src/misc/common.cpp.s
+
+src/misc/rom_loader.o: src/misc/rom_loader.cpp.o
+.PHONY : src/misc/rom_loader.o
+
+# target to build an object file
+src/misc/rom_loader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o
+.PHONY : src/misc/rom_loader.cpp.o
+
+src/misc/rom_loader.i: src/misc/rom_loader.cpp.i
+.PHONY : src/misc/rom_loader.i
+
+# target to preprocess a source file
+src/misc/rom_loader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.i
+.PHONY : src/misc/rom_loader.cpp.i
+
+src/misc/rom_loader.s: src/misc/rom_loader.cpp.s
+.PHONY : src/misc/rom_loader.s
+
+# target to generate assembly for a file
+src/misc/rom_loader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.s
+.PHONY : src/misc/rom_loader.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -262,9 +286,6 @@ help:
 	@echo "... src/components/bus.o"
 	@echo "... src/components/bus.i"
 	@echo "... src/components/bus.s"
-	@echo "... src/components/common.o"
-	@echo "... src/components/common.i"
-	@echo "... src/components/common.s"
 	@echo "... src/components/ricoh_5a22.o"
 	@echo "... src/components/ricoh_5a22.i"
 	@echo "... src/components/ricoh_5a22.s"
@@ -274,6 +295,12 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/misc/common.o"
+	@echo "... src/misc/common.i"
+	@echo "... src/misc/common.s"
+	@echo "... src/misc/rom_loader.o"
+	@echo "... src/misc/rom_loader.i"
+	@echo "... src/misc/rom_loader.s"
 .PHONY : help
 
 
