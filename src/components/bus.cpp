@@ -1,0 +1,93 @@
+#include "bus.hpp"
+
+Bus::Bus() {
+	open_bus = std::make_unique<OpenBus>();
+	wram = std::make_unique<WRAM>();
+	ppu_ports = std::make_unique<PPUPorts>();
+	apu_ports = std::make_unique<APUPorts>();
+	wram_access = std::make_unique<WRAMAccess>();
+	cpu_ports = std::make_unique<CPUPorts>();
+	cpu_dma_ports = std::make_unique<CPUDMAPorts>();
+	expansion_data = std::make_unique<ExpansionData>();
+	cartridge = std::make_unique<Cartridge>();
+
+}
+
+void Bus::set_wait_callback(WaitCallback callback) {
+	this->callback = callback;
+}
+
+Store* Bus::system_area(SNESAddress address) {
+	if (address.offset >= WRAM_SECTION && address.offset <= OPEN_BUS_SECTION) {
+		return wram.get();
+	}
+	if (address.offset >= OPEN_BUS_SECTION && address.offset < PPU_PORTS_SECTION) {
+		return open_bus.get();
+	}
+	if (address.offset >= PPU_PORTS_SECTION && address.offset < APU_PORTS_SECTION) {
+		return ppu_ports.get();
+	}
+	if (address.offset >= APU_PORTS_SECTION && address.offset < WRAM_ACCESS_SECTION) {
+		return apu_ports.get();
+	}
+	if (address.offset >= WRAM_ACCESS_SECTION && address.offset < CPU_PORTS_SECTION) {
+		return wram_access.get();
+	}
+	if (address.offset >= CPU_PORTS_SECTION && address.offset < CPU_DMA_PORTS_SECTION) {
+		return cpu_ports.get();
+	}
+	if (address.offset >= CPU_DMA_PORTS_SECTION && address.offset < EXPANSION_DATA_SECTION) {
+		return cpu_dma_ports.get();
+	}
+	if (address.offset >= EXPANSION_DATA_SECTION && address.offset < CARTRIDGE_SECTION) {
+		return expansion_data.get();
+	}
+	if (address.offset >= CARTRIDGE_SECTION && address.offset <= MAX_OFFSET_SECTION) {
+		return cartridge.get();
+	}
+	return open_bus.get();
+}
+
+Store* Bus::route(SNESAddress address) {
+	Quadrant quadrant = get_quadrant(address.bank);
+	switch(quadrant) {
+	case 1:
+		return system_area(address);
+		break;
+	case 2:
+		return system_area(address);
+		break;
+	case 3:
+		return system_area(address);
+		break;
+	case 4:
+		break;
+	default:
+		break;
+	}
+
+	return open_bus.get();
+}
+
+void Bus::write(Address addr, Byte value) {
+	SNESAddress address = split_address(addr);
+	Store* store = route(address);
+	
+	if (store->is_not_open_bus()) {
+		data_bus = value;
+		store->write(address, value);
+		callback(store->penalty());
+	}
+}
+
+Byte Bus::read(Address addr) {
+	SNESAddress address = split_address(addr);
+	Store* store = route(address);
+
+	if (store->is_not_open_bus()) {
+		data_bus = store->read(address);
+		callback(store->penalty());
+	}
+
+	return data_bus;
+}
