@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(snes_emulator LANGUAGES CXX)
 
-set(CMAKE_CXX_STASNDARD 20)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB COMPONENT_SOURCES CONFIGURE_DEPENDS
@@ -12,10 +12,21 @@ file(GLOB MISC_SOURCES CONFIGURE_DEPENDS
     src/misc/*.cpp
 )
 
+file(GLOB CPU_OPERATIONS_SOURCES CONFIGURE_DEPENDS
+    src/cpu_operations/*.cpp
+)
+
+file(GLOB MAPPER_SOURCES
+CONFIGURE_DEPENDS
+    src/mappers/*.cpp
+)
+
 
 set(SNES_SOURCES
     ${COMPONENT_SOURCES}
     ${MISC_SOURCES}
+    ${CPU_OPERATIONS_SOURCES}
+    ${MAPPER_SOURCES}
     src/main.cpp
 )
 
@@ -25,6 +36,8 @@ target_include_directories(snes_emulator PRIVATE
     ${CMAKE_SOURCE_DIR}/include/stores
     ${CMAKE_SOURCE_DIR}/include/components
     ${CMAKE_SOURCE_DIR}/include/misc
+    ${CMAKE_SOURCE_DIR}/include/cpu_operations
+    ${CMAKE_SOURCE_DIR}/include/mappers
 )   
 
 target_compile_options(snes_emulator PRIVATE)

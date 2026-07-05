@@ -18,6 +18,9 @@ public:
 	}
 
 	CycleCount penalty() override {
+		if (address_bus.offset >= CPU_PORTS_SECTION && address_bus.offset < CPU_PORTS_NON_PENALTY_SECTION) {
+			return CPU_PORTS_PENALTY;
+		}
 		return 0;
 	}
 

@@ -1,6 +1,6 @@
 #include "ricoh_5a22.hpp"
 
-Ricoh5A22::Ricoh5A22(Bus* bus) : bus(bus), cycle(0) {}
+Ricoh5A22::Ricoh5A22(Bus* bus) : bus(bus), cycle(0), instruction_cycle(0) {}
 
 void Ricoh5A22::add_cycles(CycleCount cycles) {
 	this->cycle += cycles;
@@ -14,9 +14,18 @@ TickCount Ricoh5A22::get_tick() {
 	return this->tick;
 }
 
+void Ricoh5A22::run_half_cycle() {
+	Byte opcode = 0x00;
+	Opcode op = get_opcode(optable, opcode, instruction_cycle, *this);
+	op.function(*this, op.skipped);
+}
+
 void Ricoh5A22::tick_component() { // when the component is ticked, it does a half tick in actuality
 	tick++;
-	bus->read(0x7FFFFF);
+	if constexpr (!HALF_CYCLES) {
+		run_half_cycle();
+	}
+	run_half_cycle();
 	this->add_cycles(RICOH_5A22_CYCLE);
 }
 

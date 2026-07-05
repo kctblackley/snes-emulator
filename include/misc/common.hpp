@@ -3,12 +3,15 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <chrono>
 
 #include "options.hpp"
+#include "utility.hpp"
 
 using Byte = uint8_t;
 using Bank = uint8_t;
 using Quadrant = uint8_t;
+using Word = uint16_t;
 using Offset = uint16_t;
 using Address = uint32_t;
 using CycleCount = uint64_t;
@@ -24,6 +27,10 @@ typedef struct {
 SNESAddress split_address(Address address);
 Quadrant get_quadrant(Bank bank);
 
+// Macros
+#define RICOH_5A22_START ;
+#define RICOH_5A22_END ;
+
 // Timing constants
 constexpr CycleCount MASTER_CLOCK = 21477272;
 constexpr CycleCount RICOH_5A22_CYCLE = 6;
@@ -31,7 +38,11 @@ constexpr CycleCount RICOH_5A22_CYCLE = 6;
 // WRAM constants and WRAM Access Constants
 constexpr size_t WRAM_SIZE = 128 * 1024;
 constexpr size_t WRAM_BANK_SIZE = 64 * 1024;
+
+// Wait states
 constexpr CycleCount WRAM_PENALTY = 2; // The CPU is ticked every 6 master cycles, to bring it to WRAM speed, which is every 8 master cycles, just wait 2 further master cycles
+constexpr CycleCount EXPANSION_DATA_PENALTY = 2;
+constexpr CycleCount CPU_PORTS_PENALTY = 6;
 
 // System Area Constants (where each section of system area quadrants begin)
 constexpr Offset WRAM_SECTION = 0x0000;
@@ -40,6 +51,7 @@ constexpr Offset PPU_PORTS_SECTION = 0x2100;
 constexpr Offset APU_PORTS_SECTION = 0x2140;
 constexpr Offset WRAM_ACCESS_SECTION = 0x2180;
 constexpr Offset CPU_PORTS_SECTION = 0x4000;
+constexpr Offset CPU_PORTS_NON_PENALTY_SECTION = 0x4200;
 constexpr Offset CPU_DMA_PORTS_SECTION = 0x4300;
 constexpr Offset EXPANSION_DATA_SECTION = 0x6000;
 constexpr Offset CARTRIDGE_SECTION = 0x8000;
@@ -127,6 +139,7 @@ constexpr Offset APUI00 = 0x2140;
 constexpr Offset APUI01 = 0x2141;
 constexpr Offset APUI02 = 0x2142;
 constexpr Offset APUI03 = 0x2143;
+
 
 // WRAM Access
 

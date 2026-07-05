@@ -18,7 +18,7 @@ public:
 	}
 
 	CycleCount penalty() override {
-		return 0;
+		return EXPANSION_DATA_PENALTY;
 	}
 
 private:

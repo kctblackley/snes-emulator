@@ -6,8 +6,30 @@ cmake_policy(SET CMP0009 NEW)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/home/kctb/Projects/Emulators/snes-emulator/src/components/*.cpp")
 set(OLD_GLOB
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/bus.cpp"
+  "/home/kctb/Projects/Emulators/snes-emulator/src/components/cartridge.cpp"
+  "/home/kctb/Projects/Emulators/snes-emulator/src/components/opcode_engine.cpp"
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/ricoh_5a22.cpp"
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/snes.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# CPU_OPERATIONS_SOURCES at CMakeLists.txt:15 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "/home/kctb/Projects/Emulators/snes-emulator/src/cpu_operations/*.cpp")
+set(OLD_GLOB
+  "/home/kctb/Projects/Emulators/snes-emulator/src/cpu_operations/ricoh_5a22_operations.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "/home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# MAPPER_SOURCES at CMakeLists.txt:19 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "/home/kctb/Projects/Emulators/snes-emulator/src/mappers/*.cpp")
+set(OLD_GLOB
+  "/home/kctb/Projects/Emulators/snes-emulator/src/mappers/mapper.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -18,7 +40,7 @@ endif()
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/home/kctb/Projects/Emulators/snes-emulator/src/misc/*.cpp")
 set(OLD_GLOB
   "/home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp"
-  "/home/kctb/Projects/Emulators/snes-emulator/src/misc/rom_loader.cpp"
+  "/home/kctb/Projects/Emulators/snes-emulator/src/misc/utility.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

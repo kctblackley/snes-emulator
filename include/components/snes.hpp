@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include "rom_loader.hpp"
-
 #include "bus.hpp"
 #include "ricoh_5a22.hpp"
 #include "common.hpp"
@@ -14,7 +12,7 @@ public:
 	SNES();
 
 	// How the ROM is loaded is left to main.cpp. SNES expects a cartridge to be in std::vector format.
-	void load(const std::vector<Byte>& rom); // This ROM is routed through the bus and into the cartridge store
+	void load_cartridge(const std::string& directory); // This ROM is routed through the bus and into the cartridge store
 	void poll(); // Poll finds components that are due to be ticked for the current master cycle
 	void tick_snes(); // Polls components, ticks components if there are any, then increments master cycle by 1
 	void run();

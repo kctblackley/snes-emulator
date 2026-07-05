@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/kctb/Projects/Emulators/snes-emulator/include/stores -I/home/kctb/Projects/Emulators/snes-emulator/include/components -I/home/kctb/Projects/Emulators/snes-emulator/include/misc
+CXX_INCLUDES = -I/home/kctb/Projects/Emulators/snes-emulator/include/stores -I/home/kctb/Projects/Emulators/snes-emulator/include/components -I/home/kctb/Projects/Emulators/snes-emulator/include/misc -I/home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations -I/home/kctb/Projects/Emulators/snes-emulator/include/mappers
 
-CXX_FLAGS = 
+CXX_FLAGS = -O3 -march=native -flto -O3 -DNDEBUG -std=gnu++20
 

@@ -15,8 +15,8 @@ SNES::SNES() : master_cycle(0) {
 	});
 }
 
-void SNES::load(const std::vector<Byte>& rom) {
-	bus->load_cartridge(rom);
+void SNES::load_cartridge(const std::string& directory) {
+	bus->load_cartridge(directory);
 }
 
 void SNES::tick_snes() {
@@ -40,6 +40,7 @@ void SNES::poll() {
 void SNES::run() {
 	bool running = true;
 
+	auto start = std::chrono::high_resolution_clock::now();
 	while (running) {
 		tick_snes();
 
@@ -48,7 +49,11 @@ void SNES::run() {
 			running = false;
 		}
 	}
+	auto end = std::chrono::high_resolution_clock::now();
 
+    std::chrono::duration<double> elapsed = end - start;
+
+    std::cout << "Time taken: " << elapsed.count() << " seconds\n";
 	std::cout << std::dec << (int)(ricoh_5a22->get_tick()) << std::endl;
 }
 

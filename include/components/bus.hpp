@@ -30,7 +30,7 @@ public:
 	void write(Address addr, Byte value);
 	Byte read(Address addr);
 
-	void load_cartridge(const std::vector<Byte>& rom);
+	void load_cartridge(const std::string& directory);
 
 private:
 	WaitCallback callback;

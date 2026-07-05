@@ -154,6 +154,54 @@ src/components/bus.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/bus.cpp.s
 .PHONY : src/components/bus.cpp.s
 
+src/components/cartridge.o: src/components/cartridge.cpp.o
+.PHONY : src/components/cartridge.o
+
+# target to build an object file
+src/components/cartridge.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/cartridge.cpp.o
+.PHONY : src/components/cartridge.cpp.o
+
+src/components/cartridge.i: src/components/cartridge.cpp.i
+.PHONY : src/components/cartridge.i
+
+# target to preprocess a source file
+src/components/cartridge.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/cartridge.cpp.i
+.PHONY : src/components/cartridge.cpp.i
+
+src/components/cartridge.s: src/components/cartridge.cpp.s
+.PHONY : src/components/cartridge.s
+
+# target to generate assembly for a file
+src/components/cartridge.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/cartridge.cpp.s
+.PHONY : src/components/cartridge.cpp.s
+
+src/components/opcode_engine.o: src/components/opcode_engine.cpp.o
+.PHONY : src/components/opcode_engine.o
+
+# target to build an object file
+src/components/opcode_engine.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/opcode_engine.cpp.o
+.PHONY : src/components/opcode_engine.cpp.o
+
+src/components/opcode_engine.i: src/components/opcode_engine.cpp.i
+.PHONY : src/components/opcode_engine.i
+
+# target to preprocess a source file
+src/components/opcode_engine.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/opcode_engine.cpp.i
+.PHONY : src/components/opcode_engine.cpp.i
+
+src/components/opcode_engine.s: src/components/opcode_engine.cpp.s
+.PHONY : src/components/opcode_engine.s
+
+# target to generate assembly for a file
+src/components/opcode_engine.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/opcode_engine.cpp.s
+.PHONY : src/components/opcode_engine.cpp.s
+
 src/components/ricoh_5a22.o: src/components/ricoh_5a22.cpp.o
 .PHONY : src/components/ricoh_5a22.o
 
@@ -202,6 +250,30 @@ src/components/snes.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/snes.cpp.s
 .PHONY : src/components/snes.cpp.s
 
+src/cpu_operations/ricoh_5a22_operations.o: src/cpu_operations/ricoh_5a22_operations.cpp.o
+.PHONY : src/cpu_operations/ricoh_5a22_operations.o
+
+# target to build an object file
+src/cpu_operations/ricoh_5a22_operations.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/cpu_operations/ricoh_5a22_operations.cpp.o
+.PHONY : src/cpu_operations/ricoh_5a22_operations.cpp.o
+
+src/cpu_operations/ricoh_5a22_operations.i: src/cpu_operations/ricoh_5a22_operations.cpp.i
+.PHONY : src/cpu_operations/ricoh_5a22_operations.i
+
+# target to preprocess a source file
+src/cpu_operations/ricoh_5a22_operations.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/cpu_operations/ricoh_5a22_operations.cpp.i
+.PHONY : src/cpu_operations/ricoh_5a22_operations.cpp.i
+
+src/cpu_operations/ricoh_5a22_operations.s: src/cpu_operations/ricoh_5a22_operations.cpp.s
+.PHONY : src/cpu_operations/ricoh_5a22_operations.s
+
+# target to generate assembly for a file
+src/cpu_operations/ricoh_5a22_operations.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/cpu_operations/ricoh_5a22_operations.cpp.s
+.PHONY : src/cpu_operations/ricoh_5a22_operations.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -225,6 +297,30 @@ src/main.s: src/main.cpp.s
 src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
+
+src/mappers/mapper.o: src/mappers/mapper.cpp.o
+.PHONY : src/mappers/mapper.o
+
+# target to build an object file
+src/mappers/mapper.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/mappers/mapper.cpp.o
+.PHONY : src/mappers/mapper.cpp.o
+
+src/mappers/mapper.i: src/mappers/mapper.cpp.i
+.PHONY : src/mappers/mapper.i
+
+# target to preprocess a source file
+src/mappers/mapper.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/mappers/mapper.cpp.i
+.PHONY : src/mappers/mapper.cpp.i
+
+src/mappers/mapper.s: src/mappers/mapper.cpp.s
+.PHONY : src/mappers/mapper.s
+
+# target to generate assembly for a file
+src/mappers/mapper.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/mappers/mapper.cpp.s
+.PHONY : src/mappers/mapper.cpp.s
 
 src/misc/common.o: src/misc/common.cpp.o
 .PHONY : src/misc/common.o
@@ -250,29 +346,29 @@ src/misc/common.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/common.cpp.s
 .PHONY : src/misc/common.cpp.s
 
-src/misc/rom_loader.o: src/misc/rom_loader.cpp.o
-.PHONY : src/misc/rom_loader.o
+src/misc/utility.o: src/misc/utility.cpp.o
+.PHONY : src/misc/utility.o
 
 # target to build an object file
-src/misc/rom_loader.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.o
-.PHONY : src/misc/rom_loader.cpp.o
+src/misc/utility.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.o
+.PHONY : src/misc/utility.cpp.o
 
-src/misc/rom_loader.i: src/misc/rom_loader.cpp.i
-.PHONY : src/misc/rom_loader.i
+src/misc/utility.i: src/misc/utility.cpp.i
+.PHONY : src/misc/utility.i
 
 # target to preprocess a source file
-src/misc/rom_loader.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.i
-.PHONY : src/misc/rom_loader.cpp.i
+src/misc/utility.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.i
+.PHONY : src/misc/utility.cpp.i
 
-src/misc/rom_loader.s: src/misc/rom_loader.cpp.s
-.PHONY : src/misc/rom_loader.s
+src/misc/utility.s: src/misc/utility.cpp.s
+.PHONY : src/misc/utility.s
 
 # target to generate assembly for a file
-src/misc/rom_loader.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/rom_loader.cpp.s
-.PHONY : src/misc/rom_loader.cpp.s
+src/misc/utility.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.s
+.PHONY : src/misc/utility.cpp.s
 
 # Help Target
 help:
@@ -286,21 +382,33 @@ help:
 	@echo "... src/components/bus.o"
 	@echo "... src/components/bus.i"
 	@echo "... src/components/bus.s"
+	@echo "... src/components/cartridge.o"
+	@echo "... src/components/cartridge.i"
+	@echo "... src/components/cartridge.s"
+	@echo "... src/components/opcode_engine.o"
+	@echo "... src/components/opcode_engine.i"
+	@echo "... src/components/opcode_engine.s"
 	@echo "... src/components/ricoh_5a22.o"
 	@echo "... src/components/ricoh_5a22.i"
 	@echo "... src/components/ricoh_5a22.s"
 	@echo "... src/components/snes.o"
 	@echo "... src/components/snes.i"
 	@echo "... src/components/snes.s"
+	@echo "... src/cpu_operations/ricoh_5a22_operations.o"
+	@echo "... src/cpu_operations/ricoh_5a22_operations.i"
+	@echo "... src/cpu_operations/ricoh_5a22_operations.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/mappers/mapper.o"
+	@echo "... src/mappers/mapper.i"
+	@echo "... src/mappers/mapper.s"
 	@echo "... src/misc/common.o"
 	@echo "... src/misc/common.i"
 	@echo "... src/misc/common.s"
-	@echo "... src/misc/rom_loader.o"
-	@echo "... src/misc/rom_loader.i"
-	@echo "... src/misc/rom_loader.s"
+	@echo "... src/misc/utility.o"
+	@echo "... src/misc/utility.i"
+	@echo "... src/misc/utility.s"
 .PHONY : help
 
 
