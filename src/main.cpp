@@ -15,12 +15,30 @@ int main() {
 	// e.g. tests/a1_n.json + opcode 0xA1 (LDA (dp,X)):
 	if constexpr(SST_TEST) {
 		Byte instruction = 0x00;
+		int operations_implemented = 0;
+		int incorrect_operations = 0;
+		bool passed;
 		for (auto o : optable) {
 			if (o != &nop) {
-				test(opcode_to_filename(instruction), instruction);
+				passed = test(opcode_to_filename(instruction), instruction);
+				if (!passed) {
+					incorrect_operations++;
+				}
+				operations_implemented++;
 			}
 			instruction++;
 		}
+		std::cout << "Implemented " << operations_implemented << " operation(s).\n";
+		if (incorrect_operations > 0) {
+			std::cout << incorrect_operations << " implementation(s) are incorrect. Fix these first before continuing.\n";
+		}
+		if (operations_implemented < 256) {
+			std::cout << "This instruction set is incomplete.\n";
+		}
+		if (incorrect_operations == 0 && operations_implemented == 256) {
+			std::cout << "The instruction set is finished. Hooray!\n";
+		}
+		//test("a5.n", 0xa5);
 		return 0;
 	}
 

@@ -23,8 +23,17 @@
 #define NATIVE_RELATIVE ;
 #define NATIVE_PROGRAM_COUNTER_RELATIVE_LONG ;*/
 
-/*#define NATIVE_DIRECT_READ ;
-#define NATIVE_DIRECT_READ_MODIFY_WRITE ;
+#define NATIVE_DIRECT_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::AOD, Mode::IfSkipped>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Operand>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Operand, Mode::PlusOne>, Ricoh5A22Predicates::MFlagSet),
+
+/*#define NATIVE_DIRECT_READ_MODIFY_WRITE ;
 #define NATIVE_DIRECT_WRITE ;
 #define NATIVE_DIRECT_X_READ ;
 #define NATIVE_DIRECT_X_READ_MODIFY_WRITE ;
@@ -129,10 +138,13 @@ namespace SetMode {
 	struct None {};
 	struct DX   {};
 	struct APS  {};
+	struct AOD  {};
 }
 
 namespace Mode {
 	constexpr bool PlusOne = true;
+	constexpr bool PCIncrement = true;
+	constexpr bool IfSkipped = true;
 
 	struct Native    {};
 	struct Emulation {};
@@ -147,10 +159,14 @@ namespace Ricoh5A22Functions {
 		return;
 	}
 
-	template <typename Set = SetMode::None>
+	template <typename Set = SetMode::None, bool IfSkipped = false>
 	void IncrementPC(CPU& cpu, bool skipped) {
 		INSTRUCTION_START_CHECK_ROUTINE
-		cpu.regs.PC++;
+		if constexpr (IfSkipped) {
+			if (skipped) { cpu.regs.PC++; }
+		} else {
+			cpu.regs.PC++;
+		}
 
 		if constexpr (std::is_same_v<Set, SetMode::DX>) {
 			cpu.BufferPointer = cpu.BufferPointer + cpu.regs.X + cpu.regs.D;
@@ -158,6 +174,9 @@ namespace Ricoh5A22Functions {
 		}
 		if constexpr (std::is_same_v<Set, SetMode::APS>) {
 			cpu.BufferAddress = cpu.BufferPointer + cpu.regs.S;
+		}
+		if constexpr (std::is_same_v<Set, SetMode::AOD>) {
+			cpu.BufferAddress = cpu.BufferOperand + cpu.regs.D;
 		}
 
 		INSTRUCTION_END_CHECK_ROUTINE
@@ -266,9 +285,12 @@ namespace Ricoh5A22Functions {
 	}
 
 
-	template <typename CPUMode>
+	template <typename CPUMode, bool PCIncrement = false>
 	void LDA(CPU& cpu, bool skipped) {
 		INSTRUCTION_START_CHECK_ROUTINE
+		if constexpr (PCIncrement) {
+			cpu.regs.PC++;
+		}
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_M()) {
 				cpu.regs.A = (get_hi(cpu.regs.A) << 8) | get_lo(cpu.BufferOperand);
@@ -283,9 +305,12 @@ namespace Ricoh5A22Functions {
 		INSTRUCTION_END_CHECK_ROUTINE
 	}
 
-	template <typename CPUMode>
+	template <typename CPUMode, bool PCIncrement = false>
 	void ORA(CPU& cpu, bool skipped) {
 		INSTRUCTION_START_CHECK_ROUTINE
+		if constexpr (PCIncrement) {
+			cpu.regs.PC++;
+		}
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.A = cpu.regs.A | cpu.BufferOperand;
 			if (cpu.get_flag_M()) {
@@ -299,9 +324,12 @@ namespace Ricoh5A22Functions {
 		INSTRUCTION_END_CHECK_ROUTINE
 	}
 
-	template <typename CPUMode>
+	template <typename CPUMode, bool PCIncrement = false>
 	void AND(CPU& cpu, bool skipped) {
 		INSTRUCTION_START_CHECK_ROUTINE
+		if constexpr (PCIncrement) {
+			cpu.regs.PC++;
+		}
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_M()) {
 				cpu.regs.A = (get_hi(cpu.regs.A) << 8) | (get_lo(cpu.regs.A) & get_lo(cpu.BufferOperand));
@@ -316,9 +344,12 @@ namespace Ricoh5A22Functions {
 		INSTRUCTION_END_CHECK_ROUTINE
 	}
 
-	template <typename CPUMode>
+	template <typename CPUMode, bool PCIncrement = false>
 	void EOR(CPU& cpu, bool skipped) {
 		INSTRUCTION_START_CHECK_ROUTINE
+		if constexpr (PCIncrement) {
+			cpu.regs.PC++;
+		}
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.A = cpu.regs.A ^ cpu.BufferOperand;
 			if (cpu.get_flag_M()) {
@@ -332,9 +363,12 @@ namespace Ricoh5A22Functions {
 		INSTRUCTION_END_CHECK_ROUTINE
 	}
 
-	template <typename CPUMode>
+	template <typename CPUMode, bool PCIncrement = false>
 	void ADC(CPU& cpu, bool skipped) {
 		INSTRUCTION_START_CHECK_ROUTINE
+		if constexpr (PCIncrement) {
+			cpu.regs.PC++;
+		}
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_M()) {
 				if (!cpu.get_flag_D()) {
@@ -473,7 +507,7 @@ Instruction n_01 = {
 // ORA (09)
 Instruction n_09 = {
 	NATIVE_IMMEDIATE_M
-	/* 8.1 */ MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
+	/* 8.1 */ MakeHandler(Ricoh5A22Functions::ORA<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
@@ -487,7 +521,7 @@ Instruction n_21 = {
 // AND (29)
 Instruction n_29 = {
 	NATIVE_IMMEDIATE_M
-	/* 8.1 */ MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
+	/* 8.1 */ MakeHandler(Ricoh5A22Functions::AND<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
@@ -498,10 +532,24 @@ Instruction n_41 = {
 	NEXT_OPCODE
 };
 
+// EOR (49)
+Instruction n_49 = {
+	NATIVE_IMMEDIATE_M
+	/* 8.1 */ MakeHandler(Ricoh5A22Functions::EOR<Mode::Native, Mode::PCIncrement>),
+	NEXT_OPCODE
+};
+
 // ADC (61)
 Instruction n_61 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_READ
 	/* 8.1 */ MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
+	NEXT_OPCODE
+};
+
+// ADC (69)
+Instruction n_69 = {
+	NATIVE_IMMEDIATE_M
+	/* 8.1 */ MakeHandler(Ricoh5A22Functions::ADC<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
@@ -518,6 +566,42 @@ Instruction n_a3 = {
 	/* 8.1 */ MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
+
+// LDA (A5)
+Instruction n_a5 = {
+	NATIVE_DIRECT_READ
+	/* 8.1 */ MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
+	NEXT_OPCODE
+};
+
+// LDA (A7)
+
+// LDA (A9)
+Instruction n_a9 = {
+	NATIVE_IMMEDIATE_M
+	/* 8.1 */ MakeHandler(Ricoh5A22Functions::LDA<Mode::Native, Mode::PCIncrement>),
+	NEXT_OPCODE
+};
+
+// LDA (AD)
+
+// LDA (AF)
+
+// LDA (B1)
+
+// LDA (B2)
+
+// LDA (B3)
+
+// LDA (B5)
+
+// LDA (B7)
+
+// LDA (B9)
+
+// LDA (BD)
+
+// LDA (BF)
 
 Instruction nop = {
 	MakeHandler(Ricoh5A22Functions::NOP),

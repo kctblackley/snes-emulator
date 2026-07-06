@@ -1,7 +1,7 @@
 CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.o: \
- /home/kctb/Projects/TempFolder/snes-emulator/src/misc/utility.cpp \
+ /home/kctb/Projects/Emulators/snes-emulator/src/misc/utility.cpp \
  /usr/include/stdc-predef.h \
- /home/kctb/Projects/TempFolder/snes-emulator/include/misc/utility.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/misc/utility.hpp \
  /usr/include/c++/13/cstdint \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \

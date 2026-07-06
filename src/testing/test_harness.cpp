@@ -158,7 +158,7 @@ void compare_memory(const std::vector<MemoryEntry>& expected, Ricoh5A22& cpu, st
 
 }
 
-void test(const std::string& opcode_name, Byte opcode_value) {
+bool test(const std::string& opcode_name, Byte opcode_value) {
 	const std::string path = "tests/" + opcode_name + ".json";
 
 	JsonValue root;
@@ -167,13 +167,13 @@ void test(const std::string& opcode_name, Byte opcode_value) {
 	} catch (const std::exception& e) {
 		std::cerr << COLOR_RED << "Could not load test file '" << path << "': "
 		          << e.what() << COLOR_RESET << std::endl;
-		return;
+		return false;
 	}
 
 	if (root.type != JsonValue::Type::Array) {
 		std::cerr << COLOR_RED << "Test file '" << path << "' does not contain a JSON array."
 		          << COLOR_RESET << std::endl;
-		return;
+		return false;
 	}
 
 	Bus bus;
@@ -185,9 +185,9 @@ void test(const std::string& opcode_name, Byte opcode_value) {
 	size_t failed = 0;
 	std::vector<std::string> failed_names;
 
-	std::cout << COLOR_BOLD << "\n===== Testing opcode \"" << opcode_name << "\" ("
+	/*std::cout << COLOR_BOLD << "\n===== Testing opcode \"" << opcode_name << "\" ("
 	          << to_hex(opcode_value, 2) << ") - " << root.size() << " test case(s) =====\n"
-	          << COLOR_RESET << std::endl;
+	          << COLOR_RESET << std::endl;*/
 
 	for (size_t i = 0; i < root.size(); i++) {
 		TestCase test_case = parse_test_case(root[i]);
@@ -218,11 +218,12 @@ void test(const std::string& opcode_name, Byte opcode_value) {
 		}
 	}
 
-	std::cout << "\n" << COLOR_BOLD << "----- Summary for " << opcode_name << " -----" << COLOR_RESET << "\n";
-	std::cout << COLOR_GREEN << passed << " passed" << COLOR_RESET << ", "
-	          << (failed > 0 ? COLOR_RED : COLOR_GREEN) << failed << " failed" << COLOR_RESET
-	          << " out of " << root.size() << " total" << std::endl;
-
+	//std::cout << "\n" << COLOR_BOLD << "----- Summary for " << opcode_name << " -----" << COLOR_RESET << "\n";
+	if (failed > 0) {
+		std::cout << COLOR_BOLD << opcode_name << " " << COLOR_GREEN << passed << " passed" << COLOR_RESET << ", "
+	    	<< (failed > 0 ? COLOR_RED : COLOR_GREEN) << failed << " failed" << COLOR_RESET
+	        << " out of " << root.size() << " total" << std::endl;
+	}
 	if constexpr(!SEE_TOTAL_PASS_ONLY) {
 		if (failed > 0) {
 			std::cout << COLOR_RED << "\nFailed tests:" << COLOR_RESET << "\n";
@@ -232,4 +233,6 @@ void test(const std::string& opcode_name, Byte opcode_value) {
 			std::cout << std::endl;
 		}
 	}
+
+	return (failed == 0);
 }

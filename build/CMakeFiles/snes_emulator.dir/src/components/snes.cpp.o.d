@@ -1,7 +1,7 @@
 CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: \
- /home/kctb/Projects/TempFolder/snes-emulator/src/components/snes.cpp \
+ /home/kctb/Projects/Emulators/snes-emulator/src/components/snes.cpp \
  /usr/include/stdc-predef.h \
- /home/kctb/Projects/TempFolder/snes-emulator/include/components/snes.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/snes.hpp \
  /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -130,7 +130,7 @@ CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: \
  /usr/include/c++/13/bits/uses_allocator.h \
  /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/tuple \
  /usr/include/c++/13/bits/ranges_util.h \
- /home/kctb/Projects/TempFolder/snes-emulator/include/components/bus.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/bus.hpp \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/typeinfo /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
@@ -149,7 +149,7 @@ CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: \
  /usr/include/c++/13/bits/stl_heap.h \
  /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/bits/stl_tempbuf.h \
- /home/kctb/Projects/TempFolder/snes-emulator/include/misc/common.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/misc/common.hpp \
  /usr/include/c++/13/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
@@ -243,30 +243,30 @@ CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: \
  /usr/include/c++/13/bits/quoted_string.h /usr/include/c++/13/format \
  /usr/include/c++/13/charconv /usr/include/c++/13/optional \
  /usr/include/c++/13/span /usr/include/c++/13/variant \
- /home/kctb/Projects/TempFolder/snes-emulator/include/misc/options.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/misc/utility.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/misc/options.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/misc/utility.hpp \
  /usr/include/c++/13/fstream \
  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
  /usr/include/c++/13/bits/fstream.tcc /usr/include/c++/13/iterator \
  /usr/include/c++/13/bits/stream_iterator.h \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/open_bus.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/store.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/wram.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/ppu_ports.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/apu_ports.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/wram_access.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/cpu_ports.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/cpu_dma_ports.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/expansion_data.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/stores/cartridge.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/mappers/mapper.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/mappers/lorom_mapper.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/mappers/hirom_mapper.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/mappers/exhirom_mapper.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/components/ricoh_5a22.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/components/cpu.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/components/component.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/cpu_operations/ricoh_5a22_optable.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
- /home/kctb/Projects/TempFolder/snes-emulator/include/components/opcode_engine.hpp
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/open_bus.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/store.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/wram.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/ppu_ports.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/apu_ports.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/wram_access.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/cpu_ports.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/cpu_dma_ports.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/expansion_data.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/stores/cartridge.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/mappers/mapper.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/ricoh_5a22.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/cpu.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/component.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_optable.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp

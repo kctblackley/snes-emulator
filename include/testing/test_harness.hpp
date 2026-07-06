@@ -15,4 +15,4 @@
 // are compared against the case's "final" block. Results are printed to
 // stdout as PASSED/FAILED lines followed by a summary. Cycle-exactness is not
 // checked, only whether "initial" correctly becomes "final".
-void test(const std::string& opcode_name, Byte opcode_value);
+bool test(const std::string& opcode_name, Byte opcode_value);

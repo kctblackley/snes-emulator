@@ -7,9 +7,11 @@ Opcode get_opcode(const Optable& optable, Byte opcode, CycleCount& idx, CPU& cpu
 	bool skipped = false;
 	bool predicate = true;
 	while(predicate && idx < instruction.size()) {
-		skipped = true;
 		handler = &instruction[idx++];
 		predicate = handler->predicate(cpu);
+		if (predicate) {
+			skipped = true;
+		}
 	}
 
 	if (idx >= instruction.size() ) { idx = 0; }

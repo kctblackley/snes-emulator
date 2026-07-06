@@ -149,7 +149,7 @@ constexpr Optable optable = {
 
     &nop, // 0x48
 
-    &nop, // 0x49
+    &n_49, // 0x49
 
     &nop, // 0x4A
 
@@ -213,7 +213,7 @@ constexpr Optable optable = {
 
     &nop, // 0x68
 
-    &nop, // 0x69
+    &n_69, // 0x69
 
     &nop, // 0x6A
 
@@ -333,7 +333,7 @@ constexpr Optable optable = {
 
     &nop, // 0xA4
 
-    &nop, // 0xA5
+    &n_a5, // 0xA5
 
     &nop, // 0xA6
 
@@ -341,7 +341,7 @@ constexpr Optable optable = {
 
     &nop, // 0xA8
 
-    &nop, // 0xA9
+    &n_a9, // 0xA9
 
     &nop, // 0xAA
 
