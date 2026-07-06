@@ -74,6 +74,11 @@ Store* Bus::route(SNESAddress address) {
 }
 
 void Bus::write(Address addr, Byte value) {
+	if (test_mode) {
+		test_memory[addr & 0xFFFFFF] = value;
+		return;
+	}
+
 	SNESAddress address = split_address(addr);
 	Store* store = route(address);
 	
@@ -85,6 +90,11 @@ void Bus::write(Address addr, Byte value) {
 }
 
 Byte Bus::read(Address addr) {
+	if (test_mode) {
+		auto it = test_memory.find(addr & 0xFFFFFF);
+		return it != test_memory.end() ? it->second : 0x00;
+	}
+
 	SNESAddress address = split_address(addr);
 	Store* store = route(address);
 
@@ -98,4 +108,26 @@ Byte Bus::read(Address addr) {
 
 void Bus::load_cartridge(const std::string& directory) {
 	cartridge->load_cartridge(directory);
+}
+
+void Bus::enable_test_mode() {
+	test_mode = true;
+}
+
+void Bus::disable_test_mode() {
+	test_mode = false;
+	test_memory.clear();
+}
+
+void Bus::reset_test_memory() {
+	test_memory.clear();
+}
+
+Byte Bus::test_peek(Address addr) {
+	auto it = test_memory.find(addr & 0xFFFFFF);
+	return it != test_memory.end() ? it->second : 0x00;
+}
+
+void Bus::test_poke(Address addr, Byte value) {
+	test_memory[addr & 0xFFFFFF] = value;
 }

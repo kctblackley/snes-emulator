@@ -15,8 +15,7 @@ TickCount Ricoh5A22::get_tick() {
 }
 
 void Ricoh5A22::run_half_cycle() {
-	Byte opcode = 0x00;
-	Opcode op = get_opcode(optable, opcode, instruction_cycle, *this);
+	Opcode op = get_opcode(optable, BufferOpCode, instruction_cycle, *this);
 	op.function(*this, op.skipped);
 }
 

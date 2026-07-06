@@ -21,12 +21,17 @@ CONFIGURE_DEPENDS
     src/mappers/*.cpp
 )
 
+file(GLOB TESTING_SOURCES CONFIGURE_DEPENDS
+    src/testing/*.cpp
+)
+
 
 set(SNES_SOURCES
     ${COMPONENT_SOURCES}
     ${MISC_SOURCES}
     ${CPU_OPERATIONS_SOURCES}
     ${MAPPER_SOURCES}
+    ${TESTING_SOURCES}
     src/main.cpp
 )
 
@@ -38,6 +43,7 @@ target_include_directories(snes_emulator PRIVATE
     ${CMAKE_SOURCE_DIR}/include/misc
     ${CMAKE_SOURCE_DIR}/include/cpu_operations
     ${CMAKE_SOURCE_DIR}/include/mappers
+    ${CMAKE_SOURCE_DIR}/include/testing
 )   
 
 target_compile_options(snes_emulator PRIVATE)

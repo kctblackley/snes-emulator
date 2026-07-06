@@ -1,7 +1,31 @@
 #include "snes.hpp"
+#include "test_harness.hpp"
+#include "ricoh_5a22_optable.hpp"
+
+std::string opcode_to_filename(uint8_t opcode) {
+    char buf[8];
+    std::snprintf(buf, sizeof(buf), "%02x.n", opcode);
+    return std::string(buf);
+}
 
 int main() {
-	std::string directory = "rom/super_mario_world.sfc";
+	// --- Opcode single-step tests ---------------------------------------
+	// Drop a SingleStepTests-style JSON file at tests/<name>.json and call
+	// test("<name>", <opcode byte>) to check it against your implementation.
+	// e.g. tests/a1_n.json + opcode 0xA1 (LDA (dp,X)):
+	if constexpr(SST_TEST) {
+		Byte instruction = 0x00;
+		for (auto o : optable) {
+			if (o != &nop) {
+				test(opcode_to_filename(instruction), instruction);
+			}
+			instruction++;
+		}
+		return 0;
+	}
+
+	// --- Normal emulation -------------------------------------------------
+	std::string directory = "rom/tales_of_phantasia.sfc";
 
 	SNES snes = SNES();
 	snes.initialise();

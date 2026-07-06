@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <unordered_map>
 #include "common.hpp"
 
 #include "open_bus.hpp"
@@ -14,29 +15,33 @@
 
 class Bus {
 public:
-	// Lambda used as callback to prevent circular dependencies but allow bus to inflict penalties due to RAM/ROM speeds
 	using WaitCallback = std::function<void(CycleCount cycles)>;
 
 	Bus();
 
-	// Lambda is passed in here to allow for this
 	void set_wait_callback(WaitCallback callback);
 
-	// Abstracts behaviour to find storage device that is to respond to read/write to a given address
 	Store* system_area(SNESAddress address); 
 	Store* route(SNESAddress address);
 
-	// Read and write behaviours, abstracted as above
 	void write(Address addr, Byte value);
 	Byte read(Address addr);
 
 	void load_cartridge(const std::string& directory);
 
+	void enable_test_mode();
+	void disable_test_mode();
+	void reset_test_memory();
+	Byte test_peek(Address addr);
+	void test_poke(Address addr, Byte value);
+
 private:
 	WaitCallback callback;
 	Byte data_bus;
 
-	// RAII used as the bus owns all of the stores
+	bool test_mode = false;
+	std::unordered_map<Address, Byte> test_memory;
+
 	std::unique_ptr<OpenBus> open_bus;
 	std::unique_ptr<WRAM> wram;
 

@@ -5,7 +5,7 @@ constexpr Optable optable = {
 
     &nop, // 0x00
 
-    &nop, // 0x01
+    &n_01, // 0x01
 
     &nop, // 0x02
 
@@ -21,7 +21,7 @@ constexpr Optable optable = {
 
     &nop, // 0x08
 
-    &nop, // 0x09
+    &n_09, // 0x09
 
     &nop, // 0x0A
 
@@ -69,7 +69,7 @@ constexpr Optable optable = {
 
     &nop, // 0x20
 
-    &nop, // 0x21
+    &n_21, // 0x21
 
     &nop, // 0x22
 
@@ -85,7 +85,7 @@ constexpr Optable optable = {
 
     &nop, // 0x28
 
-    &nop, // 0x29
+    &n_29, // 0x29
 
     &nop, // 0x2A
 
@@ -133,7 +133,7 @@ constexpr Optable optable = {
 
     &nop, // 0x40
 
-    &nop, // 0x41
+    &n_41, // 0x41
 
     &nop, // 0x42
 
@@ -197,7 +197,7 @@ constexpr Optable optable = {
 
     &nop, // 0x60
 
-    &nop, // 0x61
+    &n_61, // 0x61
 
     &nop, // 0x62
 
@@ -325,11 +325,11 @@ constexpr Optable optable = {
 
     &nop, // 0xA0
 
-    &lda_a1, // 0xA1
+    &n_a1, // 0xA1
 
     &nop, // 0xA2
 
-    &nop, // 0xA3
+    &n_a3, // 0xA3
 
     &nop, // 0xA4
 

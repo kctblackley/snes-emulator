@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kctb/Projects/Emulators/snes-emulator
+CMAKE_SOURCE_DIR = /home/kctb/Projects/TempFolder/snes-emulator
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kctb/Projects/Emulators/snes-emulator/build
+CMAKE_BINARY_DIR = /home/kctb/Projects/TempFolder/snes-emulator/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles /home/kctb/Projects/Emulators/snes-emulator/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kctb/Projects/TempFolder/snes-emulator/build/CMakeFiles /home/kctb/Projects/TempFolder/snes-emulator/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kctb/Projects/TempFolder/snes-emulator/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -113,7 +113,7 @@ preinstall/fast:
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -P /home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles/VerifyGlobs.cmake
+	$(CMAKE_COMMAND) -P /home/kctb/Projects/TempFolder/snes-emulator/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
@@ -370,6 +370,30 @@ src/misc/utility.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.s
 .PHONY : src/misc/utility.cpp.s
 
+src/testing/test_harness.o: src/testing/test_harness.cpp.o
+.PHONY : src/testing/test_harness.o
+
+# target to build an object file
+src/testing/test_harness.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o
+.PHONY : src/testing/test_harness.cpp.o
+
+src/testing/test_harness.i: src/testing/test_harness.cpp.i
+.PHONY : src/testing/test_harness.i
+
+# target to preprocess a source file
+src/testing/test_harness.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.i
+.PHONY : src/testing/test_harness.cpp.i
+
+src/testing/test_harness.s: src/testing/test_harness.cpp.s
+.PHONY : src/testing/test_harness.s
+
+# target to generate assembly for a file
+src/testing/test_harness.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.s
+.PHONY : src/testing/test_harness.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -409,6 +433,9 @@ help:
 	@echo "... src/misc/utility.o"
 	@echo "... src/misc/utility.i"
 	@echo "... src/misc/utility.s"
+	@echo "... src/testing/test_harness.o"
+	@echo "... src/testing/test_harness.i"
+	@echo "... src/testing/test_harness.s"
 .PHONY : help
 
 
@@ -420,7 +447,7 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -P /home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles/VerifyGlobs.cmake
+	$(CMAKE_COMMAND) -P /home/kctb/Projects/TempFolder/snes-emulator/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

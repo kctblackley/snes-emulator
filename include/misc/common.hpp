@@ -31,6 +31,12 @@ Quadrant get_quadrant(Bank bank);
 #define RICOH_5A22_START ;
 #define RICOH_5A22_END ;
 
+Byte get_lo(Word word);
+Byte get_hi(Word word);
+
+Byte set_bit(Byte byte, Byte bit);
+Byte clear_bit(Byte byte, Byte bit);
+
 // Timing constants
 constexpr CycleCount MASTER_CLOCK = 21477272;
 constexpr CycleCount RICOH_5A22_CYCLE = 6;

@@ -19,6 +19,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o.d"
   "CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.o"
   "CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.o.d"
+  "CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o"
+  "CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o.d"
   "snes_emulator"
   "snes_emulator.pdb"
 )
