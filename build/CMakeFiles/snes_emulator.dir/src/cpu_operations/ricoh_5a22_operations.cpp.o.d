@@ -264,4 +264,5 @@ CMakeFiles/snes_emulator.dir/src/cpu_operations/ricoh_5a22_operations.cpp.o: \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/src/cpu_operations/ricoh_5a22_addressing_modes.hpp

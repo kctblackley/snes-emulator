@@ -9,7 +9,8 @@
 #include "json.hpp"
 #include "opcode_engine.hpp"
 #include "ricoh_5a22.hpp"
-#include "ricoh_5a22_optable.hpp"
+#include "ricoh_5a22_native_optable.hpp"
+#include "ricoh_5a22_emulation_optable.hpp"
 
 namespace {
 
@@ -114,7 +115,8 @@ void run_instruction(Ricoh5A22& cpu, Byte opcode_value) {
 	CycleCount steps = 0;
 
 	do {
-		Opcode op = get_opcode(optable, opcode_value, idx, cpu);
+		cpu.apply_invariants();
+		Opcode op = get_opcode(cpu.regs.emulation_mode ? emulation_optable : native_optable, opcode_value, idx, cpu);
 		op.function(cpu, op.skipped);
 		steps++;
 	} while (idx != 0 && steps < MAX_STEPS);

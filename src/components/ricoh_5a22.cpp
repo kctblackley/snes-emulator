@@ -14,8 +14,21 @@ TickCount Ricoh5A22::get_tick() {
 	return this->tick;
 }
 
+void Ricoh5A22::poll_interrupts() {
+	return;
+}
+
+void Ricoh5A22::apply_invariants() {
+	if (regs.emulation_mode) {
+		regs.X = regs.X & 0x00FF;
+		regs.Y = regs.Y & 0x00FF;
+		regs.S = (regs.S & 0x00FF) | 0x0100;
+	}
+}
+
 void Ricoh5A22::run_half_cycle() {
-	Opcode op = get_opcode(optable, BufferOpCode, instruction_cycle, *this);
+	apply_invariants();
+	Opcode op = get_opcode(regs.emulation_mode ? emulation_optable : native_optable, BufferOpCode, instruction_cycle, *this);
 	op.function(*this, op.skipped);
 }
 

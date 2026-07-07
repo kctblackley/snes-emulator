@@ -267,6 +267,7 @@ CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: \
  /home/kctb/Projects/Emulators/snes-emulator/include/components/ricoh_5a22.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/components/cpu.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/components/component.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_optable.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_native_optable.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_emulation_optable.hpp

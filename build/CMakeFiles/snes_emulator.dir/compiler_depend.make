@@ -956,8 +956,9 @@ CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o: /home/kctb/Project
   /home/kctb/Projects/Emulators/snes-emulator/include/components/cpu.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/components/ricoh_5a22.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_emulation_optable.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_native_optable.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
-  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_optable.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
@@ -1284,8 +1285,9 @@ CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: /home/kctb/Projects/Emul
   /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/components/ricoh_5a22.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/components/snes.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_emulation_optable.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_native_optable.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
-  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_optable.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
@@ -1628,6 +1630,7 @@ CMakeFiles/snes_emulator.dir/src/cpu_operations/ricoh_5a22_operations.cpp.o: /ho
   /home/kctb/Projects/Emulators/snes-emulator/include/stores/store.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/stores/wram.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/stores/wram_access.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/src/cpu_operations/ricoh_5a22_addressing_modes.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -1937,8 +1940,9 @@ CMakeFiles/snes_emulator.dir/src/main.cpp.o: /home/kctb/Projects/Emulators/snes-
   /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/components/ricoh_5a22.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/components/snes.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_emulation_optable.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_native_optable.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
-  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_optable.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
@@ -3085,8 +3089,9 @@ CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o: /home/kctb/Projects
   /home/kctb/Projects/Emulators/snes-emulator/include/components/cpu.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/components/ricoh_5a22.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_emulation_optable.hpp \
+  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_native_optable.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
-  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_optable.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \
   /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
@@ -3415,19 +3420,23 @@ CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o: /home/kctb/Projects
 
 /home/kctb/Projects/Emulators/snes-emulator/src/misc/utility.cpp:
 
+/usr/include/c++/13/bits/stl_map.h:
+
+/home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp:
+
 /home/kctb/Projects/Emulators/snes-emulator/src/mappers/mapper.cpp:
 
 /home/kctb/Projects/Emulators/snes-emulator/include/testing/test_harness.hpp:
 
 /home/kctb/Projects/Emulators/snes-emulator/src/main.cpp:
 
-/usr/include/c++/13/bits/stl_map.h:
-
-/home/kctb/Projects/Emulators/snes-emulator/src/misc/common.cpp:
-
-/home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_optable.hpp:
+/home/kctb/Projects/Emulators/snes-emulator/src/cpu_operations/ricoh_5a22_addressing_modes.hpp:
 
 /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp:
+
+/home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_native_optable.hpp:
+
+/home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_emulation_optable.hpp:
 
 /home/kctb/Projects/Emulators/snes-emulator/include/components/ricoh_5a22.hpp:
 

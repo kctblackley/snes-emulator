@@ -32,8 +32,16 @@ public:
 	Word BufferPointer;
 	Word BufferAddress;
 	Word BufferOperand;
+	Word BufferBank;
+	Word BufferOrig;
 
 	bool condition;
+
+	bool Branching;
+	bool BoundaryCrossed;
+
+	virtual void apply_invariants() = 0;
+	virtual void poll_interrupts() = 0;
 
 	virtual bool get_flag_N() { return false; }
 	virtual bool get_flag_V() { return false; }

@@ -1,6 +1,7 @@
 #pragma once
 #include "cpu.hpp"
-#include "ricoh_5a22_optable.hpp"
+#include "ricoh_5a22_native_optable.hpp"
+#include "ricoh_5a22_emulation_optable.hpp"
 
 class Ricoh5A22 : public CPU {
 public:
@@ -23,6 +24,10 @@ public:
 	void write(Address addr, Byte value) override {
 		bus->write(addr, value);
 	}
+
+	void apply_invariants() override;
+
+	void poll_interrupts() override;
 
 	bool get_flag_N() override { return (regs.P >> 7) & 0b1; }
 	bool get_flag_V() override { return (regs.P >> 6) & 0b1; }
