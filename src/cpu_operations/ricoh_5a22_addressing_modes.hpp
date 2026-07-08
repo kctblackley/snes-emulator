@@ -43,8 +43,31 @@
 	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Operand>), \
 
 /*#define NATIVE_DIRECT_READ_MODIFY_WRITE ;
-#define NATIVE_DIRECT_WRITE ;
-#define NATIVE_DIRECT_X_READ ;
+#define NATIVE_DIRECT_WRITE ;*/
+
+#define NATIVE_DIRECT_X_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::AOXD, false, BranchMode::None, true>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Operand>), \
+	/* 5.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Operand, Mode::PlusOne>, Ricoh5A22Predicates::MFlagSet),
+#define EMULATION_DIRECT_X_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::AOXDEmulation, false, BranchMode::None, true>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Operand>),
+
+
+/*
 #define NATIVE_DIRECT_X_READ_MODIFY_WRITE ;
 #define NATIVE_DIRECT_X_WRITE ;
 #define NATIVE_DIRECT_Y_READ ;
@@ -167,8 +190,8 @@
 	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
 	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer, Mode::PlusOne>), \
 	/* 5.1 */ MakeHandler(Ricoh5A22Functions::DirectIndirectYIndex), \
-	/* 5.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DirectIndirectYIndexCondition<Mode::Native>), \
-	/* 6.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DirectIndirectYIndexCondition<Mode::Native>), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Native>), \
+	/* 6.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Native>), \
 	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
 	/* 7.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
 	/* 7.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerPlusOneBankCarry, ReadTo::OperandHigh>, Ricoh5A22Predicates::MFlagSet),
@@ -182,8 +205,8 @@
 	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
 	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer, Mode::PlusOne>), \
 	/* 5.1 */ MakeHandler(Ricoh5A22Functions::DirectIndirectYIndex), \
-	/* 5.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DirectIndirectYIndexCondition<Mode::Emulation>), \
-	/* 6.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DirectIndirectYIndexCondition<Mode::Emulation>), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Emulation>), \
+	/* 6.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Emulation>), \
 	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
 
 #define NATIVE_STACK_RELATIVE_READ \
@@ -203,8 +226,110 @@
 	/* 3.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
 	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Operand>), \
 	
-/*#define NATIVE_STACK_RELATIVE_WRITE ;
-#define NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ ;
+/*#define NATIVE_STACK_RELATIVE_WRITE ;*/
+
+#define NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::AOD, Mode::IfSkipped>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer, Mode::PlusOne>), \
+	/* 5.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::AddressPlusTwo, ReadTo::Bank>), \
+	/* 6.1 */ MakeHandler(Ricoh5A22Functions::DirectIndirectIndexedLongYIndex), \
+	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+	/* 7.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
+	/* 7.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerPlusOneBankCarry, ReadTo::OperandHigh>, Ricoh5A22Predicates::MFlagSet),
+#define EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::AOD, Mode::IfSkipped>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer, Mode::PlusOne>), \
+	/* 5.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::AddressPlusTwo, ReadTo::Bank>), \
+	/* 6.1 */ MakeHandler(Ricoh5A22Functions::DirectIndirectIndexedLongYIndex), \
+	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+
+#define NATIVE_ABSOLUTE_Y_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::PointerHigh>), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::AbsoluteYIndex<Mode::PCIncrement>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Native>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Native>), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+	/* 5.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerPlusOneBankCarry, ReadTo::OperandHigh>, Ricoh5A22Predicates::MFlagSet),
+#define EMULATION_ABSOLUTE_Y_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::PointerHigh>), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::AbsoluteYIndex<Mode::PCIncrement>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Emulation>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Emulation>), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+
+#define NATIVE_ABSOLUTE_X_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::PointerHigh>), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::AbsoluteXIndex<Mode::PCIncrement>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Native>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Native>), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+	/* 5.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerPlusOneBankCarry, ReadTo::OperandHigh>, Ricoh5A22Predicates::MFlagSet),
+#define EMULATION_ABSOLUTE_X_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::PointerHigh>), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::AbsoluteXIndex<Mode::PCIncrement>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Emulation>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::ReadingCondition<Mode::Emulation>), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+
+
+#define NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::APS>), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer, Mode::PlusOne>), \
+	/* 5.1 */ MakeHandler(Ricoh5A22Functions::StackRelativeIndirectIndexed), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 6.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+	/* 7.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
+	/* 7.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerPlusOneBankCarry, ReadTo::OperandHigh>, Ricoh5A22Predicates::MFlagSet),
+#define EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::APSEmulation>), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Address, ReadTo::Pointer, Mode::PlusOne>), \
+	/* 5.1 */ MakeHandler(Ricoh5A22Functions::StackRelativeIndirectIndexed), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 6.1 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+
+/*
 #define NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_WRITE ;*/
 
 /*
@@ -257,6 +382,26 @@
 	/* 4.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
 	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::AddressBank, ReadTo::Operand>), \
 
+#define NATIVE_ABSOLUTE_LONG_X_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::PointerHigh>), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Bank>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::AbsoluteLongXIndex<Mode::PCIncrement>), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
+	/* 5.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
+	/* 5.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerPlusOneBankCarry, ReadTo::OperandHigh>, Ricoh5A22Predicates::MFlagSet),
+#define EMULATION_ABSOLUTE_LONG_X_READ \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::PointerHigh>), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Bank>), \
+	/* 4.1 */ MakeHandler(Ricoh5A22Functions::AbsoluteLongXIndex<Mode::PCIncrement>), \
+	/* 4.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PointerBank, ReadTo::Operand>), \
 
 /*
 #define NATIVE_ABSOLUTE_LONG_WRITE ;
