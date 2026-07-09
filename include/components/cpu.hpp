@@ -34,6 +34,11 @@ public:
 	Word BufferOperand;
 	Word BufferBank;
 	Word BufferOrig;
+	Word BufferMVDest;
+
+	Word TransferCount;
+
+	Word DiscardBuffer;
 
 	bool condition;
 

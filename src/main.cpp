@@ -19,11 +19,17 @@ constexpr const char* COLOR_YELLOW = "\033[33m";
 constexpr const char* COLOR_BOLD   = "\033[1m";
 constexpr const char* COLOR_RESET  = "\033[0m";
 
+bool to_test(Byte instruction) {
+	std::vector<Byte> instructions = {0xea, 0xeb};
+	return (std::count(instructions.begin(), instructions.end(), instruction) > 0);
+}
+
 int main() {
 	// --- Opcode single-step tests ---------------------------------------
 	// Drop a SingleStepTests-style JSON file at tests/<name>.json and call
 	// test("<name>", <opcode byte>) to check it against your implementation.
 	// e.g. tests/a1_n.json + opcode 0xA1 (LDA (dp,X)):
+
 	if constexpr(SST_TEST) {
 		Byte instruction = 0x00;
 		int implemented = 0;
@@ -35,7 +41,7 @@ int main() {
 		bool passed;
 		std::cout << COLOR_BOLD << "Native mode\n";
 		for (auto o : native_optable) {
-			if (o != &nop) {
+			if ( (o != &nop && !SINGLE_TEST) || (o != &nop && to_test(instruction) && SINGLE_TEST) ) {
 				passed = test(opcode_to_filename(instruction, false), instruction);
 				if (!passed) {
 					incorrect++;
@@ -62,7 +68,7 @@ int main() {
 		std::cout << "\n";
 		std::cout << COLOR_BOLD << "Emulation mode\n";
 		for (auto o : emulation_optable) {
-			if (o != &nop) {
+			if ( (o != &nop && !SINGLE_TEST) || (o != &nop && to_test(instruction) && SINGLE_TEST) ) {
 				passed = test(opcode_to_filename(instruction, true), instruction);
 				if (!passed) {
 					incorrect++;

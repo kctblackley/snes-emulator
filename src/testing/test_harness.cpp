@@ -109,15 +109,59 @@ void apply_initial_state(Ricoh5A22& cpu, const TestCase& test_case) {
 	}
 }
 
-void run_instruction(Ricoh5A22& cpu, Byte opcode_value) {
+void run_block_move(Ricoh5A22& cpu, Byte opcode_value) {
 	CycleCount idx = 0;
-	constexpr CycleCount MAX_STEPS = 64; // guards against a runaway/incomplete instruction
+	constexpr CycleCount MAX_STEPS = 200; // enough for A=0xFFFF (65,536 bytes)
 	CycleCount steps = 0;
 
 	do {
 		cpu.apply_invariants();
-		Opcode op = get_opcode(cpu.regs.emulation_mode ? emulation_optable : native_optable, opcode_value, idx, cpu);
+
+		Opcode op = get_opcode(
+			cpu.regs.emulation_mode ? emulation_optable : native_optable,
+			opcode_value,
+			idx,
+			cpu
+		);
+
 		op.function(cpu, op.skipped);
+		steps++;
+
+		if (steps >= MAX_STEPS) {
+			break;
+		}
+
+		/*
+		 * MVN/MVP restart themselves internally until A wraps.
+		 * The opcode cycle index reaching zero means one instruction
+		 * iteration has completed. For block moves, continue while A
+		 * has not reached the terminating value.
+		 */
+	} while (idx != 0 || cpu.regs.A != 0xFFFF);
+}
+
+void run_instruction(Ricoh5A22& cpu, Byte opcode_value) {
+	if (opcode_value == 0x44 || opcode_value == 0x54) {
+		run_block_move(cpu, opcode_value);
+		return;
+	}
+
+	CycleCount idx = 0;
+	constexpr CycleCount MAX_STEPS = 64;
+	CycleCount steps = 0;
+
+	do {
+		cpu.apply_invariants();
+
+		Opcode op = get_opcode(
+			cpu.regs.emulation_mode ? emulation_optable : native_optable,
+			opcode_value,
+			idx,
+			cpu
+		);
+
+		op.function(cpu, op.skipped);
+
 		steps++;
 	} while (idx != 0 && steps < MAX_STEPS);
 }
@@ -159,6 +203,8 @@ void compare_memory(const std::vector<MemoryEntry>& expected, Ricoh5A22& cpu, st
 }
 
 }
+
+
 
 bool test(const std::string& opcode_name, Byte opcode_value) {
 	const std::string path = "tests/" + opcode_name + ".json";

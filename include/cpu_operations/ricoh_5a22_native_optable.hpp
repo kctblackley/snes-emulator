@@ -11,11 +11,11 @@ constexpr Optable native_optable = {
 
     &n_03, // 0x03
 
-    &nop, // 0x04
+    &n_04, // 0x04
 
     &n_05, // 0x05
 
-    &nop, // 0x06
+    &n_06, // 0x06
 
     &n_07, // 0x07
 
@@ -23,15 +23,15 @@ constexpr Optable native_optable = {
 
     &n_09, // 0x09
 
-    &nop, // 0x0A
+    &n_0a, // 0x0A
 
     &nop, // 0x0B
 
-    &nop, // 0x0C
+    &n_0c, // 0x0C
 
     &n_0d, // 0x0D
 
-    &nop, // 0x0E
+    &n_0e, // 0x0E
 
     &n_0f, // 0x0F
 
@@ -43,27 +43,27 @@ constexpr Optable native_optable = {
 
     &n_13, // 0x13
 
-    &nop, // 0x14
+    &n_14, // 0x14
 
     &n_15, // 0x15
 
-    &nop, // 0x16
+    &n_16, // 0x16
 
     &n_17, // 0x17
 
-    &nop, // 0x18
+    &n_18, // 0x18
 
     &n_19, // 0x19
 
     &nop, // 0x1A
 
-    &nop, // 0x1B
+    &n_1b, // 0x1B
 
-    &nop, // 0x1C
+    &n_1c, // 0x1C
 
     &n_1d, // 0x1D
 
-    &nop, // 0x1E
+    &n_1e, // 0x1E
 
     &n_1f, // 0x1F
 
@@ -79,7 +79,7 @@ constexpr Optable native_optable = {
 
     &n_25, // 0x25
 
-    &nop, // 0x26
+    &n_26, // 0x26
 
     &n_27, // 0x27
 
@@ -87,7 +87,7 @@ constexpr Optable native_optable = {
 
     &n_29, // 0x29
 
-    &nop, // 0x2A
+    &n_2a, // 0x2A
 
     &nop, // 0x2B
 
@@ -95,7 +95,7 @@ constexpr Optable native_optable = {
 
     &n_2d, // 0x2D
 
-    &nop, // 0x2E
+    &n_2e, // 0x2E
 
     &n_2f, // 0x2F
 
@@ -115,13 +115,13 @@ constexpr Optable native_optable = {
 
     &n_37, // 0x37
 
-    &nop, // 0x38
+    &n_38, // 0x38
 
     &n_39, // 0x39
 
     &nop, // 0x3A
 
-    &nop, // 0x3B
+    &n_3b, // 0x3B
 
     &nop, // 0x3C
 
@@ -139,11 +139,11 @@ constexpr Optable native_optable = {
 
     &n_43, // 0x43
 
-    &nop, // 0x44
+    &n_44, // 0x44
 
     &n_45, // 0x45
 
-    &nop, // 0x46
+    &n_46, // 0x46
 
     &n_47, // 0x47
 
@@ -151,7 +151,7 @@ constexpr Optable native_optable = {
 
     &n_49, // 0x49
 
-    &nop, // 0x4A
+    &n_4a, // 0x4A
 
     &nop, // 0x4B
 
@@ -159,7 +159,7 @@ constexpr Optable native_optable = {
 
     &n_4d, // 0x4D
 
-    &nop, // 0x4E
+    &n_4e, // 0x4E
 
     &n_4f, // 0x4F
 
@@ -171,27 +171,27 @@ constexpr Optable native_optable = {
 
     &n_53, // 0x53
 
-    &nop, // 0x54
+    &n_54, // 0x54
 
     &n_55, // 0x55
 
-    &nop, // 0x56
+    &n_56, // 0x56
 
     &n_57, // 0x57
 
-    &nop, // 0x58
+    &n_58, // 0x58
 
     &n_59, // 0x59
 
     &nop, // 0x5A
 
-    &nop, // 0x5B
+    &n_5b, // 0x5B
 
     &nop, // 0x5C
 
     &n_5d, // 0x5D
 
-    &nop, // 0x5E
+    &n_5e, // 0x5E
 
     &n_5f, // 0x5F
 
@@ -207,7 +207,7 @@ constexpr Optable native_optable = {
 
     &n_65, // 0x65
 
-    &nop, // 0x66
+    &n_66, // 0x66
 
     &n_67, // 0x67
 
@@ -215,7 +215,7 @@ constexpr Optable native_optable = {
 
     &n_69, // 0x69
 
-    &nop, // 0x6A
+    &n_6a, // 0x6A
 
     &nop, // 0x6B
 
@@ -223,7 +223,7 @@ constexpr Optable native_optable = {
 
     &n_6d, // 0x6D
 
-    &nop, // 0x6E
+    &n_6e, // 0x6E
 
     &n_6f, // 0x6F
 
@@ -239,119 +239,119 @@ constexpr Optable native_optable = {
 
     &n_75, // 0x75
 
-    &nop, // 0x76
+    &n_76, // 0x76
 
     &n_77, // 0x77
 
-    &nop, // 0x78
+    &n_78, // 0x78
 
     &n_79, // 0x79
 
     &nop, // 0x7A
 
-    &nop, // 0x7B
+    &n_7b, // 0x7B
 
     &nop, // 0x7C
 
     &n_7d, // 0x7D
 
-    &nop, // 0x7E
+    &n_7e, // 0x7E
 
     &n_7f, // 0x7F
 
     &n_80, // 0x80
 
-    &nop, // 0x81
+    &n_81, // 0x81
 
-    &nop, // 0x82
+    &n_82, // 0x82
 
-    &nop, // 0x83
+    &n_83, // 0x83
 
     &nop, // 0x84
 
-    &nop, // 0x85
+    &n_85, // 0x85
 
     &nop, // 0x86
 
-    &nop, // 0x87
+    &n_87, // 0x87
 
     &nop, // 0x88
 
     &nop, // 0x89
 
-    &nop, // 0x8A
+    &n_8a, // 0x8A
 
     &nop, // 0x8B
 
     &nop, // 0x8C
 
-    &nop, // 0x8D
+    &n_8d, // 0x8D
 
     &nop, // 0x8E
 
-    &nop, // 0x8F
+    &n_8f, // 0x8F
 
     &n_90, // 0x90
 
-    &nop, // 0x91
+    &n_91, // 0x91
 
-    &nop, // 0x92
+    &n_92, // 0x92
 
-    &nop, // 0x93
+    &n_93, // 0x93
 
     &nop, // 0x94
 
-    &nop, // 0x95
+    &n_95, // 0x95
 
     &nop, // 0x96
 
-    &nop, // 0x97
+    &n_97, // 0x97
 
-    &nop, // 0x98
+    &n_98, // 0x98
 
-    &nop, // 0x99
+    &n_99, // 0x99
 
-    &nop, // 0x9A
+    &n_9a, // 0x9A
 
-    &nop, // 0x9B
+    &n_9b, // 0x9B
 
     &nop, // 0x9C
 
-    &nop, // 0x9D
+    &n_9d, // 0x9D
 
     &nop, // 0x9E
 
-    &nop, // 0x9F
+    &n_9f, // 0x9F
 
-    &nop, // 0xA0
+    &n_a0, // 0xA0
 
     &n_a1, // 0xA1
 
-    &nop, // 0xA2
+    &n_a2, // 0xA2
 
     &n_a3, // 0xA3
 
-    &nop, // 0xA4
+    &n_a4, // 0xA4
 
     &n_a5, // 0xA5
 
-    &nop, // 0xA6
+    &n_a6, // 0xA6
 
     &n_a7, // 0xA7
 
-    &nop, // 0xA8
+    &n_a8, // 0xA8
 
     &n_a9, // 0xA9
 
-    &nop, // 0xAA
+    &n_aa, // 0xAA
 
     &nop, // 0xAB
 
-    &nop, // 0xAC
+    &n_ac, // 0xAC
 
     &n_ad, // 0xAD
 
-    &nop, // 0xAE
+    &n_ae, // 0xAE
 
     &n_af, // 0xAF
 
@@ -363,27 +363,27 @@ constexpr Optable native_optable = {
 
     &n_b3, // 0xB3
 
-    &nop, // 0xB4
+    &n_b4, // 0xB4
 
     &n_b5, // 0xB5
 
-    &nop, // 0xB6
+    &n_b6, // 0xB6
 
     &n_b7, // 0xB7
 
-    &nop, // 0xB8
+    &n_b8, // 0xB8
 
     &n_b9, // 0xB9
 
-    &nop, // 0xBA
+    &n_ba, // 0xBA
 
-    &nop, // 0xBB
+    &n_bb, // 0xBB
 
-    &nop, // 0xBC
+    &n_bc, // 0xBC
 
     &n_bd, // 0xBD
 
-    &nop, // 0xBE
+    &n_be, // 0xBE
 
     &n_bf, // 0xBF
 
@@ -435,7 +435,7 @@ constexpr Optable native_optable = {
 
     &n_d7, // 0xD7
 
-    &nop, // 0xD8
+    &n_d8, // 0xD8
 
     &n_d9, // 0xD9
 
@@ -471,9 +471,9 @@ constexpr Optable native_optable = {
 
     &n_e9, // 0xE9
 
-    &nop, // 0xEA
+    &n_ea, // 0xEA
 
-    &nop, // 0xEB
+    &n_eb, // 0xEB
 
     &nop, // 0xEC
 

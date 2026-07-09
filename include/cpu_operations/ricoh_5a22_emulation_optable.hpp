@@ -11,11 +11,11 @@ constexpr Optable emulation_optable = {
 
     &e_03, // 0x03
 
-    &nop, // 0x04
+    &e_04, // 0x04
 
     &e_05, // 0x05
 
-    &nop, // 0x06
+    &e_06, // 0x06
 
     &e_07, // 0x07
 
@@ -23,15 +23,15 @@ constexpr Optable emulation_optable = {
 
     &e_09, // 0x09
 
-    &nop, // 0x0A
+    &e_0a, // 0x0A
 
     &nop, // 0x0B
 
-    &nop, // 0x0C
+    &e_0c, // 0x0C
 
     &e_0d, // 0x0D
 
-    &nop, // 0x0E
+    &e_0e, // 0x0E
 
     &e_0f, // 0x0F
 
@@ -43,27 +43,27 @@ constexpr Optable emulation_optable = {
 
     &e_13, // 0x13
 
-    &nop, // 0x14
+    &e_14, // 0x14
 
     &e_15, // 0x15
 
-    &nop, // 0x16
+    &e_16, // 0x16
 
     &e_17, // 0x17
 
-    &nop, // 0x18
+    &e_18, // 0x18
 
     &e_19, // 0x19
 
     &nop, // 0x1A
 
-    &nop, // 0x1B
+    &e_1b, // 0x1B
 
-    &nop, // 0x1C
+    &e_1c, // 0x1C
 
     &e_1d, // 0x1D
 
-    &nop, // 0x1E
+    &e_1e, // 0x1E
 
     &e_1f, // 0x1F
 
@@ -79,7 +79,7 @@ constexpr Optable emulation_optable = {
 
     &e_25, // 0x25
 
-    &nop, // 0x26
+    &e_26, // 0x26
 
     &e_27, // 0x27
 
@@ -87,7 +87,7 @@ constexpr Optable emulation_optable = {
 
     &e_29, // 0x29
 
-    &nop, // 0x2A
+    &e_2a, // 0x2A
 
     &nop, // 0x2B
 
@@ -95,7 +95,7 @@ constexpr Optable emulation_optable = {
 
     &e_2d, // 0x2D
 
-    &nop, // 0x2E
+    &e_2e, // 0x2E
 
     &e_2f, // 0x2F
 
@@ -115,13 +115,13 @@ constexpr Optable emulation_optable = {
 
     &e_37, // 0x37
 
-    &nop, // 0x38
+    &e_38, // 0x38
 
     &e_39, // 0x39
 
     &nop, // 0x3A
 
-    &nop, // 0x3B
+    &e_3b, // 0x3B
 
     &nop, // 0x3C
 
@@ -139,11 +139,11 @@ constexpr Optable emulation_optable = {
 
     &e_43, // 0x43
 
-    &nop, // 0x44
+    &e_44, // 0x44
 
     &e_45, // 0x45
 
-    &nop, // 0x46
+    &e_46, // 0x46
 
     &e_47, // 0x47
 
@@ -151,7 +151,7 @@ constexpr Optable emulation_optable = {
 
     &e_49, // 0x49
 
-    &nop, // 0x4A
+    &e_4a, // 0x4A
 
     &nop, // 0x4B
 
@@ -159,7 +159,7 @@ constexpr Optable emulation_optable = {
 
     &e_4d, // 0x4D
 
-    &nop, // 0x4E
+    &e_4e, // 0x4E
 
     &e_4f, // 0x4F
 
@@ -171,27 +171,27 @@ constexpr Optable emulation_optable = {
 
     &e_53, // 0x53
 
-    &nop, // 0x54
+    &e_54, // 0x54
 
     &e_55, // 0x55
 
-    &nop, // 0x56
+    &e_56, // 0x56
 
     &e_57, // 0x57
 
-    &nop, // 0x58
+    &e_58, // 0x58
 
     &e_59, // 0x59
 
     &nop, // 0x5A
 
-    &nop, // 0x5B
+    &e_5b, // 0x5B
 
     &nop, // 0x5C
 
     &e_5d, // 0x5D
 
-    &nop, // 0x5E
+    &e_5e, // 0x5E
 
     &e_5f, // 0x5F
 
@@ -207,7 +207,7 @@ constexpr Optable emulation_optable = {
 
     &e_65, // 0x65
 
-    &nop, // 0x66
+    &e_66, // 0x66
 
     &e_67, // 0x67
 
@@ -215,7 +215,7 @@ constexpr Optable emulation_optable = {
 
     &e_69, // 0x69
 
-    &nop, // 0x6A
+    &e_6a, // 0x6A
 
     &nop, // 0x6B
 
@@ -223,7 +223,7 @@ constexpr Optable emulation_optable = {
 
     &e_6d, // 0x6D
 
-    &nop, // 0x6E
+    &e_6e, // 0x6E
 
     &e_6f, // 0x6F
 
@@ -239,119 +239,119 @@ constexpr Optable emulation_optable = {
 
     &e_75, // 0x75
 
-    &nop, // 0x76
+    &e_76, // 0x76
 
     &e_77, // 0x77
 
-    &nop, // 0x78
+    &e_78, // 0x78
 
     &e_79, // 0x79
 
     &nop, // 0x7A
 
-    &nop, // 0x7B
+    &e_7b, // 0x7B
 
     &nop, // 0x7C
 
     &e_7d, // 0x7D
 
-    &nop, // 0x7E
+    &e_7e, // 0x7E
 
     &e_7f, // 0x7F
 
     &e_80, // 0x80
 
-    &nop, // 0x81
+    &e_81, // 0x81
 
-    &nop, // 0x82
+    &e_82, // 0x82
 
-    &nop, // 0x83
+    &e_83, // 0x83
 
     &nop, // 0x84
 
-    &nop, // 0x85
+    &e_85, // 0x85
 
     &nop, // 0x86
 
-    &nop, // 0x87
+    &e_87, // 0x87
 
     &nop, // 0x88
 
     &nop, // 0x89
 
-    &nop, // 0x8A
+    &e_8a, // 0x8A
 
     &nop, // 0x8B
 
     &nop, // 0x8C
 
-    &nop, // 0x8D
+    &e_8d, // 0x8D
 
     &nop, // 0x8E
 
-    &nop, // 0x8F
+    &e_8f, // 0x8F
 
     &e_90, // 0x90
 
-    &nop, // 0x91
+    &e_91, // 0x91
 
-    &nop, // 0x92
+    &e_92, // 0x92
 
-    &nop, // 0x93
+    &e_93, // 0x93
 
     &nop, // 0x94
 
-    &nop, // 0x95
+    &e_95, // 0x95
 
     &nop, // 0x96
 
-    &nop, // 0x97
+    &e_97, // 0x97
 
-    &nop, // 0x98
+    &e_98, // 0x98
 
-    &nop, // 0x99
+    &e_99, // 0x99
 
-    &nop, // 0x9A
+    &e_9a, // 0x9A
 
-    &nop, // 0x9B
+    &e_9b, // 0x9B
 
     &nop, // 0x9C
 
-    &nop, // 0x9D
+    &e_9d, // 0x9D
 
     &nop, // 0x9E
 
-    &nop, // 0x9F
+    &e_9f, // 0x9F
 
-    &nop, // 0xA0
+    &e_a0, // 0xA0
 
     &e_a1, // 0xA1
 
-    &nop, // 0xA2
+    &e_a2, // 0xA2
 
     &e_a3, // 0xA3
 
-    &nop, // 0xA4
+    &e_a4, // 0xA4
 
     &e_a5, // 0xA5
 
-    &nop, // 0xA6
+    &e_a6, // 0xA6
 
     &e_a7, // 0xA7
 
-    &nop, // 0xA8
+    &e_a8, // 0xA8
 
     &e_a9, // 0xA9
 
-    &nop, // 0xAA
+    &e_aa, // 0xAA
 
     &nop, // 0xAB
 
-    &nop, // 0xAC
+    &e_ac, // 0xAC
 
     &e_ad, // 0xAD
 
-    &nop, // 0xAE
+    &e_ae, // 0xAE
 
     &e_af, // 0xAF
 
@@ -363,27 +363,27 @@ constexpr Optable emulation_optable = {
 
     &e_b3, // 0xB3
 
-    &nop, // 0xB4
+    &e_b4, // 0xB4
 
     &e_b5, // 0xB5
 
-    &nop, // 0xB6
+    &e_b6, // 0xB6
 
     &e_b7, // 0xB7
 
-    &nop, // 0xB8
+    &e_b8, // 0xB8
 
     &e_b9, // 0xB9
 
-    &nop, // 0xBA
+    &e_ba, // 0xBA
 
-    &nop, // 0xBB
+    &e_bb, // 0xBB
 
-    &nop, // 0xBC
+    &e_bc, // 0xBC
 
     &e_bd, // 0xBD
 
-    &nop, // 0xBE
+    &e_be, // 0xBE
 
     &e_bf, // 0xBF
 
@@ -435,7 +435,7 @@ constexpr Optable emulation_optable = {
 
     &e_d7, // 0xD7
 
-    &nop, // 0xD8
+    &e_d8, // 0xD8
 
     &e_d9, // 0xD9
 
@@ -471,9 +471,9 @@ constexpr Optable emulation_optable = {
 
     &e_e9, // 0xE9
 
-    &nop, // 0xEA
+    &e_ea, // 0xEA
 
-    &nop, // 0xEB
+    &e_eb, // 0xEB
 
     &nop, // 0xEC
 
