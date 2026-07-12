@@ -6,8 +6,14 @@
 // Functions are all of the type
 
 // Instructions
+extern Instruction n_00;
+extern Instruction e_00;
+
 extern Instruction n_01;
 extern Instruction e_01;
+
+extern Instruction n_02;
+extern Instruction e_02;
 
 extern Instruction n_03;
 extern Instruction e_03;
@@ -195,6 +201,9 @@ extern Instruction e_3e;
 extern Instruction n_3f;
 extern Instruction e_3f;
 
+extern Instruction n_40;
+extern Instruction e_40;
+
 extern Instruction n_41;
 extern Instruction e_41;
 
@@ -320,6 +329,9 @@ extern Instruction e_69;
 
 extern Instruction n_6a;
 extern Instruction e_6a;
+
+extern Instruction n_6b;
+extern Instruction e_6b;
 
 extern Instruction n_6c;
 extern Instruction e_6c;

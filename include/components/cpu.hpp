@@ -36,7 +36,8 @@ public:
 	Word BufferOrig;
 	Word BufferMVDest;
 	Word BufferStackAddress;
-	
+	Word Vector;
+
 	Word TransferCount;
 
 	Word DiscardBuffer;

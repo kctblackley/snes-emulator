@@ -3,11 +3,11 @@
 
 constexpr Optable native_optable = {
 
-    &nop, // 0x00
+    &n_00, // 0x00
 
     &n_01, // 0x01
 
-    &nop, // 0x02
+    &n_02, // 0x02
 
     &n_03, // 0x03
 
@@ -131,7 +131,7 @@ constexpr Optable native_optable = {
 
     &n_3f, // 0x3F
 
-    &nop, // 0x40
+    &n_40, // 0x40
 
     &n_41, // 0x41
 
@@ -217,7 +217,7 @@ constexpr Optable native_optable = {
 
     &n_6a, // 0x6A
 
-    &nop, // 0x6B
+    &n_6b, // 0x6B
 
     &n_6c, // 0x6C
 

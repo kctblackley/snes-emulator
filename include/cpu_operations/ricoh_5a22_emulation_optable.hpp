@@ -3,11 +3,11 @@
 
 constexpr Optable emulation_optable = {
 
-    &nop, // 0x00
+    &e_00, // 0x00
 
     &e_01, // 0x01
 
-    &nop, // 0x02
+    &e_02, // 0x02
 
     &e_03, // 0x03
 
@@ -131,7 +131,7 @@ constexpr Optable emulation_optable = {
 
     &e_3f, // 0x3F
 
-    &nop, // 0x40
+    &e_40, // 0x40
 
     &e_41, // 0x41
 
@@ -217,7 +217,7 @@ constexpr Optable emulation_optable = {
 
     &e_6a, // 0x6A
 
-    &nop, // 0x6B
+    &e_6b, // 0x6B
 
     &e_6c, // 0x6C
 

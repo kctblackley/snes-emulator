@@ -20,7 +20,7 @@ constexpr const char* COLOR_BOLD   = "\033[1m";
 constexpr const char* COLOR_RESET  = "\033[0m";
 
 bool to_test(Byte instruction) {
-	std::vector<Byte> instructions = {0x60};
+	std::vector<Byte> instructions = {0x00};
 	return (std::count(instructions.begin(), instructions.end(), instruction) > 0);
 }
 
