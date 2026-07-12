@@ -255,4 +255,13 @@ CMakeFiles/snes_emulator.dir/src/components/bus.cpp.o: \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/mapper.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp
+ /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/spc_700.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/cpu.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/component.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/apubus.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/ricoh_5a22.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_native_optable.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_emulation_optable.hpp

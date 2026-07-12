@@ -250,6 +250,30 @@ src/components/snes.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/snes.cpp.s
 .PHONY : src/components/snes.cpp.s
 
+src/components/spc_700.o: src/components/spc_700.cpp.o
+.PHONY : src/components/spc_700.o
+
+# target to build an object file
+src/components/spc_700.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/spc_700.cpp.o
+.PHONY : src/components/spc_700.cpp.o
+
+src/components/spc_700.i: src/components/spc_700.cpp.i
+.PHONY : src/components/spc_700.i
+
+# target to preprocess a source file
+src/components/spc_700.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/spc_700.cpp.i
+.PHONY : src/components/spc_700.cpp.i
+
+src/components/spc_700.s: src/components/spc_700.cpp.s
+.PHONY : src/components/spc_700.s
+
+# target to generate assembly for a file
+src/components/spc_700.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/spc_700.cpp.s
+.PHONY : src/components/spc_700.cpp.s
+
 src/cpu_operations/ricoh_5a22_operations.o: src/cpu_operations/ricoh_5a22_operations.cpp.o
 .PHONY : src/cpu_operations/ricoh_5a22_operations.o
 
@@ -370,30 +394,6 @@ src/misc/utility.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.s
 .PHONY : src/misc/utility.cpp.s
 
-src/testing/test_harness.o: src/testing/test_harness.cpp.o
-.PHONY : src/testing/test_harness.o
-
-# target to build an object file
-src/testing/test_harness.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o
-.PHONY : src/testing/test_harness.cpp.o
-
-src/testing/test_harness.i: src/testing/test_harness.cpp.i
-.PHONY : src/testing/test_harness.i
-
-# target to preprocess a source file
-src/testing/test_harness.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.i
-.PHONY : src/testing/test_harness.cpp.i
-
-src/testing/test_harness.s: src/testing/test_harness.cpp.s
-.PHONY : src/testing/test_harness.s
-
-# target to generate assembly for a file
-src/testing/test_harness.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.s
-.PHONY : src/testing/test_harness.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -418,6 +418,9 @@ help:
 	@echo "... src/components/snes.o"
 	@echo "... src/components/snes.i"
 	@echo "... src/components/snes.s"
+	@echo "... src/components/spc_700.o"
+	@echo "... src/components/spc_700.i"
+	@echo "... src/components/spc_700.s"
 	@echo "... src/cpu_operations/ricoh_5a22_operations.o"
 	@echo "... src/cpu_operations/ricoh_5a22_operations.i"
 	@echo "... src/cpu_operations/ricoh_5a22_operations.s"
@@ -433,9 +436,6 @@ help:
 	@echo "... src/misc/utility.o"
 	@echo "... src/misc/utility.i"
 	@echo "... src/misc/utility.s"
-	@echo "... src/testing/test_harness.o"
-	@echo "... src/testing/test_harness.i"
-	@echo "... src/testing/test_harness.s"
 .PHONY : help
 
 

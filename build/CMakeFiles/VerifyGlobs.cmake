@@ -10,6 +10,7 @@ set(OLD_GLOB
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/opcode_engine.cpp"
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/ricoh_5a22.cpp"
   "/home/kctb/Projects/Emulators/snes-emulator/src/components/snes.cpp"
+  "/home/kctb/Projects/Emulators/snes-emulator/src/components/spc_700.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -50,7 +51,6 @@ endif()
 # TESTING_SOURCES at CMakeLists.txt:32 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/home/kctb/Projects/Emulators/snes-emulator/src/testing/*.cpp")
 set(OLD_GLOB
-  "/home/kctb/Projects/Emulators/snes-emulator/src/testing/test_harness.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

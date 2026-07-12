@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/snes_emulator.dir/src/components/ricoh_5a22.cpp.o.d"
   "CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o"
   "CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o.d"
+  "CMakeFiles/snes_emulator.dir/src/components/spc_700.cpp.o"
+  "CMakeFiles/snes_emulator.dir/src/components/spc_700.cpp.o.d"
   "CMakeFiles/snes_emulator.dir/src/cpu_operations/ricoh_5a22_operations.cpp.o"
   "CMakeFiles/snes_emulator.dir/src/cpu_operations/ricoh_5a22_operations.cpp.o.d"
   "CMakeFiles/snes_emulator.dir/src/main.cpp.o"
@@ -19,8 +21,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/snes_emulator.dir/src/misc/common.cpp.o.d"
   "CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.o"
   "CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.o.d"
-  "CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o"
-  "CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o.d"
   "snes_emulator"
   "snes_emulator.pdb"
 )

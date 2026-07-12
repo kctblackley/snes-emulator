@@ -39,7 +39,7 @@ Byte set_bit(Byte byte, Byte bit);
 Byte clear_bit(Byte byte, Byte bit);
 
 // Timing constants
-constexpr CycleCount MASTER_CLOCK = 21477272;
+constexpr CycleCount MASTER_CLOCK = 20 * 21477272;
 constexpr CycleCount RICOH_5A22_CYCLE = 6;
 
 // WRAM constants and WRAM Access Constants

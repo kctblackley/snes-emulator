@@ -4,6 +4,7 @@
 
 #include "bus.hpp"
 #include "ricoh_5a22.hpp"
+#include "spc_700.hpp"
 #include "common.hpp"
 
 class SNES {
@@ -22,10 +23,11 @@ public:
 private:
 
 	std::unique_ptr<Bus> bus;
+	std::unique_ptr<SPC700> spc_700;
 
 	std::vector<std::unique_ptr<Component>> devices;
 
 	Ricoh5A22* ricoh_5a22 = nullptr;
-	
+
 	CycleCount master_cycle;
 };

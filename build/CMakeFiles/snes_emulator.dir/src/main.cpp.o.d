@@ -266,4 +266,5 @@ CMakeFiles/snes_emulator.dir/src/main.cpp.o: \
  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_operations.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/components/opcode_engine.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/cpu_operations/ricoh_5a22_emulation_optable.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/testing/test_harness.hpp
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/spc_700.hpp \
+ /home/kctb/Projects/Emulators/snes-emulator/include/components/apubus.hpp

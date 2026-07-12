@@ -1,10 +1,22 @@
 #include "bus.hpp"
+#include "spc_700.hpp"
+#include "ricoh_5a22.hpp"
 
 Bus::Bus() {
 	open_bus = std::make_unique<OpenBus>();
 	wram = std::make_unique<WRAM>();
 	cartridge = std::make_unique<Cartridge>();
+	
+}
 
+Bus::~Bus() = default;
+
+void Bus::connect_cpu(Ricoh5A22* cpu) {
+	this->cpu = cpu;
+}
+
+void Bus::connect_apu(SPC700* apu) {
+	this->apu = apu;
 }
 
 void Bus::set_wait_callback(WaitCallback callback) {
@@ -19,9 +31,6 @@ Store* Bus::system_area(SNESAddress address) {
 		return open_bus.get();
 	}
 	if (address.offset >= PPU_PORTS_SECTION && address.offset < APU_PORTS_SECTION) {
-		return open_bus.get(); // UNIMPLEMENTED
-	}
-	if (address.offset >= APU_PORTS_SECTION && address.offset < WRAM_ACCESS_SECTION) {
 		return open_bus.get(); // UNIMPLEMENTED
 	}
 	if (address.offset >= WRAM_ACCESS_SECTION && address.offset < CPU_PORTS_SECTION) {
@@ -40,6 +49,30 @@ Store* Bus::system_area(SNESAddress address) {
 		return cartridge.get();
 	}
 	return open_bus.get();
+}
+
+Component* Bus::system_area_component(SNESAddress address) {
+	if (address.offset >= APU_PORTS_SECTION && address.offset < WRAM_ACCESS_SECTION) {
+		return apu; // Just stubbed for now, to be finished later!
+	}
+	if (address.offset >= CPU_PORTS_SECTION && address.offset < CPU_DMA_PORTS_SECTION) {
+		return cpu; // Not all ports have been created just yet 
+	}
+	return nullptr;
+}
+
+Component* Bus::route_to_component(SNESAddress address) {
+	Quadrant quadrant = get_quadrant(address.bank);
+	switch (quadrant) {
+	case 1:
+	case 3:
+		return system_area_component(address);
+		break;
+	default:
+		break;
+	}
+
+	return nullptr;
 }
 
 Store* Bus::route(SNESAddress address) {
@@ -74,6 +107,14 @@ void Bus::write(Address addr, Byte value) {
 	}
 
 	SNESAddress address = split_address(addr);
+
+	Component* component = route_to_component(address);
+	if (component) {
+		data_bus = value;
+		component->communication_write(address, value);
+		return;
+	}
+
 	Store* store = route(address);
 	
 	if (store->is_not_open_bus()) {
@@ -90,6 +131,13 @@ Byte Bus::read(Address addr) {
 	}
 
 	SNESAddress address = split_address(addr);
+
+	Component* component = route_to_component(address);
+	if (component) {
+		data_bus = component->communication_read(address);
+		return data_bus;
+	}
+
 	Store* store = route(address);
 
 	if (store->is_not_open_bus()) {

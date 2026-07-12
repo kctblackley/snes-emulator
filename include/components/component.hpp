@@ -14,4 +14,11 @@ public:
 
 	virtual void reset() {}
 	virtual void initialise() {}
+
+	virtual Byte read(Address addr) = 0;
+	virtual void write(Address addr, Byte value) = 0;
+
+	virtual Byte communication_read(SNESAddress addr) = 0;
+	virtual void communication_write(SNESAddress addr, Byte value) = 0;
+
 };

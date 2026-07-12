@@ -6,8 +6,14 @@ SNES::SNES() : master_cycle(0) {
 	bus = std::make_unique<Bus>();
 	
 	devices.push_back(std::make_unique<Ricoh5A22>(bus.get()));
-
+	// Do not push SPC700 as the SNES does not tick that itself (separate component)
+	
 	ricoh_5a22 = static_cast<Ricoh5A22*>(devices[0].get());
+
+	spc_700 = std::make_unique<SPC700>();
+
+	bus->connect_cpu(ricoh_5a22);
+	bus->connect_apu(spc_700.get());
 
 	// Add wait-state-callback, when slow/fast data is accessed
 	bus->set_wait_callback([this](CycleCount cycles) {
@@ -43,6 +49,7 @@ void SNES::run() {
 	bool running = true;
 
 	auto start = std::chrono::high_resolution_clock::now();
+	
 	while (running) {
 		tick_snes();
 
@@ -66,7 +73,7 @@ void SNES::reset() {
 }
 
 void SNES::initialise() {
-		for (const auto& d : devices) {
+	for (const auto& d : devices) {
 		d->initialise();
 	}
 }

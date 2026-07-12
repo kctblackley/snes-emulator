@@ -2,21 +2,31 @@
 #include <functional>
 #include <unordered_map>
 #include "common.hpp"
-
 #include "open_bus.hpp"
 #include "wram.hpp"
 #include "cartridge.hpp"
+
+class SPC700;
+class Ricoh5A22;
+class Component;
 
 class Bus {
 public:
 	using WaitCallback = std::function<void(CycleCount cycles)>;
 
 	Bus();
+	~Bus();
+
+	void connect_cpu(Ricoh5A22* cpu);
+	void connect_apu(SPC700* apu);
 
 	void set_wait_callback(WaitCallback callback);
 
 	Store* system_area(SNESAddress address); 
 	Store* route(SNESAddress address);
+
+	Component* system_area_component(SNESAddress address);
+	Component* route_to_component(SNESAddress address);
 
 	void write(Address addr, Byte value);
 	Byte read(Address addr);
@@ -38,6 +48,8 @@ private:
 
 	std::unique_ptr<OpenBus> open_bus;
 	std::unique_ptr<WRAM> wram;
-
 	std::unique_ptr<Cartridge> cartridge;
+
+	SPC700* apu;
+	Ricoh5A22* cpu;
 };

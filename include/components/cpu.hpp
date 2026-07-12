@@ -98,9 +98,6 @@ public:
 	virtual void clear_flag_H() = 0;
 	virtual void clear_flag_B() = 0;
 	
-	virtual Byte read(Address addr) = 0;
-	virtual void write(Address addr, Byte value) = 0;
-
 	virtual void enable_test_mode() = 0;
 	virtual void disable_test_mode() = 0;
 	virtual void reset_test_memory() = 0;

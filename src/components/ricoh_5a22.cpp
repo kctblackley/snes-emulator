@@ -26,9 +26,19 @@ void Ricoh5A22::apply_invariants() {
 	}
 }
 
+void Ricoh5A22::tick_multiply_divisor() {
+	if (multiplier.half_cycles_since_init > 0) {
+		multiplier.half_cycles_since_init--;
+	}
+	if (divisor.half_cycles_since_init > 0) {
+		divisor.half_cycles_since_init--;
+	}
+}
+
 void Ricoh5A22::run_half_cycle() {
 	apply_invariants();
 	log();
+	tick_multiply_divisor();
 	Opcode op = get_opcode(regs.emulation_mode ? emulation_optable : native_optable, BufferOpCode, instruction_cycle, *this);
 	op.function(*this, op.skipped);
 }
@@ -52,9 +62,9 @@ void Ricoh5A22::initialise() {
 
 	regs.PB = 0;
 	regs.PC = (hi << 8) | lo;
-
+	regs.P = 0x34;
 	BufferOpCode = read(regs.PC);
-
+	regs.emulation_mode = true;
 	std::cout << "Initialised PC to " << regs.PC << "\n";
 	
 	cycle = 0;
@@ -62,9 +72,12 @@ void Ricoh5A22::initialise() {
 }
 
 void Ricoh5A22::log() {
-	std::cout << "PC:PB: " << std::hex << std::setw(2) << std::setfill('0') << regs.PB << ":"
-	                       << std::hex << std::setw(4) << std::setfill('0') << regs.PC << " "
-	          << "OP: "    << std::hex << std::setw(2) << std::setfill('0') << BufferOpCode << " "
-	          << "CYC: "   << std::dec << instruction_cycle
+	if (cycle % 1000000 != 0) {
+		return;
+	}
+	std::cout << "PC:PB: " << std::hex << std::setw(2) << std::setfill('0') << (int)regs.PB << ":"
+	                       << std::hex << std::setw(4) << std::setfill('0') << (int)regs.PC << " "
+	          << "OP: "    << std::hex << std::setw(2) << std::setfill('0') << (int)BufferOpCode << " "
+	          << "CYC: "   << std::dec << (int)instruction_cycle
 	          << "\n";
 }
