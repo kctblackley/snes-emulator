@@ -35,7 +35,8 @@ public:
 	Word BufferBank;
 	Word BufferOrig;
 	Word BufferMVDest;
-
+	Word BufferStackAddress;
+	
 	Word TransferCount;
 
 	Word DiscardBuffer;

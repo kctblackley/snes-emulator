@@ -260,6 +260,8 @@ CMakeFiles/snes_emulator.dir/src/components/snes.cpp.o: \
  /home/kctb/Projects/Emulators/snes-emulator/include/stores/cpu_dma_ports.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/stores/expansion_data.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/stores/cartridge.hpp \
+ /usr/include/c++/13/algorithm /usr/include/c++/13/bits/ranges_algo.h \
+ /usr/include/c++/13/pstl/glue_algorithm_defs.h \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/mapper.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
  /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \

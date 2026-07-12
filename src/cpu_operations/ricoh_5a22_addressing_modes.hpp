@@ -137,6 +137,27 @@
 	/* 6.1 */ MakeHandler(Ricoh5A22Functions::Copy<ReadFrom::RegisterA, ReadTo::Operand>), \
 	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Write<WriteValue::RegisterALow, WriteTo::Address>), \
 
+#define NATIVE_DIRECT_Y_WRITE \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::AOYD, false, BranchMode::None, true>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 6.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Write<WriteValue::RegisterALow, WriteTo::Address>), \
+	/* 7.1 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet), \
+	/* 7.2 */ MakeHandler(Ricoh5A22Functions::Write<WriteValue::RegisterAHigh, WriteTo::AddressPlusOne>, Ricoh5A22Predicates::MFlagSet),
+#define EMULATION_DIRECT_Y_WRITE \
+	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 1.2 */ MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>), \
+	/* 2.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \
+	/* 2.2 */ MakeHandler(Ricoh5A22Functions::NOP), \
+	/* 3.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::AOYDEmulation, false, BranchMode::None, true>), \
+	/* 3.2 */ MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::DLZero), \
+	/* 6.1 */ MakeHandler(Ricoh5A22Functions::Copy<ReadFrom::RegisterA, ReadTo::Operand>), \
+	/* 6.2 */ MakeHandler(Ricoh5A22Functions::Write<WriteValue::RegisterALow, WriteTo::Address>), \
+
 
 #define NATIVE_DIRECT_X_READ_X \
 	/* 1.1 */ MakeHandler(Ricoh5A22Functions::IncrementPC), \

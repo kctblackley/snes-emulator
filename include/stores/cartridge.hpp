@@ -1,8 +1,7 @@
 #pragma once
+#include <algorithm>
 #include "store.hpp"
 #include "mapper.hpp"
-
-
 #include "lorom_mapper.hpp"
 #include "hirom_mapper.hpp"
 #include "exhirom_mapper.hpp"

@@ -19,13 +19,13 @@ constexpr Optable emulation_optable = {
 
     &e_07, // 0x07
 
-    &nop, // 0x08
+    &e_08, // 0x08
 
     &e_09, // 0x09
 
     &e_0a, // 0x0A
 
-    &nop, // 0x0B
+    &e_0b, // 0x0B
 
     &e_0c, // 0x0C
 
@@ -55,7 +55,7 @@ constexpr Optable emulation_optable = {
 
     &e_19, // 0x19
 
-    &nop, // 0x1A
+    &e_1a, // 0x1A
 
     &e_1b, // 0x1B
 
@@ -67,15 +67,15 @@ constexpr Optable emulation_optable = {
 
     &e_1f, // 0x1F
 
-    &nop, // 0x20
+    &e_20, // 0x20
 
     &e_21, // 0x21
 
-    &nop, // 0x22
+    &e_22, // 0x22
 
     &e_23, // 0x23
 
-    &nop, // 0x24
+    &e_24, // 0x24
 
     &e_25, // 0x25
 
@@ -83,15 +83,15 @@ constexpr Optable emulation_optable = {
 
     &e_27, // 0x27
 
-    &nop, // 0x28
+    &e_28, // 0x28
 
     &e_29, // 0x29
 
     &e_2a, // 0x2A
 
-    &nop, // 0x2B
+    &e_2b, // 0x2B
 
-    &nop, // 0x2C
+    &e_2c, // 0x2C
 
     &e_2d, // 0x2D
 
@@ -107,11 +107,11 @@ constexpr Optable emulation_optable = {
 
     &e_33, // 0x33
 
-    &nop, // 0x34
+    &e_34, // 0x34
 
     &e_35, // 0x35
 
-    &nop, // 0x36
+    &e_36, // 0x36
 
     &e_37, // 0x37
 
@@ -119,15 +119,15 @@ constexpr Optable emulation_optable = {
 
     &e_39, // 0x39
 
-    &nop, // 0x3A
+    &e_3a, // 0x3A
 
     &e_3b, // 0x3B
 
-    &nop, // 0x3C
+    &e_3c, // 0x3C
 
     &e_3d, // 0x3D
 
-    &nop, // 0x3E
+    &e_3e, // 0x3E
 
     &e_3f, // 0x3F
 
@@ -135,7 +135,7 @@ constexpr Optable emulation_optable = {
 
     &e_41, // 0x41
 
-    &nop, // 0x42
+    &e_42, // 0x42
 
     &e_43, // 0x43
 
@@ -147,15 +147,15 @@ constexpr Optable emulation_optable = {
 
     &e_47, // 0x47
 
-    &nop, // 0x48
+    &e_48, // 0x48
 
     &e_49, // 0x49
 
     &e_4a, // 0x4A
 
-    &nop, // 0x4B
+    &e_4b, // 0x4B
 
-    &nop, // 0x4C
+    &e_4c, // 0x4C
 
     &e_4d, // 0x4D
 
@@ -183,11 +183,11 @@ constexpr Optable emulation_optable = {
 
     &e_59, // 0x59
 
-    &nop, // 0x5A
+    &e_5a, // 0x5A
 
     &e_5b, // 0x5B
 
-    &nop, // 0x5C
+    &e_5c, // 0x5C
 
     &e_5d, // 0x5D
 
@@ -195,15 +195,15 @@ constexpr Optable emulation_optable = {
 
     &e_5f, // 0x5F
 
-    &nop, // 0x60
+    &e_60, // 0x60
 
     &e_61, // 0x61
 
-    &nop, // 0x62
+    &e_62, // 0x62
 
     &e_63, // 0x63
 
-    &nop, // 0x64
+    &e_64, // 0x64
 
     &e_65, // 0x65
 
@@ -211,7 +211,7 @@ constexpr Optable emulation_optable = {
 
     &e_67, // 0x67
 
-    &nop, // 0x68
+    &e_68, // 0x68
 
     &e_69, // 0x69
 
@@ -219,7 +219,7 @@ constexpr Optable emulation_optable = {
 
     &nop, // 0x6B
 
-    &nop, // 0x6C
+    &e_6c, // 0x6C
 
     &e_6d, // 0x6D
 
@@ -235,7 +235,7 @@ constexpr Optable emulation_optable = {
 
     &e_73, // 0x73
 
-    &nop, // 0x74
+    &e_74, // 0x74
 
     &e_75, // 0x75
 
@@ -247,11 +247,11 @@ constexpr Optable emulation_optable = {
 
     &e_79, // 0x79
 
-    &nop, // 0x7A
+    &e_7a, // 0x7A
 
     &e_7b, // 0x7B
 
-    &nop, // 0x7C
+    &e_7c, // 0x7C
 
     &e_7d, // 0x7D
 
@@ -267,27 +267,27 @@ constexpr Optable emulation_optable = {
 
     &e_83, // 0x83
 
-    &nop, // 0x84
+    &e_84, // 0x84
 
     &e_85, // 0x85
 
-    &nop, // 0x86
+    &e_86, // 0x86
 
     &e_87, // 0x87
 
-    &nop, // 0x88
+    &e_88, // 0x88
 
-    &nop, // 0x89
+    &e_89, // 0x89
 
     &e_8a, // 0x8A
 
-    &nop, // 0x8B
+    &e_8b, // 0x8B
 
-    &nop, // 0x8C
+    &e_8c, // 0x8C
 
     &e_8d, // 0x8D
 
-    &nop, // 0x8E
+    &e_8e, // 0x8E
 
     &e_8f, // 0x8F
 
@@ -299,11 +299,11 @@ constexpr Optable emulation_optable = {
 
     &e_93, // 0x93
 
-    &nop, // 0x94
+    &e_94, // 0x94
 
     &e_95, // 0x95
 
-    &nop, // 0x96
+    &e_96, // 0x96
 
     &e_97, // 0x97
 
@@ -315,11 +315,11 @@ constexpr Optable emulation_optable = {
 
     &e_9b, // 0x9B
 
-    &nop, // 0x9C
+    &e_9c, // 0x9C
 
     &e_9d, // 0x9D
 
-    &nop, // 0x9E
+    &e_9e, // 0x9E
 
     &e_9f, // 0x9F
 
@@ -345,7 +345,7 @@ constexpr Optable emulation_optable = {
 
     &e_aa, // 0xAA
 
-    &nop, // 0xAB
+    &e_ab, // 0xAB
 
     &e_ac, // 0xAC
 
@@ -387,35 +387,35 @@ constexpr Optable emulation_optable = {
 
     &e_bf, // 0xBF
 
-    &nop, // 0xC0
+    &e_c0, // 0xC0
 
     &e_c1, // 0xC1
 
-    &nop, // 0xC2
+    &e_c2, // 0xC2
 
     &e_c3, // 0xC3
 
-    &nop, // 0xC4
+    &e_c4, // 0xC4
 
     &e_c5, // 0xC5
 
-    &nop, // 0xC6
+    &e_c6, // 0xC6
 
     &e_c7, // 0xC7
 
-    &nop, // 0xC8
+    &e_c8, // 0xC8
 
     &e_c9, // 0xC9
 
-    &nop, // 0xCA
+    &e_ca, // 0xCA
 
-    &nop, // 0xCB
+    &e_cb, // 0xCB
 
-    &nop, // 0xCC
+    &e_cc, // 0xCC
 
     &e_cd, // 0xCD
 
-    &nop, // 0xCE
+    &e_ce, // 0xCE
 
     &e_cf, // 0xCF
 
@@ -427,11 +427,11 @@ constexpr Optable emulation_optable = {
 
     &e_d3, // 0xD3
 
-    &nop, // 0xD4
+    &e_d4, // 0xD4
 
     &e_d5, // 0xD5
 
-    &nop, // 0xD6
+    &e_d6, // 0xD6
 
     &e_d7, // 0xD7
 
@@ -439,35 +439,35 @@ constexpr Optable emulation_optable = {
 
     &e_d9, // 0xD9
 
-    &nop, // 0xDA
+    &e_da, // 0xDA
 
-    &nop, // 0xDB
+    &e_db, // 0xDB
 
-    &nop, // 0xDC
+    &e_dc, // 0xDC
 
     &e_dd, // 0xDD
 
-    &nop, // 0xDE
+    &e_de, // 0xDE
 
     &e_df, // 0xDF
 
-    &nop, // 0xE0
+    &e_e0, // 0xE0
 
     &e_e1, // 0xE1
 
-    &nop, // 0xE2
+    &e_e2, // 0xE2
 
     &e_e3, // 0xE3
 
-    &nop, // 0xE4
+    &e_e4, // 0xE4
 
     &e_e5, // 0xE5
 
-    &nop, // 0xE6
+    &e_e6, // 0xE6
 
     &e_e7, // 0xE7
 
-    &nop, // 0xE8
+    &e_e8, // 0xE8
 
     &e_e9, // 0xE9
 
@@ -475,11 +475,11 @@ constexpr Optable emulation_optable = {
 
     &e_eb, // 0xEB
 
-    &nop, // 0xEC
+    &e_ec, // 0xEC
 
     &e_ed, // 0xED
 
-    &nop, // 0xEE
+    &e_ee, // 0xEE
 
     &e_ef, // 0xEF
 
@@ -491,27 +491,27 @@ constexpr Optable emulation_optable = {
 
     &e_f3, // 0xF3
 
-    &nop, // 0xF4
+    &e_f4, // 0xF4
 
     &e_f5, // 0xF5
 
-    &nop, // 0xF6
+    &e_f6, // 0xF6
 
     &e_f7, // 0xF7
 
-    &nop, // 0xF8
+    &e_f8, // 0xF8
 
     &e_f9, // 0xF9
 
-    &nop, // 0xFA
+    &e_fa, // 0xFA
 
-    &nop, // 0xFB
+    &e_fb, // 0xFB
 
-    &nop, // 0xFC
+    &e_fc, // 0xFC
 
     &e_fd, // 0xFD
 
-    &nop, // 0xFE
+    &e_fe, // 0xFE
 
     &e_ff // 0xFF
 
