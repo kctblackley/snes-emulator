@@ -114,6 +114,8 @@ public:
 	}
 
 private:
+	void log();
+
 	Bus* bus = nullptr;
 
 	CycleCount cycle; 

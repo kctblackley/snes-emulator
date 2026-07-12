@@ -107,10 +107,9 @@ int main() {
 	}
 
 	// --- Normal emulation -------------------------------------------------
-	std::string directory = "rom/tales_of_phantasia.sfc";
+	std::string directory = "rom/earthbound.sfc";
 
 	SNES snes = SNES();
-	snes.initialise();
 	snes.load_cartridge(directory);
 	snes.run();
 }

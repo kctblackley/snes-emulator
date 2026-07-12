@@ -17,6 +17,7 @@ SNES::SNES() : master_cycle(0) {
 
 void SNES::load_cartridge(const std::string& directory) {
 	bus->load_cartridge(directory);
+	initialise();
 }
 
 void SNES::tick_snes() {
@@ -38,6 +39,7 @@ void SNES::poll() {
 }
 
 void SNES::run() {
+
 	bool running = true;
 
 	auto start = std::chrono::high_resolution_clock::now();
