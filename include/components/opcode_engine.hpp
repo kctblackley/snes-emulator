@@ -22,7 +22,7 @@ constexpr Handler MakeHandler(HandlerFn fn, PredicateFn pred = DefaultPredicate)
 }
 
 using Instruction = std::vector<Handler>;
-using Optable = std::array<Instruction*, 256>;
+using Optable = std::array<Instruction*, 258>;
 
 struct Opcode {
 	HandlerFn function;
@@ -30,4 +30,4 @@ struct Opcode {
 	bool skipped;
 };
 
-Opcode get_opcode(const Optable& optable, Byte opcode, CycleCount& idx, CPU& cpu);
+Opcode get_opcode(const Optable& optable, Word opcode, CycleCount& idx, CPU& cpu);

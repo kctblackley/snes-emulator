@@ -513,6 +513,10 @@ constexpr Optable native_optable = {
 
     &n_fe, // 0xFE
 
-    &n_ff // 0xFF
+    &n_ff, // 0xFF
+
+    &n_nmi, // NMI interrupt routine
+
+    &n_irq // IRQ interrupt routine
 
 };

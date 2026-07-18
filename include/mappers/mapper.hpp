@@ -3,6 +3,8 @@
 #include <vector>
 #include <optional>
 
+class Ricoh5A22;
+
 class Mapper {
 public:
 	virtual ~Mapper() = default;
@@ -24,6 +26,10 @@ public:
 		sram.assign(sram_size, 0);
 	}
 
+	void connect_cpu(Ricoh5A22* cpu) {
+		this->cpu = cpu;
+	}
+
 protected:
 	virtual std::optional<Address> rom_idx(SNESAddress address) const = 0;
 	virtual std::optional<Address> sram_idx(SNESAddress address) const = 0;
@@ -35,4 +41,6 @@ protected:
 
 	std::vector<Byte> rom;
 	std::vector<Byte> sram;
+
+	Ricoh5A22* cpu = nullptr;
 };

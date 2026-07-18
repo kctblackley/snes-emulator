@@ -4,7 +4,10 @@
 
 #include "bus.hpp"
 #include "ricoh_5a22.hpp"
+#include "ppu.hpp"
 #include "spc_700.hpp"
+#include "dma_controller.hpp"
+#include "renderer.hpp"
 #include "common.hpp"
 
 class SNES {
@@ -24,10 +27,13 @@ private:
 
 	std::unique_ptr<Bus> bus;
 	std::unique_ptr<SPC700> spc_700;
+	std::unique_ptr<Renderer> renderer;
+	std::unique_ptr<DMAController> dma_controller;
 
 	std::vector<std::unique_ptr<Component>> devices;
 
 	Ricoh5A22* ricoh_5a22 = nullptr;
+	PPU* ppu = nullptr;
 
 	CycleCount master_cycle;
 };

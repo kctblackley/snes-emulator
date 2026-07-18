@@ -513,6 +513,9 @@ constexpr Optable emulation_optable = {
 
     &e_fe, // 0xFE
 
-    &e_ff // 0xFF
+    &e_ff, // 0xFF
 
+    &e_nmi, // NMI interrupt routine
+
+    &e_irq // IRQ interrupt routine
 };

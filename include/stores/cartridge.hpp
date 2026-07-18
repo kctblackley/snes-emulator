@@ -6,6 +6,7 @@
 #include "hirom_mapper.hpp"
 #include "exhirom_mapper.hpp"
 
+class Ricoh5A22;
 
 enum class MapperType {
 	LoROM,
@@ -25,10 +26,10 @@ struct CartridgeHeader {
 	Byte region;
 	Byte version;
 
-	Byte checksum;
-	Byte complement;
+	Word checksum;
+ 	Word complement;
 
-	Byte reset_vector;
+	Word reset_vector;
 };
 
 struct MapperCandidate {
@@ -109,6 +110,10 @@ public:
 		mapper->load_sram(header.ram_size);
 		mapper->to_string();
 		std::cout << header.title << "\n";
+	}
+
+	void connect_cpu(Ricoh5A22* cpu) {
+		mapper->connect_cpu(cpu);
 	}
 
 private:

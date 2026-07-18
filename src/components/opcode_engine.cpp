@@ -1,6 +1,6 @@
 #include "opcode_engine.hpp"
 
-Opcode get_opcode(const Optable& optable, Byte opcode, CycleCount& idx, CPU& cpu) {
+Opcode get_opcode(const Optable& optable, Word opcode, CycleCount& idx, CPU& cpu) {
 	Instruction& instruction = *optable[opcode];
 	
 	Handler* handler = nullptr;

@@ -8,7 +8,9 @@
 
 class SPC700;
 class Ricoh5A22;
+class PPU;
 class Component;
+class DMAController;
 
 class Bus {
 public:
@@ -19,7 +21,9 @@ public:
 
 	void connect_cpu(Ricoh5A22* cpu);
 	void connect_apu(SPC700* apu);
-
+	void connect_dma_controller(DMAController* dma_controller);
+	void connect_ppu(PPU* ppu);
+	
 	void set_wait_callback(WaitCallback callback);
 
 	Store* system_area(SNESAddress address); 
@@ -28,8 +32,8 @@ public:
 	Component* system_area_component(SNESAddress address);
 	Component* route_to_component(SNESAddress address);
 
-	void write(Address addr, Byte value);
-	Byte read(Address addr);
+	void write(Address addr, Byte value, bool is_dma = false);
+	Byte read(Address addr, bool is_dma = false);
 
 	void load_cartridge(const std::string& directory);
 
@@ -38,6 +42,10 @@ public:
 	void reset_test_memory();
 	Byte test_peek(Address addr);
 	void test_poke(Address addr, Byte value);
+
+	void connect_cpu_to_cartridge(Ricoh5A22* cpu) {
+		cartridge->connect_cpu(cpu);
+	}
 
 private:
 	WaitCallback callback;
@@ -52,4 +60,6 @@ private:
 
 	SPC700* apu;
 	Ricoh5A22* cpu;
+	PPU* ppu;
+	DMAController* dma_controller;
 };

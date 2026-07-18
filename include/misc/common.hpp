@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <chrono>
+#include <SDL3/SDL.h>
 
 #include "options.hpp"
 #include "utility.hpp"
@@ -25,21 +26,35 @@ typedef struct {
 	Offset offset;
 } SNESAddress;
 
-SNESAddress split_address(Address address);
-Quadrant get_quadrant(Bank bank);
-
 // Macros
 #define RICOH_5A22_START ;
 #define RICOH_5A22_END ;
 
-Byte get_lo(Word word);
-Byte get_hi(Word word);
+inline SNESAddress split_address(Address address) {
+	Bank bank = (address & 0xFF0000) >> 16;
+	Offset offset = address & 0xFFFF;
+	return {bank, offset};
+}
 
+inline Quadrant get_quadrant(Bank bank) {
+	if (bank  <  0x40) { return 1; }
+	if (bank  <  0x80) { return 2; }
+	if (bank  <  0xC0) { return 3; }
+	return 4;
+}
+
+inline Byte get_lo(Word word) {
+	return (word & 0xFF);
+}
+
+inline Byte get_hi(Word word) {
+	return (word & 0xFF00) >> 8;
+}
 Byte set_bit(Byte byte, Byte bit);
 Byte clear_bit(Byte byte, Byte bit);
 
 // Timing constants
-constexpr CycleCount MASTER_CLOCK = 20 * 21477272;
+constexpr CycleCount MASTER_CLOCK = 21477272;
 constexpr CycleCount RICOH_5A22_CYCLE = 6;
 
 // WRAM constants and WRAM Access Constants
@@ -60,6 +75,7 @@ constexpr Offset WRAM_ACCESS_SECTION = 0x2180;
 constexpr Offset CPU_PORTS_SECTION = 0x4000;
 constexpr Offset CPU_PORTS_NON_PENALTY_SECTION = 0x4200;
 constexpr Offset CPU_DMA_PORTS_SECTION = 0x4300;
+constexpr Offset CPU_DMA_PORTS_ENDING = 0x4380;
 constexpr Offset EXPANSION_DATA_SECTION = 0x6000;
 constexpr Offset CARTRIDGE_SECTION = 0x8000;
 constexpr Offset MAX_OFFSET_SECTION = 0xFFFF;

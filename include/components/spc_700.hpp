@@ -55,6 +55,8 @@ public:
 				stall_counter = 0;
 			}
 		}
+		//std::cout << "Reading from APU to CPU: Port " << (int)(port) << "\n";
+		//std::cout << "Value is: " << (int)(apu_to_cpu_ports[port]) << "\n";
 		return apu_to_cpu_ports[port];
 	}
 
@@ -64,6 +66,8 @@ public:
 		if (handshake_active) {
 			apu_to_cpu_ports[port] = value;
 		}
+		//std::cout << "Writing from CPU to APU: Port " << (int)(port) << "\n";
+		//std::cout << "Value is " << (int)value << "\n";
 		cpu_to_apu_ports[port] = value;
 	}
 
@@ -183,3 +187,4 @@ private:
 	int stall_counter = 0;
 	Byte last_polled_value[4] = {0xFF, 0xFF, 0xFF, 0xFF};
 };
+

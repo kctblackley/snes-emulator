@@ -1,12 +1,13 @@
 #include "bus.hpp"
 #include "spc_700.hpp"
 #include "ricoh_5a22.hpp"
+#include "ppu.hpp"
+#include "dma_controller.hpp"
 
 Bus::Bus() {
 	open_bus = std::make_unique<OpenBus>();
 	wram = std::make_unique<WRAM>();
 	cartridge = std::make_unique<Cartridge>();
-	
 }
 
 Bus::~Bus() = default;
@@ -17,6 +18,14 @@ void Bus::connect_cpu(Ricoh5A22* cpu) {
 
 void Bus::connect_apu(SPC700* apu) {
 	this->apu = apu;
+}
+
+void Bus::connect_ppu(PPU* ppu) {
+	this->ppu = ppu;
+}
+
+void Bus::connect_dma_controller(DMAController* dma_controller) {
+	this->dma_controller = dma_controller;
 }
 
 void Bus::set_wait_callback(WaitCallback callback) {
@@ -30,17 +39,8 @@ Store* Bus::system_area(SNESAddress address) {
 	if (address.offset >= OPEN_BUS_SECTION && address.offset < PPU_PORTS_SECTION) {
 		return open_bus.get();
 	}
-	if (address.offset >= PPU_PORTS_SECTION && address.offset < APU_PORTS_SECTION) {
-		return open_bus.get(); // UNIMPLEMENTED
-	}
 	if (address.offset >= WRAM_ACCESS_SECTION && address.offset < CPU_PORTS_SECTION) {
-		return open_bus.get(); // UNIMPLEMENTED
-	}
-	if (address.offset >= CPU_PORTS_SECTION && address.offset < CPU_DMA_PORTS_SECTION) {
-		return open_bus.get(); // UNIMPLEMENTED
-	}
-	if (address.offset >= CPU_DMA_PORTS_SECTION && address.offset < EXPANSION_DATA_SECTION) {
-		return open_bus.get(); // UNIMPLEMENTED
+		return wram.get(); // UNIMPLEMENTED
 	}
 	if (address.offset >= EXPANSION_DATA_SECTION && address.offset < CARTRIDGE_SECTION) {
 		return open_bus.get(); // UNIMPLEMENTED
@@ -52,8 +52,14 @@ Store* Bus::system_area(SNESAddress address) {
 }
 
 Component* Bus::system_area_component(SNESAddress address) {
+	if (address.offset >= PPU_PORTS_SECTION && address.offset < APU_PORTS_SECTION) {
+		return ppu;
+	}
 	if (address.offset >= APU_PORTS_SECTION && address.offset < WRAM_ACCESS_SECTION) {
 		return apu; // Just stubbed for now, to be finished later!
+	}
+	if (address.offset == 0x420b || address.offset == 0x420c || (address.offset >= CPU_DMA_PORTS_SECTION && address.offset < CPU_DMA_PORTS_ENDING)) {
+		return dma_controller;
 	}
 	if (address.offset >= CPU_PORTS_SECTION && address.offset < CPU_DMA_PORTS_SECTION) {
 		return cpu; // Not all ports have been created just yet 
@@ -61,7 +67,7 @@ Component* Bus::system_area_component(SNESAddress address) {
 	return nullptr;
 }
 
-Component* Bus::route_to_component(SNESAddress address) {
+inline Component* Bus::route_to_component(SNESAddress address) {
 	Quadrant quadrant = get_quadrant(address.bank);
 	switch (quadrant) {
 	case 1:
@@ -75,7 +81,7 @@ Component* Bus::route_to_component(SNESAddress address) {
 	return nullptr;
 }
 
-Store* Bus::route(SNESAddress address) {
+inline Store* Bus::route(SNESAddress address) {
 	Quadrant quadrant = get_quadrant(address.bank);
 	switch(quadrant) {
 	case 1:
@@ -100,7 +106,7 @@ Store* Bus::route(SNESAddress address) {
 	return open_bus.get();
 }
 
-void Bus::write(Address addr, Byte value) {
+void Bus::write(Address addr, Byte value, bool is_dma) {
 	if (test_mode) {
 		test_memory[addr & 0xFFFFFF] = value;
 		return;
@@ -120,11 +126,13 @@ void Bus::write(Address addr, Byte value) {
 	if (store->is_not_open_bus()) {
 		data_bus = value;
 		store->write(address, value);
-		callback(store->penalty());
+		if (!is_dma) {
+			callback(store->penalty());
+		}
 	}
 }
 
-Byte Bus::read(Address addr) {
+Byte Bus::read(Address addr, bool is_dma) {
 	if (test_mode) {
 		auto it = test_memory.find(addr & 0xFFFFFF);
 		return it != test_memory.end() ? it->second : 0x00;
@@ -142,7 +150,9 @@ Byte Bus::read(Address addr) {
 
 	if (store->is_not_open_bus()) {
 		data_bus = store->read(address);
-		callback(store->penalty());
+		if (!is_dma) {
+			callback(store->penalty());
+		}
 	}
 
 	return data_bus;

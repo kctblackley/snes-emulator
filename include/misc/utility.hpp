@@ -6,6 +6,7 @@
 #include <iterator>
 #include <string>
 #include <vector>
+#include <iostream>
 
 using Byte = uint8_t;
 

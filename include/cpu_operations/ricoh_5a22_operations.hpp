@@ -778,4 +778,10 @@ extern Instruction e_fe;
 extern Instruction n_ff;
 extern Instruction e_ff;
 
+extern Instruction n_nmi;
+extern Instruction e_nmi;
+
+extern Instruction n_irq;
+extern Instruction e_irq;
+
 extern Instruction nop;

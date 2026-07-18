@@ -15,7 +15,15 @@ TickCount Ricoh5A22::get_tick() {
 }
 
 void Ricoh5A22::poll_interrupts() {
-	return;
+	if (nmi_line) {
+		nmi_line = false;
+		BufferOpCode = OPCODE_NMI;
+		//std::cout << "NMI interrupt" << std::endl;
+		//std::cout << "NMI interrupt";
+	} else if (irq_line && !get_flag_I()) {
+		BufferOpCode = OPCODE_IRQ;
+		//std::cout << "IRQ interrupt";
+	}
 }
 
 void Ricoh5A22::apply_invariants() {
@@ -37,8 +45,11 @@ void Ricoh5A22::tick_multiply_divisor() {
 
 void Ricoh5A22::run_half_cycle() {
 	apply_invariants();
-	log();
+	//log();
 	tick_multiply_divisor();
+	if (instruction_cycle == 0 && BufferOpCode != 0x100 && BufferOpCode != 0x101) {
+		poll_interrupts();
+	}
 	Opcode op = get_opcode(regs.emulation_mode ? emulation_optable : native_optable, BufferOpCode, instruction_cycle, *this);
 	op.function(*this, op.skipped);
 }
@@ -67,14 +78,20 @@ void Ricoh5A22::initialise() {
 	regs.emulation_mode = true;
 	std::cout << "Initialised PC to " << regs.PC << "\n";
 	
+	// Also occur on reset
+	mregs.RDNMI = mregs.RDNMI & 0x7F;
+	mregs.TIMEUP = mregs.TIMEUP & 0x7F;
+	mregs.VTIMEL = 0xFF;
+	mregs.VTIMEH = 0x01;
+	mregs.HTIMEL = 0xFF;
+	mregs.HTIMEH = 0x01;
+	mregs.NMITIMEN = 0x00;
+
 	cycle = 0;
 	return;
 }
 
 void Ricoh5A22::log() {
-	if (cycle % 1000000 != 0) {
-		return;
-	}
 	std::cout << "PC:PB: " << std::hex << std::setw(2) << std::setfill('0') << (int)regs.PB << ":"
 	                       << std::hex << std::setw(4) << std::setfill('0') << (int)regs.PC << " "
 	          << "OP: "    << std::hex << std::setw(2) << std::setfill('0') << (int)BufferOpCode << " "

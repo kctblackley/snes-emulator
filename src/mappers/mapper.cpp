@@ -1,31 +1,20 @@
 #include "mapper.hpp"
+#include "ricoh_5a22.hpp"
 
 Byte Mapper::read(SNESAddress address) {
 	if (auto idx = rom_idx(address)) {
-		if (*idx >= rom.size()) {
-			std::cerr << "ROM access out of range: " << std::hex << *idx << '\n';
-			return 0xFF;
-		}
-		return rom[*idx];
+		return rom[(*idx) & (rom.size() - 1)];
 	}
 
 	if (auto idx = sram_idx(address)) {
-		if (*idx >= sram.size()) {
-			std::cerr << "SRAM access out of range: " << std::hex << *idx << '\n';
-			return 0xFF;
-		}
-		return sram[*idx];
+		return sram[(*idx) & (sram.size() - 1)];
 	}
 
-	return 0xFF; // Might need to change this to consider open bus!
+	return 0x00; // Might need to change this to consider open bus!
 }
 
 void Mapper::write(SNESAddress address, Byte value) {
 	if (auto idx = sram_idx(address)) {
-		if (*idx >= sram.size()) {
-			std::cerr << "SRAM access out of range: " << std::hex << *idx << '\n';
-			return;
-		}
-		sram[*idx] = value;
+		sram[(*idx) & (sram.size() - 1)] = value;
 	}
 }

@@ -23,9 +23,8 @@ bool to_test(Byte instruction) {
 	return (std::count(instructions.begin(), instructions.end(), instruction) > 0);
 }
 
-int main() {
-	std::string directory = "rom/super_mario_world.sfc";
-
+int main(int argc, char* argv[]) {
+	std::string directory = std::string("rom/") + argv[1] + ".sfc";
 	SNES snes = SNES();
 	snes.load_cartridge(directory);
 	snes.run();

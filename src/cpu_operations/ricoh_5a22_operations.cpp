@@ -2687,6 +2687,34 @@ namespace Ricoh5A22Functions {
 			cpu.write(address, value);
 		}
 	}
+
+	template<typename CPUMode>
+	void SetVectorNMI(CPU& cpu, bool skipped) {
+	    if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
+	        cpu.Vector = 0xFFEA;
+	    } else {
+	        cpu.Vector = 0xFFFA;
+	    }
+	}
+
+	template<typename CPUMode>
+	void SetVectorIRQ(CPU& cpu, bool skipped) {
+	    if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
+	        cpu.Vector = 0xFFEE;
+	    } else {
+	        cpu.Vector = 0xFFFE;   // same vector as SetVectorBRK<Emulation> — see note below
+	    }
+	}
+
+	void PushStatusClearBreakFlag(CPU& cpu, bool skipped) {
+	    Byte value = cpu.regs.P & ~0x10;
+	    Address address = 0x0100 | (uint8_t)(get_lo(cpu.regs.S) - 2);
+	    if constexpr (SST_TEST) {
+	        cpu.test_poke(address, value);
+	    } else {
+	        cpu.write(address, value);
+	    }
+	}
 }
 
 namespace Ricoh5A22Predicates {
@@ -2746,6 +2774,82 @@ namespace Ricoh5A22Predicates {
 	}
 }
 
+// Interrupt routines
+// NMI
+Instruction n_nmi = {
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PB, WriteTo::Stack0>),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PCHigh, WriteTo::StackMinus1>),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PCLow, WriteTo::StackMinus2>),
+    MakeHandler(Ricoh5A22Functions::SetVectorNMI<Mode::Native>),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::P, WriteTo::StackMinus3>),
+    MakeHandler(Ricoh5A22Functions::DecrementS4),
+    MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Vector, ReadTo::AddressLow>),
+    MakeHandler(Ricoh5A22Functions::SetIUnsetD),
+    MakeHandler(Ricoh5A22Functions::Read<ReadFrom::VectorPlusOne, ReadTo::AddressHigh>),
+    MakeHandler(Ricoh5A22Functions::COP),
+    NEXT_OPCODE
+};
+Instruction e_nmi = {
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PCHigh, WriteTo::Stack0Emulation>),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PCLow, WriteTo::StackMinus1Emulation>),
+    MakeHandler(Ricoh5A22Functions::SetVectorNMI<Mode::Emulation>),
+    MakeHandler(Ricoh5A22Functions::PushStatusClearBreakFlag),
+    MakeHandler(Ricoh5A22Functions::DecrementS3Low),
+    MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Vector, ReadTo::AddressLow>),
+    MakeHandler(Ricoh5A22Functions::SetIUnsetD),
+    MakeHandler(Ricoh5A22Functions::Read<ReadFrom::VectorPlusOne, ReadTo::AddressHigh>),
+    MakeHandler(Ricoh5A22Functions::COP),
+    NEXT_OPCODE
+};
+
+// IRQ
+Instruction n_irq = {
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PB, WriteTo::Stack0>),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PCHigh, WriteTo::StackMinus1>),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PCLow, WriteTo::StackMinus2>),
+    MakeHandler(Ricoh5A22Functions::SetVectorIRQ<Mode::Native>),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::P, WriteTo::StackMinus3>),
+    MakeHandler(Ricoh5A22Functions::DecrementS4),
+    MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Vector, ReadTo::AddressLow>),
+    MakeHandler(Ricoh5A22Functions::SetIUnsetD),
+    MakeHandler(Ricoh5A22Functions::Read<ReadFrom::VectorPlusOne, ReadTo::AddressHigh>),
+    MakeHandler(Ricoh5A22Functions::COP),
+    NEXT_OPCODE
+};
+Instruction e_irq = {
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PCHigh, WriteTo::Stack0Emulation>),
+    MakeHandler(Ricoh5A22Functions::NOP),
+    MakeHandler(Ricoh5A22Functions::Write<WriteValue::PCLow, WriteTo::StackMinus1Emulation>),
+    MakeHandler(Ricoh5A22Functions::SetVectorIRQ<Mode::Emulation>),
+    MakeHandler(Ricoh5A22Functions::PushStatusClearBreakFlag),
+    MakeHandler(Ricoh5A22Functions::DecrementS3Low),
+    MakeHandler(Ricoh5A22Functions::Read<ReadFrom::Vector, ReadTo::AddressLow>),
+    MakeHandler(Ricoh5A22Functions::SetIUnsetD),
+    MakeHandler(Ricoh5A22Functions::Read<ReadFrom::VectorPlusOne, ReadTo::AddressHigh>),
+    MakeHandler(Ricoh5A22Functions::COP),
+    NEXT_OPCODE
+};
+
+// Main instructions
+
+// BRK (00)
 Instruction n_00 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),

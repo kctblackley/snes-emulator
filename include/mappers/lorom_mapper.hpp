@@ -17,7 +17,7 @@ protected:
 	}
 
 	std::optional<Address> sram_idx(SNESAddress address) const override {
-		if (!(address.bank >= 0x70 && address.bank <= 0x7d)) {
+		if (!(address.bank >= 0x70 && address.bank <= 0x7D) || (address.bank >= 0xF0 && address.bank <= 0xFF)) {
 			return std::nullopt;
 		}
 
