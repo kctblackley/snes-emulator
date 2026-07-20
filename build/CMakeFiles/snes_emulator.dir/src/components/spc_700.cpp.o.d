@@ -1,8 +1,8 @@
 CMakeFiles/snes_emulator.dir/src/components/spc_700.cpp.o: \
- /home/kctb/Projects/Emulators/snes-emulator/src/components/spc_700.cpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/src/components/spc_700.cpp \
  /usr/include/stdc-predef.h \
- /home/kctb/Projects/Emulators/snes-emulator/include/components/spc_700.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/components/cpu.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/components/spc_700.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/components/cpu.hpp \
  /usr/include/c++/13/functional \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -111,9 +111,9 @@ CMakeFiles/snes_emulator.dir/src/components/spc_700.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib.h \
  /usr/include/c++/13/bits/std_abs.h \
- /home/kctb/Projects/Emulators/snes-emulator/include/components/component.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/components/bus.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/misc/common.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/components/component.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/components/bus.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/misc/common.hpp \
  /usr/include/c++/13/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
@@ -242,21 +242,72 @@ CMakeFiles/snes_emulator.dir/src/components/spc_700.cpp.o: \
  /usr/include/c++/13/bits/chrono_io.h /usr/include/c++/13/format \
  /usr/include/c++/13/charconv /usr/include/c++/13/optional \
  /usr/include/c++/13/span /usr/include/c++/13/variant \
- /home/kctb/Projects/Emulators/snes-emulator/include/misc/options.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/misc/utility.hpp \
+ /usr/local/include/SDL3/SDL.h /usr/local/include/SDL3/SDL_stdinc.h \
+ /usr/local/include/SDL3/SDL_platform_defines.h /usr/include/string.h \
+ /usr/include/strings.h \
+ /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
+ /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+ /usr/local/include/SDL3/SDL_begin_code.h \
+ /usr/local/include/SDL3/SDL_close_code.h \
+ /usr/local/include/SDL3/SDL_assert.h \
+ /usr/local/include/SDL3/SDL_asyncio.h \
+ /usr/local/include/SDL3/SDL_atomic.h /usr/local/include/SDL3/SDL_audio.h \
+ /usr/local/include/SDL3/SDL_endian.h /usr/local/include/SDL3/SDL_error.h \
+ /usr/local/include/SDL3/SDL_mutex.h /usr/local/include/SDL3/SDL_thread.h \
+ /usr/local/include/SDL3/SDL_properties.h \
+ /usr/local/include/SDL3/SDL_iostream.h \
+ /usr/local/include/SDL3/SDL_bits.h \
+ /usr/local/include/SDL3/SDL_blendmode.h \
+ /usr/local/include/SDL3/SDL_camera.h \
+ /usr/local/include/SDL3/SDL_pixels.h \
+ /usr/local/include/SDL3/SDL_surface.h /usr/local/include/SDL3/SDL_rect.h \
+ /usr/local/include/SDL3/SDL_clipboard.h \
+ /usr/local/include/SDL3/SDL_cpuinfo.h \
+ /usr/local/include/SDL3/SDL_dialog.h /usr/local/include/SDL3/SDL_video.h \
+ /usr/local/include/SDL3/SDL_dlopennote.h \
+ /usr/local/include/SDL3/SDL_events.h \
+ /usr/local/include/SDL3/SDL_gamepad.h /usr/local/include/SDL3/SDL_guid.h \
+ /usr/local/include/SDL3/SDL_joystick.h \
+ /usr/local/include/SDL3/SDL_power.h /usr/local/include/SDL3/SDL_sensor.h \
+ /usr/local/include/SDL3/SDL_keyboard.h \
+ /usr/local/include/SDL3/SDL_keycode.h \
+ /usr/local/include/SDL3/SDL_scancode.h \
+ /usr/local/include/SDL3/SDL_mouse.h \
+ /usr/local/include/SDL3/SDL_notification.h \
+ /usr/local/include/SDL3/SDL_pen.h /usr/local/include/SDL3/SDL_touch.h \
+ /usr/local/include/SDL3/SDL_filesystem.h \
+ /usr/local/include/SDL3/SDL_gpu.h /usr/local/include/SDL3/SDL_haptic.h \
+ /usr/local/include/SDL3/SDL_hidapi.h /usr/local/include/SDL3/SDL_hints.h \
+ /usr/local/include/SDL3/SDL_init.h /usr/local/include/SDL3/SDL_loadso.h \
+ /usr/local/include/SDL3/SDL_locale.h /usr/local/include/SDL3/SDL_log.h \
+ /usr/local/include/SDL3/SDL_messagebox.h \
+ /usr/local/include/SDL3/SDL_metal.h /usr/local/include/SDL3/SDL_misc.h \
+ /usr/local/include/SDL3/SDL_platform.h \
+ /usr/local/include/SDL3/SDL_process.h \
+ /usr/local/include/SDL3/SDL_render.h \
+ /usr/local/include/SDL3/SDL_storage.h \
+ /usr/local/include/SDL3/SDL_system.h /usr/local/include/SDL3/SDL_time.h \
+ /usr/local/include/SDL3/SDL_timer.h /usr/local/include/SDL3/SDL_tray.h \
+ /usr/local/include/SDL3/SDL_version.h \
+ /usr/local/include/SDL3/SDL_oldnames.h \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/misc/options.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/misc/utility.hpp \
  /usr/include/c++/13/fstream \
  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
  /usr/include/c++/13/bits/fstream.tcc /usr/include/c++/13/iterator \
  /usr/include/c++/13/bits/stream_iterator.h \
- /home/kctb/Projects/Emulators/snes-emulator/include/stores/open_bus.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/stores/store.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/stores/wram.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/stores/cartridge.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/stores/open_bus.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/stores/store.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/stores/wram.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/stores/cartridge.hpp \
  /usr/include/c++/13/algorithm /usr/include/c++/13/bits/ranges_algo.h \
  /usr/include/c++/13/pstl/glue_algorithm_defs.h \
- /home/kctb/Projects/Emulators/snes-emulator/include/mappers/mapper.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/mappers/lorom_mapper.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/mappers/hirom_mapper.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/mappers/exhirom_mapper.hpp \
- /home/kctb/Projects/Emulators/snes-emulator/include/components/apubus.hpp
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/mappers/mapper.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/mappers/lorom_mapper.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/mappers/hirom_mapper.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/mappers/exhirom_mapper.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/cpu_operations/spc_700_optable.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/cpu_operations/spc_700_operations.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/components/opcode_engine.hpp \
+ /home/kctb/Projects/GithubBackups/snes-emulator/include/components/apubus.hpp

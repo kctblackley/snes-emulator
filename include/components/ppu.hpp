@@ -108,9 +108,9 @@ public:
 
 	bool should_resolve(bool is_window, int value);
 	bool is_colour_math_window(int x);
-	void resolve_main_screen_px(Pixel& px, bool is_window);
+	bool resolve_main_screen_px(Pixel& px, bool is_window);
 	void resolve_sub_screen_px(Pixel& px, bool is_window);
-	Pixel colour_math(Pixel main, Pixel sub);
+	Pixel colour_math(Pixel main, Pixel sub, bool ignore_half);
 
 	void window_mask(std::array<Pixel, 512>& scanline, bool window1_enabled, bool window2_enabled, bool window1_inverted, bool window2_inverted, Byte mask_logic, bool colour_math);
 	void composite(std::array<Pixel, 512>& final_scanline);
@@ -198,7 +198,7 @@ public:
 				break;
 
 			case TILE_NUMBER_BYTE:
-				o.tile_number = value;
+				o.tile_number = ((get_hi(o.tile_number) & 1) << 8) | (uint8_t)value;
 				break;
 
 			case ATTRIBUTE_BYTE:
@@ -233,9 +233,7 @@ public:
 				o.x_coordinate = signed_x;
 
 				bool size = (pair >> 1) & 1;
-
-				o.width  = size ? oam.obj_size.large_width  : oam.obj_size.small_width;
-				o.height = size ? oam.obj_size.large_height : oam.obj_size.small_height;
+				o.size = size;
 			}
 		}
 	}
@@ -257,6 +255,25 @@ public:
 			bg2.bpp = 4;
 			bg3.bpp = 2;
 			bg4.bpp = 2;		
+		}
+		if (bg_mode == 2) { // offset per tile
+			bg1.bpp = 4;
+			bg2.bpp = 4;
+		}
+		if (bg_mode == 3) {
+			bg1.bpp = 8;
+			bg2.bpp = 4;
+		}
+		if (bg_mode == 4) { // offset per tile
+			bg1.bpp = 8;
+			bg2.bpp = 2;
+		}
+		if (bg_mode == 5) {
+			bg1.bpp = 4;
+			bg2.bpp = 2;
+		}
+		if (bg_mode == 6) { // offset per tile
+			bg1.bpp = 4;
 		}
 		if (bg_mode == 7) {
 			bg1.bpp = 8;
@@ -588,9 +605,9 @@ public:
 		}
 		if (addr.offset == COLDATA_ADDRESS) {
 			Byte colour = value & 0x1F;
-			if (value & 0x20) { col.blue = colour; }
+			if (value & 0x20) { col.red = colour; }
 			if (value & 0x40) { col.green = colour; }
-			if (value & 0x80) { col.red = colour; }
+			if (value & 0x80) { col.blue = colour; }
 		}
 
 		// OAM
@@ -629,8 +646,8 @@ public:
 			Byte obj_size_index = (value >> 5);
 
 			oam.obj_size = size_table[obj_size_index];
-			oam.first_base = (name_base_address << 13) & 0x7FFF;
-			oam.second_base = (oam.first_base + ((name_select + 1) * 0x1000)) & 0x7FFF;
+			oam.first_base = (name_base_address << 13);
+			oam.second_base = (oam.first_base + ((name_select + 1) * 0x1000));
 		}
 
 		// CGRAM

@@ -28,7 +28,7 @@ namespace ReadTo {
 	struct OperandLow  {};
 	struct AddressLow  {};
 
-	struct PnCPB      {};
+	struct PCPB      {};
 	struct PointerDB {};
 }
 

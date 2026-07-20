@@ -43,6 +43,8 @@ set(SNES_SOURCES
     src/main.cpp
 )
 
+find_package(SDL3 REQUIRED CONFIG)
+
 add_executable(snes_emulator ${SNES_SOURCES})
 
 target_include_directories(snes_emulator PRIVATE
@@ -52,9 +54,18 @@ target_include_directories(snes_emulator PRIVATE
     ${CMAKE_SOURCE_DIR}/include/cpu_operations
     ${CMAKE_SOURCE_DIR}/include/mappers
     ${CMAKE_SOURCE_DIR}/include/testing
-)   
+)
 
-target_compile_options(snes_emulator PRIVATE)
+target_link_libraries(snes_emulator PRIVATE SDL3::SDL3)
+
+target_compile_options(snes_emulator PRIVATE
+    -O3
+    -march=native
+    -mtune=native
+    -flto
+    -fomit-frame-pointer
+)
+
 
 
 

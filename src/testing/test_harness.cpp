@@ -11,6 +11,8 @@
 #include "ricoh_5a22.hpp"
 #include "ricoh_5a22_native_optable.hpp"
 #include "ricoh_5a22_emulation_optable.hpp"
+#include "spc_700.hpp"
+#include "spc_700_optable.hpp"
 
 namespace {
 
@@ -191,7 +193,8 @@ void compare_registers(const RegisterState& expected, Ricoh5A22& cpu, std::vecto
 	check("E",   expected.e ? 1u : 0u, cpu.regs.emulation_mode ? 1u : 0u, 1);
 }
 
-void compare_memory(const std::vector<MemoryEntry>& expected, Ricoh5A22& cpu, std::vector<Mismatch>& mismatches) {
+template <typename CPUType>
+void compare_memory(const std::vector<MemoryEntry>& expected, CPUType& cpu, std::vector<Mismatch>& mismatches) {
 	for (const MemoryEntry& entry : expected) {
 		Byte actual = cpu.test_peek(entry.address);
 		if (actual != entry.value) {
@@ -202,6 +205,174 @@ void compare_memory(const std::vector<MemoryEntry>& expected, Ricoh5A22& cpu, st
 	}
 }
 
+// ===================== SPC-700 ============================================
+//
+// The SPC-700's SingleStepTests layout is flatter than the 65816's: no bank
+// registers, no emulation-mode flag, an 8-bit accumulator/index registers,
+// and a single flat 64KB address space (see tests/00.json for the shape).
+
+struct SPCRegisterState {
+	Word pc = 0;
+	Byte a = 0;
+	Byte x = 0;
+	Byte y = 0;
+	Byte sp = 0;
+	Byte psw = 0;
+};
+
+struct SPCTestCase {
+	std::string name;
+	SPCRegisterState initial;
+	SPCRegisterState final_state;
+	std::vector<MemoryEntry> initial_ram;
+	std::vector<MemoryEntry> final_ram;
+};
+
+SPCRegisterState parse_spc_register_state(const JsonValue& node) {
+	SPCRegisterState state;
+	state.pc  = static_cast<Word>(node["pc"].as_int());
+	state.a   = static_cast<Byte>(node["a"].as_int());
+	state.x   = static_cast<Byte>(node["x"].as_int());
+	state.y   = static_cast<Byte>(node["y"].as_int());
+	state.sp  = static_cast<Byte>(node["sp"].as_int());
+	state.psw = static_cast<Byte>(node["psw"].as_int());
+	return state;
+}
+
+SPCTestCase parse_spc_test_case(const JsonValue& node) {
+	SPCTestCase test_case;
+	test_case.name        = node["name"].as_string();
+	test_case.initial     = parse_spc_register_state(node["initial"]);
+	test_case.final_state = parse_spc_register_state(node["final"]);
+	test_case.initial_ram = parse_ram(node["initial"]);
+	test_case.final_ram   = parse_ram(node["final"]);
+	return test_case;
+}
+
+void apply_initial_state(SPC700& cpu, const SPCTestCase& test_case) {
+	cpu.regs.PC = test_case.initial.pc;
+	cpu.regs.A  = test_case.initial.a;
+	cpu.regs.X  = test_case.initial.x;
+	cpu.regs.Y  = test_case.initial.y;
+	cpu.regs.S  = test_case.initial.sp;
+	cpu.regs.P  = test_case.initial.psw;
+
+	for (const MemoryEntry& entry : test_case.initial_ram) {
+		cpu.test_poke(entry.address, entry.value);
+	}
+}
+
+// Feeds the opcode straight into the optable via BufferOpCode, the same way
+// SPC700::run_half_cycle() reads it, rather than relying on a real fetch
+// cycle -- this lets the harness drive any handler directly regardless of
+// how much of real opcode fetch/dispatch has been wired up yet.
+void run_instruction(SPC700& cpu, Byte opcode_value) {
+	cpu.BufferOpCode = opcode_value;
+
+	CycleCount idx = 0;
+	constexpr CycleCount MAX_STEPS = 64;
+	CycleCount steps = 0;
+
+	do {
+		cpu.apply_invariants();
+
+		Opcode op = get_opcode(optable, cpu.BufferOpCode, idx, cpu);
+		op.function(cpu, op.skipped);
+
+		steps++;
+	} while (idx != 0 && steps < MAX_STEPS);
+}
+
+void compare_registers(const SPCRegisterState& expected, SPC700& cpu, std::vector<Mismatch>& mismatches) {
+	auto check = [&](const std::string& field, unsigned long long exp, unsigned long long act, int width) {
+		if (exp != act) {
+			mismatches.push_back({field, to_hex(exp, width), to_hex(act, width)});
+		}
+	};
+
+	check("PC",  expected.pc,  cpu.regs.PC, 4);
+	check("A",   expected.a,   cpu.regs.A,  2);
+	check("X",   expected.x,   cpu.regs.X,  2);
+	check("Y",   expected.y,   cpu.regs.Y,  2);
+	check("SP",  expected.sp,  cpu.regs.S,  2);
+	check("PSW", expected.psw, cpu.regs.P,  2);
+}
+
+}
+
+bool test_spc700(const std::string& opcode_name, Byte opcode_value) {
+	const std::string path = "tests/" + opcode_name + ".json";
+
+	JsonValue root;
+	try {
+		root = parse_json_file(path);
+	} catch (const std::exception& e) {
+		std::cerr << COLOR_RED << "Could not load test file '" << path << "': "
+		          << e.what() << COLOR_RESET << std::endl;
+		return false;
+	}
+
+	if (root.type != JsonValue::Type::Array) {
+		std::cerr << COLOR_RED << "Test file '" << path << "' does not contain a JSON array."
+		          << COLOR_RESET << std::endl;
+		return false;
+	}
+
+	SPC700 cpu;
+	cpu.enable_test_mode();
+
+	size_t passed = 0;
+	size_t failed = 0;
+	std::vector<std::string> failed_names;
+
+	for (size_t i = 0; i < root.size(); i++) {
+		SPCTestCase test_case = parse_spc_test_case(root[i]);
+
+		cpu.reset_test_memory();
+		apply_initial_state(cpu, test_case);
+
+		run_instruction(cpu, opcode_value);
+
+		std::vector<Mismatch> mismatches;
+		compare_registers(test_case.final_state, cpu, mismatches);
+		compare_memory(test_case.final_ram, cpu, mismatches);
+
+		if (mismatches.empty()) {
+			passed++;
+		} else {
+			failed++;
+			failed_names.push_back(test_case.name);
+
+			if constexpr(!SEE_TOTAL_PASS_ONLY) {
+				std::cout << COLOR_RED << "[FAILED] " << COLOR_RESET << test_case.name << "\n";
+				for (const Mismatch& m : mismatches) {
+					std::cout << "         " << COLOR_YELLOW << m.field << COLOR_RESET
+					          << " expected " << m.expected << " but got " << m.actual << "\n";
+				}
+			}
+		}
+	}
+
+	if (failed > 0) {
+		std::cout << COLOR_BOLD << opcode_name << " " << COLOR_GREEN << passed << " passed" << COLOR_RESET << ", "
+		    << COLOR_RED << failed << " failed" << COLOR_RESET
+		    << " out of " << root.size() << " total" << std::endl;
+	} else {
+		std::cout << COLOR_BOLD << opcode_name << " " << COLOR_GREEN << passed << " passed" << COLOR_RESET
+		    << " out of " << root.size() << " total" << std::endl;
+	}
+
+	if constexpr(!SEE_TOTAL_PASS_ONLY) {
+		if (failed > 0) {
+			std::cout << COLOR_RED << "\nFailed tests:" << COLOR_RESET << "\n";
+			for (const std::string& name : failed_names) {
+				std::cout << "  - " << name << "\n";
+			}
+			std::cout << std::endl;
+		}
+	}
+
+	return (failed == 0);
 }
 
 

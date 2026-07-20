@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kctb/Projects/Emulators/snes-emulator
+CMAKE_SOURCE_DIR = /home/kctb/Projects/GithubBackups/snes-emulator
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kctb/Projects/Emulators/snes-emulator/build
+CMAKE_BINARY_DIR = /home/kctb/Projects/GithubBackups/snes-emulator/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles /home/kctb/Projects/Emulators/snes-emulator/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kctb/Projects/GithubBackups/snes-emulator/build/CMakeFiles /home/kctb/Projects/GithubBackups/snes-emulator/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kctb/Projects/GithubBackups/snes-emulator/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -113,7 +113,7 @@ preinstall/fast:
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -P /home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles/VerifyGlobs.cmake
+	$(CMAKE_COMMAND) -P /home/kctb/Projects/GithubBackups/snes-emulator/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
@@ -178,6 +178,30 @@ src/components/cartridge.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/cartridge.cpp.s
 .PHONY : src/components/cartridge.cpp.s
 
+src/components/dma_controller.o: src/components/dma_controller.cpp.o
+.PHONY : src/components/dma_controller.o
+
+# target to build an object file
+src/components/dma_controller.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/dma_controller.cpp.o
+.PHONY : src/components/dma_controller.cpp.o
+
+src/components/dma_controller.i: src/components/dma_controller.cpp.i
+.PHONY : src/components/dma_controller.i
+
+# target to preprocess a source file
+src/components/dma_controller.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/dma_controller.cpp.i
+.PHONY : src/components/dma_controller.cpp.i
+
+src/components/dma_controller.s: src/components/dma_controller.cpp.s
+.PHONY : src/components/dma_controller.s
+
+# target to generate assembly for a file
+src/components/dma_controller.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/dma_controller.cpp.s
+.PHONY : src/components/dma_controller.cpp.s
+
 src/components/opcode_engine.o: src/components/opcode_engine.cpp.o
 .PHONY : src/components/opcode_engine.o
 
@@ -201,6 +225,30 @@ src/components/opcode_engine.s: src/components/opcode_engine.cpp.s
 src/components/opcode_engine.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/opcode_engine.cpp.s
 .PHONY : src/components/opcode_engine.cpp.s
+
+src/components/ppu.o: src/components/ppu.cpp.o
+.PHONY : src/components/ppu.o
+
+# target to build an object file
+src/components/ppu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/ppu.cpp.o
+.PHONY : src/components/ppu.cpp.o
+
+src/components/ppu.i: src/components/ppu.cpp.i
+.PHONY : src/components/ppu.i
+
+# target to preprocess a source file
+src/components/ppu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/ppu.cpp.i
+.PHONY : src/components/ppu.cpp.i
+
+src/components/ppu.s: src/components/ppu.cpp.s
+.PHONY : src/components/ppu.s
+
+# target to generate assembly for a file
+src/components/ppu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/components/ppu.cpp.s
+.PHONY : src/components/ppu.cpp.s
 
 src/components/ricoh_5a22.o: src/components/ricoh_5a22.cpp.o
 .PHONY : src/components/ricoh_5a22.o
@@ -298,6 +346,30 @@ src/cpu_operations/ricoh_5a22_operations.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/cpu_operations/ricoh_5a22_operations.cpp.s
 .PHONY : src/cpu_operations/ricoh_5a22_operations.cpp.s
 
+src/cpu_operations/spc_700_operations.o: src/cpu_operations/spc_700_operations.cpp.o
+.PHONY : src/cpu_operations/spc_700_operations.o
+
+# target to build an object file
+src/cpu_operations/spc_700_operations.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/cpu_operations/spc_700_operations.cpp.o
+.PHONY : src/cpu_operations/spc_700_operations.cpp.o
+
+src/cpu_operations/spc_700_operations.i: src/cpu_operations/spc_700_operations.cpp.i
+.PHONY : src/cpu_operations/spc_700_operations.i
+
+# target to preprocess a source file
+src/cpu_operations/spc_700_operations.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/cpu_operations/spc_700_operations.cpp.i
+.PHONY : src/cpu_operations/spc_700_operations.cpp.i
+
+src/cpu_operations/spc_700_operations.s: src/cpu_operations/spc_700_operations.cpp.s
+.PHONY : src/cpu_operations/spc_700_operations.s
+
+# target to generate assembly for a file
+src/cpu_operations/spc_700_operations.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/cpu_operations/spc_700_operations.cpp.s
+.PHONY : src/cpu_operations/spc_700_operations.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -394,6 +466,30 @@ src/misc/utility.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/misc/utility.cpp.s
 .PHONY : src/misc/utility.cpp.s
 
+src/testing/test_harness.o: src/testing/test_harness.cpp.o
+.PHONY : src/testing/test_harness.o
+
+# target to build an object file
+src/testing/test_harness.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.o
+.PHONY : src/testing/test_harness.cpp.o
+
+src/testing/test_harness.i: src/testing/test_harness.cpp.i
+.PHONY : src/testing/test_harness.i
+
+# target to preprocess a source file
+src/testing/test_harness.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.i
+.PHONY : src/testing/test_harness.cpp.i
+
+src/testing/test_harness.s: src/testing/test_harness.cpp.s
+.PHONY : src/testing/test_harness.s
+
+# target to generate assembly for a file
+src/testing/test_harness.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snes_emulator.dir/build.make CMakeFiles/snes_emulator.dir/src/testing/test_harness.cpp.s
+.PHONY : src/testing/test_harness.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -409,9 +505,15 @@ help:
 	@echo "... src/components/cartridge.o"
 	@echo "... src/components/cartridge.i"
 	@echo "... src/components/cartridge.s"
+	@echo "... src/components/dma_controller.o"
+	@echo "... src/components/dma_controller.i"
+	@echo "... src/components/dma_controller.s"
 	@echo "... src/components/opcode_engine.o"
 	@echo "... src/components/opcode_engine.i"
 	@echo "... src/components/opcode_engine.s"
+	@echo "... src/components/ppu.o"
+	@echo "... src/components/ppu.i"
+	@echo "... src/components/ppu.s"
 	@echo "... src/components/ricoh_5a22.o"
 	@echo "... src/components/ricoh_5a22.i"
 	@echo "... src/components/ricoh_5a22.s"
@@ -424,6 +526,9 @@ help:
 	@echo "... src/cpu_operations/ricoh_5a22_operations.o"
 	@echo "... src/cpu_operations/ricoh_5a22_operations.i"
 	@echo "... src/cpu_operations/ricoh_5a22_operations.s"
+	@echo "... src/cpu_operations/spc_700_operations.o"
+	@echo "... src/cpu_operations/spc_700_operations.i"
+	@echo "... src/cpu_operations/spc_700_operations.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
@@ -436,6 +541,9 @@ help:
 	@echo "... src/misc/utility.o"
 	@echo "... src/misc/utility.i"
 	@echo "... src/misc/utility.s"
+	@echo "... src/testing/test_harness.o"
+	@echo "... src/testing/test_harness.i"
+	@echo "... src/testing/test_harness.s"
 .PHONY : help
 
 
@@ -447,7 +555,7 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -P /home/kctb/Projects/Emulators/snes-emulator/build/CMakeFiles/VerifyGlobs.cmake
+	$(CMAKE_COMMAND) -P /home/kctb/Projects/GithubBackups/snes-emulator/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

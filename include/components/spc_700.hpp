@@ -1,5 +1,6 @@
 #pragma once
 #include "cpu.hpp"
+#include "spc_700_optable.hpp"
 #include "common.hpp"
 #include "apubus.hpp"
 
@@ -150,28 +151,28 @@ public:
 
 
 	void enable_test_mode() override {
-		bus->enable_test_mode();
+		return;
 	}
 
 	void disable_test_mode() override {
-		bus->disable_test_mode();
+		return;
 	}
 
 	void reset_test_memory() override {
-		bus->reset_test_memory();
+		return;
 	}
 
 	Byte test_peek(Address addr) override {
-		return bus->test_peek(addr);
+		return bus->read(addr);
 	}
 
 	void test_poke(Address addr, Byte value) override {
-		bus->test_poke(addr, value);
+		bus->write(addr, value);
 	}
 
 private:
 
-	APUBus* bus = nullptr;
+	std::unique_ptr<APUBus> bus;
 
 	Byte cpu_to_apu_ports[4] = {0x00, 0x00, 0x00, 0x00};
 	Byte apu_to_cpu_ports[4] = {0xAA, 0xBB, 0x00, 0x00};

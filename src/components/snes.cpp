@@ -47,13 +47,15 @@ void SNES::load_cartridge(const std::string& directory) {
 }
 
 void SNES::tick_snes() {
-	if (ricoh_5a22->get_cycle() <= ppu->get_cycle()) {
-		ricoh_5a22->tick_component();
-		master_cycle = ricoh_5a22->get_cycle();
-	} else {
-		ppu->tick_component();
-		master_cycle = ppu->get_cycle();
-	}
+	auto next_device = std::min_element(
+		devices.begin(), devices.end(),
+		[](const std::unique_ptr<Component>& a, const std::unique_ptr<Component>& b) {
+			return a->get_cycle() < b->get_cycle();
+		}	
+	);
+
+	(*next_device)->tick_component();
+	master_cycle = (*next_device)->get_cycle();
 }
 
 void SNES::poll() {

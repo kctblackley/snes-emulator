@@ -1,5 +1,6 @@
 #include "ppu.hpp"
 #include "dma_controller.hpp"
+#include <iostream>
 
 // Register handling defined in header
 // This just contains code related to the rendering itself
@@ -254,25 +255,75 @@ void PPU::render_bg_scanline(BG& bg) {
 std::vector<Object> PPU::fetch_objects() {
 	std::vector<Object> objects;
 
-	for (auto& o : all_objects) {
+	for (int i = 0; i < 128; i++) {
+		Word x_coordinate = oam.data[(4 * i) + 0];
+		Word y_coordinate = oam.data[(4 * i) + 1];
+		Word tile_number  = oam.data[(4 * i) + 2];
+		Word attributes   = oam.data[(4 * i) + 3];
+
+		tile_number       = ((attributes & 1) << 8) | tile_number;
+		Byte palette      = (attributes >> 1) & 0x7;
+		Byte priority     = 0;
+
+		switch ((attributes >> 4) & 0x3) {
+		case 0:
+			priority = priority_order.S0;
+			break;
+		case 1:
+			priority = priority_order.S1;
+			break;
+		case 2:
+			priority = priority_order.S2;
+			break;
+		case 3:
+			priority = priority_order.S3;
+			break;
+		}
+
+		bool horizontal_flip = (attributes >> 6) & 1;
+		bool vertical_flip   = (attributes >> 7) & 1;
+
+		Byte high_byte = oam.data[512 + (int)(i / 4)];
+		Byte high_byte_pair = (high_byte >> (2 * (i % 4))) & 0x3;
 		
-		int line_in_sprite = (vcounter - o.y_coordinate) & 0xFF;
+		x_coordinate = ((high_byte_pair & 1) << 8) | x_coordinate;
+		int signed_x = x_coordinate;
+		if (signed_x > 255) {
+			signed_x -= 512;
+		}
 
-		if (line_in_sprite < o.height && o.x_coordinate >= -1 * o.width && o.x_coordinate < 256 + o.width) {
-			
-			o.render_width  = hires_mode ? o.width : (2 * o.width);
-			o.render_height = hires_mode ? o.height : (2 * o.height);
+		bool size = (high_byte_pair >> 1) & 1;
 
-			switch (o.priority_number) {
-			case 0: o.priority = priority_order.S0; break;
-			case 1: o.priority = priority_order.S1; break;
-			case 2: o.priority = priority_order.S2; break;
-			case 3: o.priority = priority_order.S3; break;
-			default: break;
-			}
+		int width  = size ? oam.obj_size.large_width  : oam.obj_size.small_width;
+		int height = size ? oam.obj_size.large_height : oam.obj_size.small_height;
 
-			o.line_in_sprite = line_in_sprite;
-			objects.push_back(o);
+		int render_width  = hires_mode ? width : (2 * width);
+		int render_height = hires_mode ? height : (2 * height);
+
+		int line_in_sprite = (vcounter - y_coordinate) & 0xFF;
+
+		if (line_in_sprite < height) {
+			Object obj;
+
+			obj.x_coordinate = signed_x;
+			obj.y_coordinate = y_coordinate;
+			obj.tile_number = tile_number;
+			obj.attributes = attributes;
+			obj.palette = palette;
+			obj.priority = priority;
+			obj.horizontal_flip = horizontal_flip;
+			obj.vertical_flip = vertical_flip;
+			obj.width = width;
+			obj.height = height;
+			obj.render_width = render_width;
+			obj.render_height = render_height;
+			obj.line_in_sprite = line_in_sprite;
+
+			objects.push_back(obj);
+		} 
+
+		if (objects.size() >= 32) {
+			return objects;
 		}
 	}
 
@@ -304,7 +355,13 @@ void PPU::render_obj_scanline(ObjectLayer& obj) {
 				sprite_x = o.width - 1 - sprite_x;
 			}
 			if (o.vertical_flip) {
-				sprite_y = o.height - 1 - sprite_y;
+				if (o.width == o.height) {
+					sprite_y = o.height - 1 - sprite_y;
+				} else if (sprite_y < o.width) {
+					sprite_y = o.width - 1 - sprite_y;
+				} else {
+					sprite_y = o.width + (o.width - 1) - (sprite_y - o.width);
+				}
 			}
 
 			int tile_col = sprite_x / 8;
@@ -313,16 +370,17 @@ void PPU::render_obj_scanline(ObjectLayer& obj) {
 			int pixel_x = sprite_x & 7;
 			int pixel_y = sprite_y & 7;
 
-			int base = o.tile_number;
-			int with_row = base + (tile_row << 4);
-			int combined = (with_row & ~0xF) | ((with_row + tile_col) & 0xF);
+			int base_col = o.tile_number & 0xF;
+			int base_row = (o.tile_number >> 4) & 0xF;
 
-			bool second_base = (combined & 0x100) != 0;
-			int tile_index = combined & 0xFF;
+			int col = (base_col + tile_col) & 0xF;
+			int row = (base_row + tile_row) & 0xF;
 
+			int tile_index = (row << 4) | col;
+
+			bool second_base = (o.tile_number & 0x100) != 0;
 			Word tile_base = second_base ? oam.second_base : oam.first_base;
 			Word tile_address = (tile_base + (tile_index * 16)) & 0x7FFF;
-
 			Word p01 = vram.data[(tile_address + 0 + pixel_y) & 0x7FFF];
 			Word p23 = vram.data[(tile_address + 8 + pixel_y) & 0x7FFF];
 
@@ -347,7 +405,7 @@ void PPU::render_obj_scanline(ObjectLayer& obj) {
 			px.priority = o.priority;
 			px.colour = snes_colour;
 
-			px.colour_math = obj.enable_colour_math;
+			px.colour_math =  obj.enable_colour_math && (o.palette >= 4);
 
 			// Sprites are not affected by hires mode
 			if (x >= 0 && x < 512) {
@@ -408,12 +466,13 @@ bool PPU::is_colour_math_window(int x) {
 	return mask;
 }
 
-void PPU::resolve_main_screen_px(Pixel& px, bool is_window) {
+bool PPU::resolve_main_screen_px(Pixel& px, bool is_window) {
 	bool resolve = should_resolve(is_window, col.main_screen_black_region);
 	if (resolve) {
 		px.colour = 0;
 		px.transparent = false;
 	}
+	return resolve;
 }
 
 void PPU::resolve_sub_screen_px(Pixel& px, bool is_window) {
@@ -429,7 +488,7 @@ inline int clamp(int value, int min, int max) {
 	return value;
 }
 
-Pixel PPU::colour_math(Pixel main, Pixel sub) {
+Pixel PPU::colour_math(Pixel main, Pixel sub, bool ignore_half) {
 	if (!main.colour_math || (col.addend == 1 && sub.transparent)) {
 		return main;
 	}
@@ -451,7 +510,7 @@ Pixel PPU::colour_math(Pixel main, Pixel sub) {
 	
 	Byte red, green, blue;
 
-	Byte divide = col.half_colour_math ? 2 : 1;
+	Byte divide = (col.half_colour_math && !ignore_half) ? 2 : 1;
 	if (col.operator_type) {
 		red   = clamp( (main_red   - sub_red) / divide,   0, 31);
 		green = clamp( (main_green - sub_green) / divide, 0, 31);
@@ -537,14 +596,19 @@ void PPU::composite(std::array<Pixel, 512>& final_scanline) {
 		}
 
 		Pixel sub_screen_px = winner ? *winner : sub_default_pixel;
+		bool sub_is_backdrop = (winner == nullptr);
+
 		uint16_t screen_x = hires_mode ? dot : (dot >> 1);
 		bool is_window = is_colour_math_window(screen_x);
-		resolve_main_screen_px(main_screen_px, is_window);
+		bool main_forced_black = resolve_main_screen_px(main_screen_px, is_window);
 		resolve_sub_screen_px(sub_screen_px, is_window);
 
-		final_scanline[dot] = colour_math(main_screen_px, sub_screen_px);
+		bool ignore_half = main_forced_black || (col.addend && sub_is_backdrop);
+		final_scanline[dot] = colour_math(main_screen_px, sub_screen_px, ignore_half);
 	}
 }
+
+static int dump_timer = 0;
 
 void PPU::render_scanline() {
 
@@ -565,12 +629,26 @@ void PPU::render_scanline() {
 
 	int idx1 = screen_width * (2 * vcounter);
 	int idx2 = screen_width * ((2 * vcounter) + 1);
+	
+	if (forced_blank) {
+		for (int i = 0; i < screen_width; i++) {
+			framebuffer[idx1 + i] = 0x000000FF;
+			framebuffer[idx2 + i] = 0x000000FF;
+		}
+
+		return;
+	}
+
 	for (auto px : final_scanline) {
 		uint16_t colour = px.colour;
 
 		Byte r5 = colour & 0x1F;
 		Byte g5 = (colour >> 5) & 0x1F;
 		Byte b5 = (colour >> 10) & 0x1F;
+
+		r5 = (r5 * (brightness + 1)) >> 4;
+		g5 = (g5 * (brightness + 1)) >> 4;
+		b5 = (b5 * (brightness + 1)) >> 4;
 
 		Byte r8 = (r5 << 3) | (r5 >> 2);
 		Byte g8 = (g5 << 3) | (g5 >> 2);

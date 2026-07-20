@@ -140,6 +140,8 @@ struct Object {
 	int render_width = 0;
 	int render_height = 0;
 	int line_in_sprite = 0;
+
+	bool size = false;
 };
 
 struct SizePair {

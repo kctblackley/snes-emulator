@@ -20,7 +20,7 @@ public:
 	void create_window(int width, int height) {
 		screen_width = width;
 		screen_height = height;
-		scale = 2;
+		scale = 3;
 
 		SDL_Init(SDL_INIT_VIDEO);
 		window = SDL_CreateWindow(

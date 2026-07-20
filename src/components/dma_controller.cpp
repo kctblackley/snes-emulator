@@ -160,6 +160,7 @@ CycleCount DMAController::perform_hdma_transfer(DMAChannel& ch) {
     else {
     	//std::cout << "PERFORMED COMMON HDMA\n";
         ch.set_a2a(source);
+        ch.hdma.table_address = source;
     }
 
     return cycles;

@@ -3,7 +3,7 @@
 
 Byte Mapper::read(SNESAddress address) {
 	if (auto idx = rom_idx(address)) {
-		return rom[(*idx) & (rom.size() - 1)];
+		return rom[(*idx) % rom.size()];
 	}
 
 	if (auto idx = sram_idx(address)) {
