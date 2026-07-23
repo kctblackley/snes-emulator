@@ -145,14 +145,16 @@ public:
 
 		// Interrupt handling
 		if (addr.offset == RDNMI_ADDRESS) {
+			Byte value = mregs.RDNMI;
 			mregs.RDNMI = mregs.RDNMI & 0x7F;
 			nmi_line = false;
-			return mregs.RDNMI;
+			return value;
 		}
 		if (addr.offset == TIMEUP_ADDRESS) {
+			Byte value = mregs.TIMEUP;
 			mregs.TIMEUP = mregs.TIMEUP & 0x7F;
 			irq_line = false;
-			return mregs.TIMEUP;
+			return value;
 		}
 
 

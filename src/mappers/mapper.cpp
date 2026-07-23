@@ -7,7 +7,10 @@ Byte Mapper::read(SNESAddress address) {
 	}
 
 	if (auto idx = sram_idx(address)) {
-		return sram[(*idx) & (sram.size() - 1)];
+		if (sram.size() == 0) {
+			return 0x00;
+		}
+		return sram[(*idx) % sram.size()];
 	}
 
 	return 0x00; // Might need to change this to consider open bus!
@@ -15,6 +18,9 @@ Byte Mapper::read(SNESAddress address) {
 
 void Mapper::write(SNESAddress address, Byte value) {
 	if (auto idx = sram_idx(address)) {
-		sram[(*idx) & (sram.size() - 1)] = value;
+		if (sram.size() == 0) {
+			return;
+		}
+		sram[(*idx) % sram.size()] = value;
 	}
 }

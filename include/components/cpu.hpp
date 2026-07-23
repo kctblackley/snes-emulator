@@ -10,42 +10,50 @@ public:
 	struct Registers {
 
 		// Both
-		Word A;
-		Word X;
-		Word Y;
-		Word PC;
-		Word S;
-		Byte P;
+		Word A = 0;
+		Word X = 0;
+		Word Y = 0;
+		Word PC = 0;
+		Word S = 0;
+		Byte P = 0;
 
 		// Ricoh 5A22
 
-		Word D;
-		Byte DB;
-		Byte PB;
-		bool emulation_mode;
+		Word D = 0;
+		Byte DB = 0;
+		Byte PB = 0;
+		bool emulation_mode = false;
 		
 	};
 
 	Registers regs;
 
-	Word BufferOpCode;
-	Word BufferPointer;
-	Word BufferAddress;
-	Word BufferOperand;
-	Word BufferBank;
-	Word BufferOrig;
-	Word BufferMVDest;
-	Word BufferStackAddress;
-	Word Vector;
+	Word BufferOpCode = 0;
+	Word BufferPointer = 0;
+	Word BufferAddress = 0;
+	Word BufferOperand = 0;
+	Word BufferOperand0 = 0;
+	Word BufferOperand1 = 0;
+	Word BufferBank = 0;
+	Word BufferOrig = 0;
+	Word BufferMVDest = 0;
+	Word BufferStackAddress = 0;
+	Word Vector = 0;
 
-	Word TransferCount;
+	Word YABuffer = 0; // just a buffer, does not give actual value of YA for SPC-700
+	Word BufferJump = 0;
 
-	Word DiscardBuffer;
+	uint32_t DivYa = 0;
+	uint32_t ShiftedX = 0;
 
-	bool condition;
+	Word TransferCount = 0;
 
-	bool Branching;
-	bool BoundaryCrossed;
+	Word DiscardBuffer = 0;
+
+	bool condition = 0;
+
+	bool Branching = 0;
+	bool BoundaryCrossed = 0;
 
 	virtual void apply_invariants() = 0;
 	virtual void poll_interrupts() = 0;

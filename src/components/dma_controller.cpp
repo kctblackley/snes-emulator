@@ -25,7 +25,7 @@ void DMAController::execute_gpdma() {
 
 				while (count > 0) {
 					Byte offset = pattern.offsets[step % pattern.length];
-					Address port = b_address + offset;
+					Address port = 0x2100 | ((ch.bbad() + offset) & 0xFF);
 					Address addr = (a_bank << 16) | a_address;
 					if (ch.direction() == 0) {
 						Byte byte = bus->read(addr, true);

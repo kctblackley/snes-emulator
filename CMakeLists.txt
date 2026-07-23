@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(snes_emulator LANGUAGES CXX)
 
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-endif()
-
 set(CMAKE_CXX_FLAGS_RELEASE
     "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto"
 )
@@ -59,11 +55,7 @@ target_include_directories(snes_emulator PRIVATE
 target_link_libraries(snes_emulator PRIVATE SDL3::SDL3)
 
 target_compile_options(snes_emulator PRIVATE
-    -O3
-    -march=native
-    -mtune=native
-    -flto
-    -fomit-frame-pointer
+     $<$<CONFIG:Release>:-O3;-march=native;-mtune=native;-flto;-fomit-frame-pointer>
 )
 
 

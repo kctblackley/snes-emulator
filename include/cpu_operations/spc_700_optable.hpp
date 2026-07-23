@@ -4,9 +4,9 @@
 constexpr Optable optable = {
 
     &s_00, // 0x00
-    &s_nop, // 0x01
-    &s_nop, // 0x02
-    &s_nop, // 0x03
+    &s_01, // 0x01
+    &s_02, // 0x02
+    &s_03, // 0x03
     &s_nop, // 0x04
     &s_nop, // 0x05
     &s_nop, // 0x06
@@ -16,14 +16,14 @@ constexpr Optable optable = {
     &s_nop, // 0x0A
     &s_nop, // 0x0B
     &s_nop, // 0x0C
-    &s_nop, // 0x0D
+    &s_0d, // 0x0D
     &s_nop, // 0x0E
-    &s_nop, // 0x0F
+    &s_0f, // 0x0F
 
     &s_nop, // 0x10
-    &s_nop, // 0x11
-    &s_nop, // 0x12
-    &s_nop, // 0x13
+    &s_11, // 0x11
+    &s_12, // 0x12
+    &s_13, // 0x13
     &s_nop, // 0x14
     &s_nop, // 0x15
     &s_nop, // 0x16
@@ -38,9 +38,9 @@ constexpr Optable optable = {
     &s_nop, // 0x1F
 
     &s_20, // 0x20
-    &s_nop, // 0x21
-    &s_nop, // 0x22
-    &s_nop, // 0x23
+    &s_21, // 0x21
+    &s_22, // 0x22
+    &s_23, // 0x23
     &s_nop, // 0x24
     &s_nop, // 0x25
     &s_nop, // 0x26
@@ -50,14 +50,14 @@ constexpr Optable optable = {
     &s_nop, // 0x2A
     &s_nop, // 0x2B
     &s_nop, // 0x2C
-    &s_nop, // 0x2D
+    &s_2d, // 0x2D
     &s_nop, // 0x2E
     &s_nop, // 0x2F
 
     &s_nop, // 0x30
-    &s_nop, // 0x31
-    &s_nop, // 0x32
-    &s_nop, // 0x33
+    &s_31, // 0x31
+    &s_32, // 0x32
+    &s_33, // 0x33
     &s_nop, // 0x34
     &s_nop, // 0x35
     &s_nop, // 0x36
@@ -72,9 +72,9 @@ constexpr Optable optable = {
     &s_nop, // 0x3F
 
     &s_40, // 0x40
-    &s_nop, // 0x41
-    &s_nop, // 0x42
-    &s_nop, // 0x43
+    &s_41, // 0x41
+    &s_42, // 0x42
+    &s_43, // 0x43
     &s_nop, // 0x44
     &s_nop, // 0x45
     &s_nop, // 0x46
@@ -84,14 +84,14 @@ constexpr Optable optable = {
     &s_nop, // 0x4A
     &s_nop, // 0x4B
     &s_nop, // 0x4C
-    &s_nop, // 0x4D
+    &s_4d, // 0x4D
     &s_nop, // 0x4E
     &s_nop, // 0x4F
 
     &s_nop, // 0x50
-    &s_nop, // 0x51
-    &s_nop, // 0x52
-    &s_nop, // 0x53
+    &s_51, // 0x51
+    &s_52, // 0x52
+    &s_53, // 0x53
     &s_nop, // 0x54
     &s_nop, // 0x55
     &s_nop, // 0x56
@@ -101,14 +101,14 @@ constexpr Optable optable = {
     &s_nop, // 0x5A
     &s_nop, // 0x5B
     &s_nop, // 0x5C
-    &s_nop, // 0x5D
+    &s_5d, // 0x5D
     &s_nop, // 0x5E
     &s_nop, // 0x5F
 
     &s_60, // 0x60
-    &s_nop, // 0x61
-    &s_nop, // 0x62
-    &s_nop, // 0x63
+    &s_61, // 0x61
+    &s_62, // 0x62
+    &s_63, // 0x63
     &s_nop, // 0x64
     &s_nop, // 0x65
     &s_nop, // 0x66
@@ -118,14 +118,14 @@ constexpr Optable optable = {
     &s_nop, // 0x6A
     &s_nop, // 0x6B
     &s_nop, // 0x6C
-    &s_nop, // 0x6D
+    &s_6d, // 0x6D
     &s_nop, // 0x6E
-    &s_nop, // 0x6F
+    &s_6f, // 0x6F
 
     &s_nop, // 0x70
-    &s_nop, // 0x71
-    &s_nop, // 0x72
-    &s_nop, // 0x73
+    &s_71, // 0x71
+    &s_72, // 0x72
+    &s_73, // 0x73
     &s_nop, // 0x74
     &s_nop, // 0x75
     &s_nop, // 0x76
@@ -135,14 +135,14 @@ constexpr Optable optable = {
     &s_nop, // 0x7A
     &s_nop, // 0x7B
     &s_nop, // 0x7C
-    &s_nop, // 0x7D
+    &s_7d, // 0x7D
     &s_nop, // 0x7E
-    &s_nop, // 0x7F
+    &s_7f, // 0x7F
 
     &s_80, // 0x80
-    &s_nop, // 0x81
-    &s_nop, // 0x82
-    &s_nop, // 0x83
+    &s_81, // 0x81
+    &s_82, // 0x82
+    &s_83, // 0x83
     &s_nop, // 0x84
     &s_nop, // 0x85
     &s_nop, // 0x86
@@ -152,14 +152,14 @@ constexpr Optable optable = {
     &s_nop, // 0x8A
     &s_nop, // 0x8B
     &s_nop, // 0x8C
-    &s_nop, // 0x8D
-    &s_nop, // 0x8E
-    &s_nop, // 0x8F
+    &s_8d, // 0x8D
+    &s_8e, // 0x8E
+    &s_8f, // 0x8F
 
     &s_nop, // 0x90
-    &s_nop, // 0x91
-    &s_nop, // 0x92
-    &s_nop, // 0x93
+    &s_91, // 0x91
+    &s_92, // 0x92
+    &s_93, // 0x93
     &s_nop, // 0x94
     &s_nop, // 0x95
     &s_nop, // 0x96
@@ -169,14 +169,14 @@ constexpr Optable optable = {
     &s_nop, // 0x9A
     &s_nop, // 0x9B
     &s_nop, // 0x9C
-    &s_nop, // 0x9D
-    &s_nop, // 0x9E
-    &s_nop, // 0x9F
+    &s_9d, // 0x9D
+    &s_9e, // 0x9E
+    &s_9f, // 0x9F
 
     &s_a0, // 0xA0
-    &s_nop, // 0xA1
-    &s_nop, // 0xA2
-    &s_nop, // 0xA3
+    &s_a1, // 0xA1
+    &s_a2, // 0xA2
+    &s_a3, // 0xA3
     &s_nop, // 0xA4
     &s_nop, // 0xA5
     &s_nop, // 0xA6
@@ -187,13 +187,13 @@ constexpr Optable optable = {
     &s_nop, // 0xAB
     &s_nop, // 0xAC
     &s_nop, // 0xAD
-    &s_nop, // 0xAE
-    &s_nop, // 0xAF
+    &s_ae, // 0xAE
+    &s_af, // 0xAF
 
     &s_nop, // 0xB0
-    &s_nop, // 0xB1
-    &s_nop, // 0xB2
-    &s_nop, // 0xB3
+    &s_b1, // 0xB1
+    &s_b2, // 0xB2
+    &s_b3, // 0xB3
     &s_nop, // 0xB4
     &s_nop, // 0xB5
     &s_nop, // 0xB6
@@ -204,13 +204,13 @@ constexpr Optable optable = {
     &s_nop, // 0xBB
     &s_nop, // 0xBC
     &s_nop, // 0xBD
-    &s_nop, // 0xBE
+    &s_be, // 0xBE
     &s_nop, // 0xBF
 
     &s_c0, // 0xC0
-    &s_nop, // 0xC1
-    &s_nop, // 0xC2
-    &s_nop, // 0xC3
+    &s_c1, // 0xC1
+    &s_c2, // 0xC2
+    &s_c3, // 0xC3
     &s_nop, // 0xC4
     &s_nop, // 0xC5
     &s_nop, // 0xC6
@@ -221,13 +221,13 @@ constexpr Optable optable = {
     &s_nop, // 0xCB
     &s_nop, // 0xCC
     &s_nop, // 0xCD
-    &s_nop, // 0xCE
-    &s_nop, // 0xCF
+    &s_ce, // 0xCE
+    &s_cf, // 0xCF
 
     &s_nop, // 0xD0
-    &s_nop, // 0xD1
-    &s_nop, // 0xD2
-    &s_nop, // 0xD3
+    &s_d1, // 0xD1
+    &s_d2, // 0xD2
+    &s_d3, // 0xD3
     &s_nop, // 0xD4
     &s_nop, // 0xD5
     &s_nop, // 0xD6
@@ -239,12 +239,12 @@ constexpr Optable optable = {
     &s_nop, // 0xDC
     &s_nop, // 0xDD
     &s_nop, // 0xDE
-    &s_nop, // 0xDF
+    &s_df, // 0xDF
 
     &s_e0, // 0xE0
-    &s_nop, // 0xE1
-    &s_nop, // 0xE2
-    &s_nop, // 0xE3
+    &s_e1, // 0xE1
+    &s_e2, // 0xE2
+    &s_e3, // 0xE3
     &s_nop, // 0xE4
     &s_nop, // 0xE5
     &s_nop, // 0xE6
@@ -255,13 +255,13 @@ constexpr Optable optable = {
     &s_nop, // 0xEB
     &s_nop, // 0xEC
     &s_ed, // 0xED
-    &s_nop, // 0xEE
+    &s_ee, // 0xEE
     &s_nop, // 0xEF
 
     &s_nop, // 0xF0
-    &s_nop, // 0xF1
-    &s_nop, // 0xF2
-    &s_nop, // 0xF3
+    &s_f1, // 0xF1
+    &s_f2, // 0xF2
+    &s_f3, // 0xF3
     &s_nop, // 0xF4
     &s_nop, // 0xF5
     &s_nop, // 0xF6

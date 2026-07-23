@@ -4,6 +4,11 @@
 #include "common.hpp"
 #include "apubus.hpp"
 
+enum class APUStubState {
+	WaitForCC,
+	Transfer
+};
+
 class SPC700 : public CPU {
 public:
 	SPC700();
@@ -39,6 +44,9 @@ public:
 	//     the CPU without needing real SPC700 execution -- games proceed with
 	//     no audio instead of hanging.
 	Byte communication_read(SNESAddress addr) override {
+		/*Byte port = addr.offset & 3;
+		return apu_to_cpu_ports[port];*/
+
 		Byte port = addr.offset & 0x3;
 		if (port == 0 || port == 1) {
 			handshake_active = true;
@@ -62,6 +70,24 @@ public:
 	}
 
 	void communication_write(SNESAddress addr, Byte value) override {
+		/*if (addr.offset == 0x2140 && value == 0xCC && state == APUStubState::WaitForCC) {
+			apu_to_cpu_ports[0] = 0xCC;
+			state = APUStubState::Transfer;
+		}
+		if (addr.offset == 0x2140 && state == APUStubState::Transfer) {
+			apu_to_cpu_ports[0] = value;
+		}
+		if (addr.offset == 0x2141) {
+			last_apuio1 = value;
+		}
+		if (addr.offset == 0x2140 && state == APUStubState::Transfer && last_apuio1 == 0x00) {
+			apu_program_running = true;
+		}*/
+
+		/*Byte port = addr.offset & 3;
+		cpu_to_apu_ports[port] = value;
+		apu_to_cpu_ports[port] = value;*/
+
 		Byte port = addr.offset & 0x3;
 		stall_counter = 0; // any write counts as forward progress
 		if (handshake_active) {
@@ -74,11 +100,11 @@ public:
 
 	// Stubbed until I implement the SPC700 in full!
 	Byte read(Address addr) override {
-		return 0xFF;
+		return bus->read(addr);
 	}
 
 	void write(Address addr, Byte value) override {
-		return;
+		bus->write(addr, value);
 	}
 
 	void apply_invariants() override;
@@ -89,7 +115,7 @@ public:
 	bool get_flag_N() override { return (regs.P >> 7) & 0b1; }
 	bool get_flag_V() override { return (regs.P >> 6) & 0b1; }
 	bool get_flag_P() override { return (regs.P >> 5) & 0b1; }
- 	bool get_flag_B() override { return (regs.P >> 4) & 0b1; }
+ 	bool get_flag_X() override { return (regs.P >> 4) & 0b1; }
 	bool get_flag_H() override { return (regs.P >> 3) & 0b1; }
 	bool get_flag_I() override { return (regs.P >> 2) & 0b1; } 
 	bool get_flag_Z() override { return (regs.P >> 1) & 0b1;  }
@@ -102,7 +128,7 @@ public:
 
 	void set_flag_V(Byte value) override { return; }
 	void set_flag_P(Byte value) override { return; }
-	void set_flag_B(Byte value) override { return; }
+	void set_flag_X(Byte value) override { return; }
 	void set_flag_H(Byte value) override { return; }
 	void set_flag_I(Byte value) override { return; }
 
@@ -116,7 +142,7 @@ public:
 	void set_flag_N() override { regs.P = set_bit(regs.P, 7); }
 	void set_flag_V() override { regs.P = set_bit(regs.P, 6); }
 	void set_flag_P() override { regs.P = set_bit(regs.P, 5); }
-	void set_flag_B() override { regs.P = set_bit(regs.P, 4); }
+	void set_flag_X() override { regs.P = set_bit(regs.P, 4); }
 	void set_flag_H() override { regs.P = set_bit(regs.P, 3); }
 	void set_flag_I() override { regs.P = set_bit(regs.P, 2); }
 	void set_flag_Z() override { regs.P = set_bit(regs.P, 1); }
@@ -125,7 +151,7 @@ public:
 	void clear_flag_N() override { regs.P = clear_bit(regs.P, 7); }
  	void clear_flag_V() override { regs.P = clear_bit(regs.P, 6); }
 	void clear_flag_P() override { regs.P = clear_bit(regs.P, 5); }
-	void clear_flag_B() override { regs.P = clear_bit(regs.P, 4); }
+	void clear_flag_X() override { regs.P = clear_bit(regs.P, 4); }
 	void clear_flag_H() override { regs.P = clear_bit(regs.P, 3); }
 	void clear_flag_I() override { regs.P = clear_bit(regs.P, 2); }
 	void clear_flag_Z() override { regs.P = clear_bit(regs.P, 1); }
@@ -134,19 +160,19 @@ public:
 	// Unused flags (SPC700 only)
 	bool get_flag_M() override { return false; }
 	bool get_flag_D() override { return false; }
-	bool get_flag_X() override { return false; }
+	bool get_flag_B() override { return false; }
 
 	void set_flag_M(Byte value) override { return; }
 	void set_flag_D(Byte value) override { return; }
-	void set_flag_X(Byte value) override { return; }
+	void set_flag_B(Byte value) override { return; }
 
 	void set_flag_M() override { return; }
 	void set_flag_D() override { return; }
-	void set_flag_X() override { return; }
+	void set_flag_B() override { return; }
 
 	void clear_flag_M() override { return; }
 	void clear_flag_D() override { return; }
-	void clear_flag_X() override { return; }
+	void clear_flag_B() override { return; }
 
 
 
@@ -171,6 +197,10 @@ public:
 	}
 
 private:
+
+	APUStubState state = APUStubState::WaitForCC;
+	Byte last_apuio1 = 1;
+	bool apu_program_running = false;
 
 	std::unique_ptr<APUBus> bus;
 

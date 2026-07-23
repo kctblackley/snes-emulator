@@ -11,6 +11,8 @@
 #define TILE_NUMBER_BYTE 2
 #define ATTRIBUTE_BYTE 3
 
+#define MAX_OBJECTS 32
+
 class DMAController;
 
 constexpr Byte PPU1_VERSION = 1;
@@ -61,16 +63,16 @@ public:
 		initialise_bg(bg3, 3);
 		initialise_bg(bg4, 4);
 		initialise_obj(obj);
+
+		object_buffer.reserve(MAX_OBJECTS);
 	}
 
 	void initialise_bg(BG& bg, int layer) {
-		bg.framebuffer.clear();
 		bg.framebuffer.assign(screen_width * framebuffer_height, 0x000000FF);
 		bg.layer = layer;
 	}
 
 	void initialise_obj(ObjectLayer& obj) {
-		obj.framebuffer.clear();
 		obj.framebuffer.assign(screen_width * framebuffer_height, 0x000000FF);
 		obj.layer = 0;
 	}
@@ -102,7 +104,6 @@ public:
 
 	void create_window() {
 		renderer->create_window(screen_width, screen_height);
-		framebuffer.clear();
 		framebuffer.assign(screen_width * framebuffer_height, 0x000000FF);
 	}
 
@@ -116,13 +117,20 @@ public:
 	void composite(std::array<Pixel, 512>& final_scanline);
 	Pixel fetch_bg_pixel(BG& bg, uint16_t screen_x);
 	Pixel fetch_mode7_pixel(BG& bg, uint16_t screen_x);
-	std::vector<Object> fetch_objects();
+	void fetch_objects();
 	void render_bg_scanline(BG& bg);
 	void render_obj_scanline(ObjectLayer& obj);
 	void render_scanline();
 
+	void clear_framebuffer(std::vector<uint32_t>& f);
+	void add_to_framebuffer(std::vector<uint32_t>& f, std::array<Pixel, 512>& line);
+	uint32_t convert_to_rgba(uint16_t colour);
+
 	void push_framebuffer() {
 		renderer->display_framebuffer(this->framebuffer);
+		if constexpr (DEBUG_WINDOW) {
+			renderer->display_separate_framebuffers(this->bg1.framebuffer, this->bg2.framebuffer, this->bg3.framebuffer, this->bg4.framebuffer, this->obj.framebuffer);
+		}
 	}
 
 	CycleCount get_cycle() override {
@@ -242,6 +250,7 @@ public:
 		priority_order = priorities[bg_mode];
 		if (bg_mode == 1 && bg3_priority) {
 			priority_order.H3 = 20; // just a random value for now, will change later
+			priority_order.L3 = 19;
 		}
 
 		if (bg_mode == 0) {
@@ -724,6 +733,8 @@ public:
 	}
 
 private:
+
+	std::vector<Object> object_buffer;
 	
 	bool time_over = false;
 	bool range_over = false;
@@ -737,6 +748,9 @@ private:
 	int tiles_x, tiles_y;
 	
 	std::vector<uint32_t> framebuffer;
+
+	std::array<bool, 512> window1_dots;
+	std::array<bool, 512> window2_dots;
 
 	OAM oam;
 	CGRAM cgram;

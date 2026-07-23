@@ -12,8 +12,8 @@ constexpr CycleCount PPU_CYCLE = 4;
 void PPU::window_mask(std::array<Pixel, 512>& scanline, bool window1_enabled, bool window2_enabled, bool window1_inverted, bool window2_inverted, Byte mask_logic, bool colour_math) {
 	int x = 0;
 	for (int dot = 0; dot < 512; dot += 2) {
-		bool window1_mask = (x >= window1.left_position) && (x <= window1.right_position);
-		bool window2_mask = (x >= window2.left_position) && (x <= window2.right_position);
+		bool window1_mask = window1_dots[dot];
+		bool window2_mask = window2_dots[dot];
 		if (window1_inverted) { window1_mask = !window1_mask; }
 		if (window2_inverted) { window2_mask = !window2_mask; }
 				
@@ -33,7 +33,6 @@ void PPU::window_mask(std::array<Pixel, 512>& scanline, bool window1_enabled, bo
 			scanline[dot].transparent = true;
 			scanline[dot + 1].transparent = true;
 		}
-		x++;
 	}
 }
 
@@ -225,7 +224,8 @@ void PPU::render_bg_scanline(BG& bg) {
 	for (int dot = 0; dot < 512; dot++) {
 
 		if (!hires_mode && (dot & 1)) {
-			bg.scanline[i++] = fetched_pixel;
+			bg.main_scanline[i]  = fetched_pixel;
+			bg.sub_scanline[i++] = fetched_pixel;
 			continue;
 		}
 
@@ -238,11 +238,9 @@ void PPU::render_bg_scanline(BG& bg) {
 
 		fetched_pixel.colour_math = bg.enable_colour_math;
 
-		bg.scanline[i++] = fetched_pixel;
+		bg.main_scanline[i]  = fetched_pixel;
+		bg.sub_scanline[i++] = fetched_pixel;
 	}
-
-	bg.main_scanline = bg.scanline;
-	bg.sub_scanline = bg.scanline;
 
 	if (bg.windows_on_subscreen) {
 		window_mask(bg.sub_scanline, bg.window1_enabled, bg.window2_enabled, bg.window1_inverted, bg.window2_inverted, bg.mask_logic, bg.enable_colour_math);
@@ -252,10 +250,11 @@ void PPU::render_bg_scanline(BG& bg) {
 	}
 }
 
-std::vector<Object> PPU::fetch_objects() {
-	std::vector<Object> objects;
+void PPU::fetch_objects() {
 
-	for (int i = 0; i < 128; i++) {
+	object_buffer.clear();
+
+	for (int i = 0; i < 128 && object_buffer.size() < MAX_OBJECTS; i++) {
 		Word x_coordinate = oam.data[(4 * i) + 0];
 		Word y_coordinate = oam.data[(4 * i) + 1];
 		Word tile_number  = oam.data[(4 * i) + 2];
@@ -319,15 +318,10 @@ std::vector<Object> PPU::fetch_objects() {
 			obj.render_height = render_height;
 			obj.line_in_sprite = line_in_sprite;
 
-			objects.push_back(obj);
+			object_buffer.push_back(obj);
 		} 
-
-		if (objects.size() >= 32) {
-			return objects;
-		}
 	}
 
-	return objects;
 }
 
 void PPU::render_obj_scanline(ObjectLayer& obj) {
@@ -340,10 +334,10 @@ void PPU::render_obj_scanline(ObjectLayer& obj) {
 	std::array<Pixel, 512>& scanline = obj.scanline;
 	scanline.fill(transparent_pixel);
 
-	std::vector<Object> objects = fetch_objects();
+	fetch_objects();
 
 	// Render each object into scanline here
-	for (auto& o : objects) {
+	for (auto& o : object_buffer) {
 		int x = hires_mode ? o.x_coordinate : (o.x_coordinate * 2);
 
 		for (int i = 0; i < o.width; i++) {
@@ -610,16 +604,94 @@ void PPU::composite(std::array<Pixel, 512>& final_scanline) {
 
 static int dump_timer = 0;
 
-void PPU::render_scanline() {
+void PPU::clear_framebuffer(std::vector<uint32_t>& f) {
+	f.assign(screen_width * framebuffer_height, 0x000000FF);
+}
 
+void PPU::add_to_framebuffer(std::vector<uint32_t>& f, std::array<Pixel, 512>& line) {
+	int idx1 = screen_width * (2 * vcounter);
+
+	for (int i = 0; i < screen_width; i++) {
+		f[idx1 + i] = convert_to_rgba(line[i].colour);
+	}
+
+	std::copy(f.begin() + idx1, f.begin() + idx1 + screen_width, f.begin() + idx1 + screen_width);
+}
+
+static const auto& rgba_lut() {
+	static auto lut = []{
+		std::array<std::array<uint32_t, 32768>, 16> t{};
+		for (int b = 0; b < 16; b++) {
+			for (int c = 0; c < 32768; c++) {
+				Byte r5 = c & 0x1F;
+				Byte g5 = (c >> 5) & 0x1F;
+				Byte b5 = (c >> 10) & 0x1F;
+
+				r5 = (r5 * (b + 1)) >> 4;
+				g5 = (g5 * (b + 1)) >> 4;
+				b5 = (b5 * (b + 1)) >> 4;
+
+				Byte r8 = (r5 << 3) | (r5 >> 2);
+				Byte g8 = (g5 << 3) | (g5 >> 2);
+				Byte b8 = (b5 << 3) | (b5 >> 2);
+
+				uint32_t rgba = (r8 << 24) | (g8 << 16) | (b8 << 8) | 0xFF;
+
+				t[b][c] = rgba;
+			}
+		}
+		return t;
+	}();
+	return lut;
+}
+
+uint32_t PPU::convert_to_rgba(uint16_t colour) {
+	return rgba_lut()[brightness][colour];
+}
+
+void PPU::render_scanline() {
 	// Calculations go here
+	for (int x = 0; x < 512; x ++) {
+		int even_x = x / 2;
+		window1_dots[x] = (even_x >= window1.left_position) && (even_x <= window1.right_position);
+		window2_dots[x] = (even_x >= window2.left_position) && (even_x <= window2.right_position);
+	}
 	render_bg_scanline(bg1);
-	render_bg_scanline(bg2);
-	render_bg_scanline(bg3);
+	if constexpr (DEBUG_WINDOW) {
+		if (!forced_blank) {
+			add_to_framebuffer(bg1.framebuffer, bg1.main_scanline);
+		}
+	}
+	if (bg_mode != 6) {
+		render_bg_scanline(bg2);
+		if constexpr (DEBUG_WINDOW) {
+			if (!forced_blank) {
+				add_to_framebuffer(bg2.framebuffer, bg2.main_scanline);
+			}
+		}
+	}
+	if (bg_mode != 3 && bg_mode != 5 && bg_mode != 7) {
+		render_bg_scanline(bg3);
+		if constexpr (DEBUG_WINDOW) {
+			if (!forced_blank) {
+				add_to_framebuffer(bg3.framebuffer, bg3.main_scanline);
+			}
+		}
+	}
 	if (bg_mode == 0) {
 		render_bg_scanline(bg4);
+		if constexpr (DEBUG_WINDOW) {
+			if (!forced_blank) {
+				add_to_framebuffer(bg4.framebuffer, bg4.main_scanline);
+			}
+		}
 	}
 	render_obj_scanline(obj);
+	if constexpr (DEBUG_WINDOW) {
+		if (!forced_blank) {
+			add_to_framebuffer(obj.framebuffer, obj.main_scanline);
+		}
+	}
 
 	std::array<Pixel, 512> final_scanline;
 	composite(final_scanline);
@@ -639,22 +711,8 @@ void PPU::render_scanline() {
 		return;
 	}
 
-	for (auto px : final_scanline) {
-		uint16_t colour = px.colour;
-
-		Byte r5 = colour & 0x1F;
-		Byte g5 = (colour >> 5) & 0x1F;
-		Byte b5 = (colour >> 10) & 0x1F;
-
-		r5 = (r5 * (brightness + 1)) >> 4;
-		g5 = (g5 * (brightness + 1)) >> 4;
-		b5 = (b5 * (brightness + 1)) >> 4;
-
-		Byte r8 = (r5 << 3) | (r5 >> 2);
-		Byte g8 = (g5 << 3) | (g5 >> 2);
-		Byte b8 = (b5 << 3) | (b5 >> 2);
-
-		uint32_t rgba = (r8 << 24) | (g8 << 16) | (b8 << 8) | 0xFF;
+	for (const auto& px : final_scanline) {
+		uint32_t rgba = convert_to_rgba(px.colour);
 
 		framebuffer[idx1] = rgba;
 		framebuffer[idx2] = rgba;
