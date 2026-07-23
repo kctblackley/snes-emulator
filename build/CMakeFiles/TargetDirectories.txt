@@ -1,3 +1,0 @@
-/home/kctb/Projects/GithubBackups/snes-emulator/build/CMakeFiles/snes_emulator.dir
-/home/kctb/Projects/GithubBackups/snes-emulator/build/CMakeFiles/edit_cache.dir
-/home/kctb/Projects/GithubBackups/snes-emulator/build/CMakeFiles/rebuild_cache.dir
