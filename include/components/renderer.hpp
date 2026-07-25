@@ -67,6 +67,31 @@ public:
 			texture,
 			SDL_SCALEMODE_NEAREST
 		);
+
+		// OAM sprite viewer window -- always created regardless of DEBUG_WINDOW,
+		// so it's available whether or not the separate-layers debug window is.
+		// Lays out all 128 OAM sprites in a 16x8 grid, one cell per sprite.
+		oam_window = SDL_CreateWindow(
+			"OAM Sprite Viewer",
+			oam_view_width,
+			oam_view_height,
+			SDL_WINDOW_RESIZABLE
+		);
+
+		oam_renderer = SDL_CreateRenderer(oam_window, nullptr);
+
+		oam_texture = SDL_CreateTexture(
+			oam_renderer,
+			SDL_PIXELFORMAT_RGBA8888,
+			SDL_TEXTUREACCESS_STREAMING,
+			oam_view_width,
+			oam_view_height
+		);
+
+		SDL_SetTextureScaleMode(
+			oam_texture,
+			SDL_SCALEMODE_NEAREST
+		);
 	}
 
 	Byte get_joypad(uint16_t offset) {
@@ -117,6 +142,50 @@ public:
 		);
 
 		SDL_RenderPresent(renderer);
+		return;
+	}
+
+	// This displays the current OAM sprites -- always runs, regardless of
+	// DEBUG_WINDOW, in its own dedicated window.
+	void display_oam_view(std::vector<uint32_t>& oam_buffer) {
+		int window_width;
+		int window_height;
+
+		SDL_GetWindowSize(oam_window, &window_width, &window_height);
+
+		int scale = std::max(1, std::min(
+			window_width  / oam_view_width,
+			window_height / oam_view_height
+		));
+
+		float render_width  = static_cast<float>(oam_view_width  * scale);
+		float render_height = static_cast<float>(oam_view_height * scale);
+
+		SDL_UpdateTexture(
+			oam_texture,
+			nullptr,
+			oam_buffer.data(),
+			oam_view_width * sizeof(uint32_t)
+		);
+
+		SDL_SetRenderDrawColor(oam_renderer, 0, 0, 0, 255);
+		SDL_RenderClear(oam_renderer);
+
+		oam_dst = {
+			(window_width  - render_width)  * 0.5f,
+			(window_height - render_height) * 0.5f,
+			render_width,
+			render_height
+		};
+
+		SDL_RenderTexture(
+			oam_renderer,
+			oam_texture,
+			nullptr,
+			&oam_dst
+		);
+
+		SDL_RenderPresent(oam_renderer);
 		return;
 	}
 
@@ -203,6 +272,7 @@ public:
 		if constexpr (DEBUG_WINDOW) {
 			SDL_DestroyWindow(debug_window);
 		}
+		SDL_DestroyWindow(oam_window);
 		SDL_Quit();
 		closed = true;
 	}
@@ -229,6 +299,17 @@ private:
 	SDL_Texture* obj_tex = nullptr;
 
 	SDL_FRect bg1_r, bg2_r, bg3_r, bg4_r, obj_r;
+
+	// OAM sprite viewer window (always-on, independent of DEBUG_WINDOW)
+	SDL_Window* oam_window = nullptr;
+	SDL_Renderer* oam_renderer = nullptr;
+	SDL_Texture* oam_texture = nullptr;
+	SDL_FRect oam_dst;
+	// 16x8 grid of 128 sprites, 64x64 px/cell -- 64 is the largest possible sprite size
+	static constexpr int oam_cell_size = 64;
+	static constexpr int oam_view_width  = 16 * oam_cell_size;
+	static constexpr int oam_view_height = 8  * oam_cell_size;
+
 	bool closed = true;
 	Byte joy1l, joy1h = 0x00;
 

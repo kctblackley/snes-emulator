@@ -1,4 +1,28 @@
+#include <sstream>
+#include <iomanip>
+#include <cstdint>
+#include <array>
+#include <cstdlib>
 #include "ricoh_5a22.hpp"
+#include "ricoh_5a22_opcode_info.hpp"
+
+namespace {
+	std::string byte_hex(Byte b) {
+		std::ostringstream s;
+		s << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(b);
+		return s.str();
+	}
+	std::string word_hex(Word w) {
+		std::ostringstream s;
+		s << std::uppercase << std::hex << std::setfill('0') << std::setw(4) << static_cast<int>(w);
+		return s.str();
+	}
+	std::string long_hex(Address a) {
+		std::ostringstream s;
+		s << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << (a & 0xFFFFFF);
+		return s.str();
+	}
+}
 
 Ricoh5A22::Ricoh5A22(Bus* bus) : bus(bus), cycle(0), instruction_cycle(0) {}
 
@@ -16,13 +40,17 @@ TickCount Ricoh5A22::get_tick() {
 
 void Ricoh5A22::poll_interrupts() {
 	if (nmi_line) {
+		was_interrupt = false;
 		nmi_line = false;
 		BufferOpCode = OPCODE_NMI;
-		//std::cout << "NMI interrupt" << std::endl;
-		//std::cout << "NMI interrupt";
+		instruction_cycle = 0;
+		was_interrupt = true;
+		interrupt_type = false;
 	} else if (irq_line && !get_flag_I()) {
 		BufferOpCode = OPCODE_IRQ;
-		//std::cout << "IRQ interrupt";
+		instruction_cycle = 0;
+		was_interrupt = true;
+		interrupt_type = true;
 	}
 }
 
@@ -47,11 +75,66 @@ void Ricoh5A22::run_half_cycle() {
 	apply_invariants();
 	//log();
 	tick_multiply_divisor();
+	if constexpr (DEBUG_WINDOW) {
+		if (instruction_cycle == 0) {
+			const OpCodeInfo& info = ricoh_5a22_opcode_info[BufferOpCode];
+			std::cout <<
+			 std::hex << std::uppercase << std::setw(2) << std::setfill('0') << static_cast<int>(regs.PB) << ":" <<
+			 std::hex << std::uppercase << std::setw(4) << std::setfill('0') << static_cast<int>(regs.PC) << " ";
+			std::cout << info.mnemonic;
+			SizeType size_type = info.size_type;
+
+			bool flag = false;
+			switch(size_type) {
+			case SizeType::Fixed:      flag = false;        break;
+			case SizeType::MDependent: flag = get_flag_M(); break;
+			case SizeType::XDependent: flag = get_flag_X(); break;
+			}
+
+			int size = flag ? info.size_when_set : info.size_when_clear;
+
+			Word trace_pc = regs.PC;
+			Byte trace_pb = regs.PB;
+
+			for (int i = 0; i < size - 1; i++) {
+				trace_pc++;
+				Byte operand = read((trace_pb << 16) | trace_pc);
+				std::cout << " " << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << static_cast<int>(operand);
+			}
+			
+			std::cout
+			    << "  "
+			    << "A:"  << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << regs.A
+			    << " "
+			    << "X:"  << std::setw(4) << std::setfill('0') << regs.X
+			    << " "
+			    << "Y:"  << std::setw(4) << std::setfill('0') << regs.Y
+			    << " "
+			    << "S:"  << std::setw(4) << std::setfill('0') << regs.S
+			    << " "
+			    << "D:"  << std::setw(4) << std::setfill('0') << regs.D
+			    << " "
+			    << "DB:" << std::setw(2) << std::setfill('0') << static_cast<int>(regs.DB)
+			    << " "
+			    << "P:"  << std::setw(2) << std::setfill('0') << static_cast<int>(regs.P)
+			    << " "
+			    << "V:"  << std::dec << static_cast<int>(ppu->get_vcounter())
+			    << " "
+			    << "H:"  << std::dec << static_cast<int>(ppu->get_hcounter());
+
+			std::cout << '\n';
+		}
+	}
 	if (instruction_cycle == 0 && BufferOpCode != 0x100 && BufferOpCode != 0x101) {
 		poll_interrupts();
 	}
+	prev_PC = regs.PC;
+	prev_PB = regs.PB;
 	Opcode op = get_opcode(regs.emulation_mode ? emulation_optable : native_optable, BufferOpCode, instruction_cycle, *this);
 	op.function(*this, op.skipped);
+	if (regs.PC != prev_PC && regs.PB != prev_PB) {
+		new_operand = true;
+	}
 }
 
 void Ricoh5A22::tick_component() { // when the component is ticked, it does a half tick in actuality
@@ -71,14 +154,17 @@ void Ricoh5A22::initialise() {
 	uint8_t lo = read(0x00FFFC);
 	uint8_t hi = read(0x00FFFD);
 
+	std::cout << std::hex << "RESET LO: " << (int)lo << std::endl;
+	std::cout << std::hex << "RESET HI: " << (int)hi << std::endl;
+
 	regs.PB = 0;
 	regs.PC = (hi << 8) | lo;
+
 	regs.P = 0x34;
-	BufferOpCode = read(regs.PC);
+	regs.S = 0x01FF;
 	regs.emulation_mode = true;
-	std::cout << "Initialised PC to " << regs.PC << "\n";
+	BufferOpCode = read(regs.PC);
 	
-	// Also occur on reset
 	mregs.RDNMI = mregs.RDNMI & 0x7F;
 	mregs.TIMEUP = mregs.TIMEUP & 0x7F;
 	mregs.VTIMEL = 0xFF;

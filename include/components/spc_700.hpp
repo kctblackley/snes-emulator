@@ -47,7 +47,7 @@ public:
 		/*Byte port = addr.offset & 3;
 		return apu_to_cpu_ports[port];*/
 
-		Byte port = addr.offset & 0x3;
+		/*Byte port = addr.offset & 0x3;
 		if (port == 0 || port == 1) {
 			handshake_active = true;
 
@@ -59,6 +59,9 @@ public:
 			last_polled_value[port] = apu_to_cpu_ports[port];
 
 			if (stall_counter > STALL_THRESHOLD) {
+				std::cout << "[APU-STALL-RECOVERY] port=" << (int)port
+				          << " stuck_value=0x" << std::hex << (int)apu_to_cpu_ports[port] << std::dec
+				          << " re-arming ports 0/1 to 0xAA/0xBB\n";
 				apu_to_cpu_ports[0] = 0xAA;
 				apu_to_cpu_ports[1] = 0xBB;
 				stall_counter = 0;
@@ -66,7 +69,22 @@ public:
 		}
 		//std::cout << "Reading from APU to CPU: Port " << (int)(port) << "\n";
 		//std::cout << "Value is: " << (int)(apu_to_cpu_ports[port]) << "\n";
-		return apu_to_cpu_ports[port];
+		return apu_to_cpu_ports[port];*/
+		int channel_id = (addr.offset - 0x2140) % 4;
+		int value = channel_data[channel_id];
+
+		switch(channel_id) {
+		case 0:
+			channel_data[channel_id] = 0xAA;
+			break;
+		case 1:
+			channel_data[channel_id] = 0xBB;
+			break;
+		default:
+			channel_data[channel_id] = 0;
+			break;
+		}
+		return value;
 	}
 
 	void communication_write(SNESAddress addr, Byte value) override {
@@ -88,14 +106,19 @@ public:
 		cpu_to_apu_ports[port] = value;
 		apu_to_cpu_ports[port] = value;*/
 
-		Byte port = addr.offset & 0x3;
+		/*Byte port = addr.offset & 0x3;
 		stall_counter = 0; // any write counts as forward progress
 		if (handshake_active) {
 			apu_to_cpu_ports[port] = value;
 		}
-		//std::cout << "Writing from CPU to APU: Port " << (int)(port) << "\n";
-		//std::cout << "Value is " << (int)value << "\n";
-		cpu_to_apu_ports[port] = value;
+		static uint64_t write_seq = 0;
+		std::cout << "[APU-WRITE] #" << write_seq++ << " port=" << (int)port
+		          << " value=0x" << std::hex << (int)value << std::dec << "\n";
+		cpu_to_apu_ports[port] = value;*/
+
+		int channel_id = (addr.offset - 0x2140) % 4;
+		channel_data[channel_id] = value;
+
 	}
 
 	// Stubbed until I implement the SPC700 in full!
@@ -197,6 +220,7 @@ public:
 	}
 
 private:
+	std::array<Byte, 4> channel_data {}; // FOR STUB
 
 	APUStubState state = APUStubState::WaitForCC;
 	Byte last_apuio1 = 1;
@@ -218,4 +242,3 @@ private:
 	int stall_counter = 0;
 	Byte last_polled_value[4] = {0xFF, 0xFF, 0xFF, 0xFF};
 };
-

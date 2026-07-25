@@ -1,9 +1,13 @@
 #pragma once
+#include <string>
+#include <iostream>
+#include <array>
 #include "cpu.hpp"
 #include "ricoh_5a22_native_optable.hpp"
 #include "ricoh_5a22_emulation_optable.hpp"
 #include "renderer.hpp"
 #include "ppu.hpp"
+#include "ricoh_5a22_opcode_info.hpp"
 
 // Multiplier addresses
 #define WRMPYA_ADDRESS 0x4202
@@ -37,14 +41,6 @@
 #define VTIMEH_ADDRESS 0x420A
 #define RDNMI_ADDRESS 0x4210
 #define TIMEUP_ADDRESS 0x4211
-
-/*
-To do:
-1. Create all handling of interrupt registers
-2. Create mechanism to send all relevant information to PPU
-3. Create mechanism that signals PPU interrupts via writes
-4. Then in communication_write of CPU, handle interrupts
-*/
 
 // The Multiplier's RDMPYH and RDMPYL also store the remainder of division by the divisor
 // Multiplication takes 16 half-cycles of the CPU (not master clock)
@@ -192,7 +188,12 @@ public:
 			divisor.completed = false;
 		}
 
-		if (addr.offset == HVBJOY_ADDRESS) { mregs.HVBJOY = value; }
+		if (addr.offset == HVBJOY_ADDRESS) {
+			// HVBJOY ($4212) is read-only on real hardware; writes from the
+			// CPU (or DMA landing here by mistake) are ignored. It is only
+			// ever updated internally via set_hvbjoy_flag(), driven by the
+			// PPU's own H/V-blank timing.
+		}
 
 		// Interrupts
 		if (addr.offset == NMITIMEN_ADDRESS) {
@@ -203,7 +204,7 @@ public:
 			this->irq_mode = (value >> 4) & 3;
 			ppu->irq_mode = this->irq_mode;
 			mregs.NMITIMEN = value;
-
+			
 			if (irq_bits_before != 0 && (value & 0x30) == 0) {
 				mregs.TIMEUP = mregs.TIMEUP & ~0x80;
 				irq_line = false;
@@ -225,23 +226,40 @@ public:
 			mregs.VTIMEH = value;
 			ppu->v_time_target = (mregs.VTIMEH << 8) | mregs.VTIMEL;
 		}
-		if (addr.offset == RDNMI_ADDRESS) {
-			mregs.RDNMI = mregs.RDNMI | value;
-			if (value == 0x00) {
-				mregs.RDNMI = 0x00;
-			}
-			if (nmi_enabled && (mregs.RDNMI & 0x80)) {
-				nmi_line = true;
-			}
+		// RDNMI ($4210) and TIMEUP ($4211) are read-only on real hardware;
+		// writes from the CPU (or DMA landing here by mistake) are ignored.
+		// They are only ever updated internally, via signal_nmi_start(),
+		// signal_nmi_end(), and signal_irq(), driven by the PPU's own
+		// V-blank/H/V-IRQ timing -- never by a bus write.
+	}
+
+	// --- Internal-only interrupt signalling -------------------------------
+	// These are called directly by the PPU (never routed through the bus),
+	// so a stray or corrupted DMA/CPU write can never forge an interrupt or
+	// corrupt these flags. This intentionally mirrors real hardware, where
+	// RDNMI/TIMEUP/HVBJOY are read-only registers driven purely by internal
+	// timing logic.
+	void signal_nmi_start() {
+		mregs.RDNMI = mregs.RDNMI | 0x80;
+		if (nmi_enabled) {
+			nmi_line = true;
 		}
-		if (addr.offset == TIMEUP_ADDRESS) {
-			mregs.TIMEUP = mregs.TIMEUP | value;
-			if (value == 0x00) {
-				mregs.TIMEUP = 0x00;
-			}
-			if (mregs.TIMEUP & 0x80) {
-				irq_line = true;
-			}
+	}
+
+	void signal_nmi_end() {
+		mregs.RDNMI = 0x00;
+	}
+
+	void signal_irq() {
+		mregs.TIMEUP = mregs.TIMEUP | 0x80;
+		irq_line = true;
+	}
+
+	void set_hvbjoy_flag(Byte bit_mask, bool set) {
+		if (set) {
+			mregs.HVBJOY = mregs.HVBJOY | bit_mask;
+		} else {
+			mregs.HVBJOY = mregs.HVBJOY & ~bit_mask;
 		}
 	}
 
@@ -363,4 +381,13 @@ private:
 	bool irq_line = false;
 	bool nmi_enabled = false;
 	bool auto_read_enabled = false;
+
+	// For disassembler
+	bool was_interrupt = false;
+	bool interrupt_type = false; // false = NMI, true = IRQ
+	Word prev_PC = 0;
+	Byte prev_PB = 0;
+	Byte prev_opcode = 0;
+
+	bool new_operand = false;
 };

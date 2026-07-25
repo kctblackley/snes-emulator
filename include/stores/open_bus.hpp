@@ -4,7 +4,7 @@ class OpenBus : public Store {
 public:
 	Byte read(SNESAddress address) override {
 		address_bus = address;
-		return 0x00;
+		return 0x00; // unused: Bus::read() takes the open-bus latch path instead, see is_not_open_bus()
 	}
 
 	void write(SNESAddress address, Byte value) override {
@@ -21,7 +21,7 @@ public:
 	}
 
 	bool is_not_open_bus() const override {
-		return true;
+		return false;
 	}
 
 private:

@@ -14,6 +14,7 @@
 #define MAX_OBJECTS 32
 
 class DMAController;
+class Ricoh5A22;
 
 constexpr Byte PPU1_VERSION = 1;
 constexpr Byte PPU2_VERSION = 2;
@@ -65,6 +66,10 @@ public:
 		initialise_obj(obj);
 
 		object_buffer.reserve(MAX_OBJECTS);
+
+		// Always-on OAM sprite viewer buffer -- 16x8 grid of 64x64 cells,
+		// one cell per OAM sprite (128 total).
+		oam_view_framebuffer.assign(oam_view_width * oam_view_height, 0x000000FF);
 	}
 
 	void initialise_bg(BG& bg, int layer) {
@@ -121,6 +126,7 @@ public:
 	void render_bg_scanline(BG& bg);
 	void render_obj_scanline(ObjectLayer& obj);
 	void render_scanline();
+	void render_oam_view();
 
 	void clear_framebuffer(std::vector<uint32_t>& f);
 	void add_to_framebuffer(std::vector<uint32_t>& f, std::array<Pixel, 512>& line);
@@ -131,7 +137,16 @@ public:
 		if constexpr (DEBUG_WINDOW) {
 			renderer->display_separate_framebuffers(this->bg1.framebuffer, this->bg2.framebuffer, this->bg3.framebuffer, this->bg4.framebuffer, this->obj.framebuffer);
 		}
+
+		// OAM sprite viewer -- always runs, regardless of DEBUG_WINDOW.
+		render_oam_view();
+		renderer->display_oam_view(this->oam_view_framebuffer);
 	}
+
+	// 16x8 grid of 128 sprites, 64x64 px/cell -- 64 is the largest possible sprite size
+	static constexpr int oam_cell_size = 64;
+	static constexpr int oam_view_width  = 16 * oam_cell_size;
+	static constexpr int oam_view_height = 8  * oam_cell_size;
 
 	CycleCount get_cycle() override {
 		return cycle;
@@ -291,7 +306,7 @@ public:
 
 	// PPU registers go here
 	Byte communication_read(SNESAddress addr) override {
-		Byte fetched = 0xFF;
+		Byte fetched = bus->get_open_bus();
 		// OAM
 		if (addr.offset == OAMDATAREAD_ADDRESS) {
 			if (oam.oamadd < 0x200) {
@@ -347,7 +362,7 @@ public:
 
 		if (addr.offset == SLHV_ADDRESS) {
 			counter_latch = true;
-			ophct = hcounter;
+			ophct = hcounter / 4;
 			opvct = vcounter;
 		}
 		if (addr.offset == OPHCT_ADDRESS) {
@@ -405,7 +420,8 @@ public:
 	void communication_write(SNESAddress addr, Byte value) override {
 		// Display configuration
 		if (addr.offset == INIDISP_ADDRESS) {
-			forced_blank = ((value >> 7) & 0b1) == 1;
+			bool new_forced_blank = ((value >> 7) & 0b1) == 1;
+			forced_blank = new_forced_blank;
 			brightness = value & 0x0F;
 		}
 
@@ -731,8 +747,21 @@ public:
 	void connect_renderer(Renderer* renderer) {
 		this->renderer = renderer;
 	}
+	void connect_cpu(Ricoh5A22* cpu) {
+		this->cpu = cpu;
+	}
+
+	int get_vcounter() {
+		return vcounter;
+	}
+
+	int get_hcounter() {
+		return hcounter;
+	}
 
 private:
+
+	Ricoh5A22* cpu = nullptr;
 
 	std::vector<Object> object_buffer;
 	
@@ -748,6 +777,7 @@ private:
 	int tiles_x, tiles_y;
 	
 	std::vector<uint32_t> framebuffer;
+	std::vector<uint32_t> oam_view_framebuffer;
 
 	std::array<bool, 512> window1_dots;
 	std::array<bool, 512> window2_dots;

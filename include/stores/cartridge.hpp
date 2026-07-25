@@ -62,7 +62,7 @@ public:
 		return 0;
 	}
 
-	void load_cartridge(const std::string& directory) {
+	void load_cartridge(const std::string& directory, Ricoh5A22* cpu) {
 		std::vector<Byte> rom = load_rom(directory);
 
 		std::vector<MapperCandidate> candidates;
@@ -108,6 +108,7 @@ public:
 		header = best->h;
 		mapper->load_rom(rom);
 		mapper->load_sram(header.ram_size);
+		mapper->connect_cpu(cpu);
 		mapper->to_string();
 		std::cout << header.title << "\n";
 	}

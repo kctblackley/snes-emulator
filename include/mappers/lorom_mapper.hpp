@@ -12,19 +12,24 @@ protected:
 		if (address.offset < 0x8000) {
 			return std::nullopt;
 		}
-
 		return ((address.bank & 0x7F) << 15) | (address.offset & 0x7FFF);
 	}
 
 	std::optional<Address> sram_idx(SNESAddress address) const override {
-		if (!(address.bank >= 0x70 && address.bank <= 0x7D) || (address.bank >= 0xF0 && address.bank <= 0xFF)) {
-			return std::nullopt;
+		bool sram_bank =
+		    (address.bank >= 0x70 && address.bank <= 0x7D) ||
+		    (address.bank >= 0xF0 && address.bank <= 0xFF);
+
+		if (sram_bank) {
+		    return ((address.bank & 0x0F) << 15) | address.offset;
 		}
 
-		if (address.offset >= 0x8000) {
-			return std::nullopt;
+		bool sram_mirror_bank = (address.bank <= 0x3F) || (address.bank >= 0x80 && address.bank <= 0xBF);
+
+		if (sram_mirror_bank && address.offset >= 0x6000 && address.offset < 0x8000) {
+		    return ((address.bank & 0x0F) << 15) | (address.offset - 0x6000);
 		}
 
-		return ((address.bank & 0x0F) << 15) | address.offset;
+		return std::nullopt;
 	}
 };

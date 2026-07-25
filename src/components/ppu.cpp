@@ -1,11 +1,14 @@
 #include "ppu.hpp"
 #include "dma_controller.hpp"
+#include "ricoh_5a22.hpp"
 #include <iostream>
+#include <algorithm>
 
 // Register handling defined in header
 // This just contains code related to the rendering itself
 
 constexpr int DOTS_PER_LINE = 1364;
+constexpr int HBLANK_DOTS = 1096;
 constexpr Address HVBJOY = 0x4212;
 constexpr CycleCount PPU_CYCLE = 4;
 
@@ -215,6 +218,101 @@ Pixel PPU::fetch_mode7_pixel(BG& bg, uint16_t xcounter) {
 	px.priority = priority_order.H1;
 
 	return px;
+}
+
+// Decodes every OAM sprite (all 128 entries, regardless of whether they're
+// currently positioned on-screen) directly out of OAM/VRAM/CGRAM and lays
+// them out in a 16x8 grid, one sprite per cell. This is a debug view: it
+// reads whatever is currently sitting in OAM/VRAM/CGRAM, ignoring vblank/
+// forced-blank access restrictions, so it stays useful even mid-upload.
+void PPU::render_oam_view() {
+	// Clear to black first so empty/unused sprites and any leftover area
+	// from a previous, larger sprite don't show stale data.
+	std::fill(oam_view_framebuffer.begin(), oam_view_framebuffer.end(), 0x000000FF);
+
+	for (int i = 0; i < 128; i++) {
+		Word tile_number = oam.data[(4 * i) + 2];
+		Word attributes  = oam.data[(4 * i) + 3];
+
+		tile_number = ((attributes & 1) << 8) | tile_number;
+		Byte palette = (attributes >> 1) & 0x7;
+
+		bool horizontal_flip = (attributes >> 6) & 1;
+		bool vertical_flip   = (attributes >> 7) & 1;
+
+		Byte high_byte = oam.data[512 + (i / 4)];
+		Byte high_byte_pair = (high_byte >> (2 * (i % 4))) & 0x3;
+		bool size = (high_byte_pair >> 1) & 1;
+
+		int width  = size ? oam.obj_size.large_width  : oam.obj_size.small_width;
+		int height = size ? oam.obj_size.large_height : oam.obj_size.small_height;
+
+		int cell_col = i % 16;
+		int cell_row = i / 16;
+		int cell_x0 = cell_col * oam_cell_size;
+		int cell_y0 = cell_row * oam_cell_size;
+
+		for (int sprite_y = 0; sprite_y < height && sprite_y < oam_cell_size; sprite_y++) {
+			int flipped_y = sprite_y;
+			if (vertical_flip) {
+				if (width == height) {
+					flipped_y = height - 1 - sprite_y;
+				} else if (sprite_y < width) {
+					flipped_y = width - 1 - sprite_y;
+				} else {
+					flipped_y = width + (width - 1) - (sprite_y - width);
+				}
+			}
+
+			int tile_row = flipped_y / 8;
+			int pixel_y = flipped_y & 7;
+
+			for (int sprite_x = 0; sprite_x < width && sprite_x < oam_cell_size; sprite_x++) {
+				int flipped_x = horizontal_flip ? (width - 1 - sprite_x) : sprite_x;
+
+				int tile_col = flipped_x / 8;
+				int pixel_x = flipped_x & 7;
+
+				int base_col = tile_number & 0xF;
+				int base_row = (tile_number >> 4) & 0xF;
+
+				int name_col = (base_col + tile_col) & 0xF;
+				int name_row = (base_row + tile_row) & 0xF;
+
+				int tile_index = (name_row << 4) | name_col;
+
+				bool second_base = (tile_number & 0x100) != 0;
+				Word tile_base = second_base ? oam.second_base : oam.first_base;
+				Word tile_address = (tile_base + (tile_index * 16)) & 0x7FFF;
+
+				Word p01 = vram.data[(tile_address + 0 + pixel_y) & 0x7FFF];
+				Word p23 = vram.data[(tile_address + 8 + pixel_y) & 0x7FFF];
+
+				Byte p0 = get_lo(p01);
+				Byte p1 = get_hi(p01);
+				Byte p2 = get_lo(p23);
+				Byte p3 = get_hi(p23);
+
+				int bit = 7 - pixel_x;
+				Byte colour = (((p0 >> bit) & 1) << 0) |
+							  (((p1 >> bit) & 1) << 1) |
+							  (((p2 >> bit) & 1) << 2) |
+							  (((p3 >> bit) & 1) << 3);
+
+				if (colour == 0) {
+					continue; // leave backdrop black, like transparent pixels elsewhere
+				}
+
+				Byte cgram_index = 128 + (palette * 16) + colour;
+				Word snes_colour = cgram.data[cgram_index];
+				uint32_t rgba = convert_to_rgba(snes_colour);
+
+				int px = cell_x0 + sprite_x;
+				int py = cell_y0 + sprite_y;
+				oam_view_framebuffer[py * oam_view_width + px] = rgba;
+			}
+		}
+	}
 }
 
 void PPU::render_bg_scanline(BG& bg) {
@@ -723,11 +821,15 @@ void PPU::render_scanline() {
 }
 
 void PPU::call_irq() {
-	bus->write(TIMEUP_ADDRESS, 0x80);
+	if (cpu) {
+		cpu->signal_irq();
+	}
 }
 
 void PPU::call_nmi() {
-	bus->write(RDNMI_ADDRESS, 0x80);
+	if (cpu) {
+		cpu->signal_nmi_start();
+	}
 }
 
 bool PPU::frame_ended() {
@@ -746,7 +848,9 @@ void PPU::next_frame() {
 
 void PPU::enter_hblank() {
 	hvbjoy = hvbjoy | (0b1 << 6);
-	bus->write(HVBJOY, hvbjoy);
+	if (cpu) {
+		cpu->set_hvbjoy_flag(0b1 << 6, true);
+	}
 
 	if (!vblank && dma_controller) {
 		dma_controller->execute_hdma();
@@ -755,20 +859,26 @@ void PPU::enter_hblank() {
 
 void PPU::leave_hblank() {
 	hvbjoy = hvbjoy & ~(0b1 << 6);
-	bus->write(HVBJOY, hvbjoy);
+	if (cpu) {
+		cpu->set_hvbjoy_flag(0b1 << 6, false);
+	}
 }
 
 void PPU::enter_vblank() {
 	frame_finished = true;
 	hvbjoy = hvbjoy | (0b1 << 7);
-	bus->write(HVBJOY, hvbjoy);
+	if (cpu) {
+		cpu->set_hvbjoy_flag(0b1 << 7, true);
+	}
 	call_nmi();
 }
 
 void PPU::leave_vblank() {
 	hvbjoy = hvbjoy & ~(0b1 << 7);
-	bus->write(HVBJOY, hvbjoy);
-	bus->write(RDNMI_ADDRESS, 0x00);
+	if (cpu) {
+		cpu->set_hvbjoy_flag(0b1 << 7, false);
+		cpu->signal_nmi_end();
+	}
 
 	if (dma_controller) {
 		dma_controller->hdma_init();
@@ -777,7 +887,7 @@ void PPU::leave_vblank() {
 
 void PPU::update_hblank() {
 	bool old_hblank = hblank;
-	hblank = (hcounter >= 1096);
+	hblank = (hcounter >= HBLANK_DOTS);
 
 	if (!old_hblank && hblank) {
 		enter_hblank();
@@ -818,20 +928,20 @@ void PPU::tick_component() {
 
 	hcounter += 1;
 
-	update_hblank();
-
 	if (hcounter == DOTS_PER_LINE) {
 		hcounter = 0;
 		end_scanline();
 	}
 
-	if (irq_mode == 1 && hcounter == h_time_target) {
+	update_hblank();
+
+	if (irq_mode == 1 && (int)(hcounter / 4) == h_time_target) {
 		call_irq();
 	}
-	if (irq_mode == 2 && vcounter == v_time_target && hcounter == 0) {
+	if (irq_mode == 2 && vcounter == v_time_target && (int)(hcounter / 4) == 0) {
 		call_irq();
 	}
-	if (irq_mode == 3 && vcounter == v_time_target && hcounter == h_time_target) {
+	if (irq_mode == 3 && vcounter == v_time_target && (int)(hcounter / 4) == h_time_target) {
 		call_irq();
 	}
 

@@ -1,60 +1,73 @@
 #include "dma_controller.hpp"
 
-// GPDMA
+bool is_dma_forbidden_address(Address addr) {
+    Byte bank = (addr >> 16) & 0xFF;
+    bool system_bank = (bank <= 0x3F) || (bank >= 0x80 && bank <= 0xBF);
+    if (!system_bank) { return false; }
+    Offset offset = addr & 0xFFFF;
+    if (offset >= 0x2100 && offset <= 0x21FF) { return true; }
+    if (offset >= 0x4000 && offset <= 0x41FF) { return true; }
+    if (offset >= 0x4200 && offset <= 0x421F) { return true; }
+    if (offset >= 0x4300 && offset <= 0x437F) { return true; }
+    return false;
+}
 
 void DMAController::execute_gpdma() {
-	CycleCount total_cycles = 8;
-	if (mdmaen != 0) {
-		for (int channel = 0; channel < 8; channel++) {
-			if (((mdmaen >> channel) & 0b1) == 1) {
-				total_cycles += 8;
-				DMAChannel& ch = channels[channel];
-				
-				Word a_address = ch.a1t();
-				Byte a_bank = ch.a1b();
+    CycleCount total_cycles = 8;
+    if (mdmaen != 0) {
+        for (int channel = 0; channel < 8; channel++) {
+            if (((mdmaen >> channel) & 0b1) == 1) {
+                total_cycles += 8;
+                DMAChannel& ch = channels[channel];
+                
+                Word a_address = ch.a1t();
+                Byte a_bank = ch.a1b();
 
-				Word b_address = 0x2100 + ch.bbad();
-				uint32_t count = ch.das();
+                Word b_address = 0x2100 + ch.bbad();
+                uint32_t count = ch.das();
 
-				if (count == 0) {
-					count = 0x10000;
-				}
+                if (count == 0) {
+                    count = 0x10000;
+                }
 
-				const Pattern& pattern = transfer_patterns[ch.transfer_pattern()];
-				int step = 0;
+                const Pattern& pattern = transfer_patterns[ch.transfer_pattern()];
+                int step = 0;
 
-				while (count > 0) {
-					Byte offset = pattern.offsets[step % pattern.length];
-					Address port = 0x2100 | ((ch.bbad() + offset) & 0xFF);
-					Address addr = (a_bank << 16) | a_address;
-					if (ch.direction() == 0) {
-						Byte byte = bus->read(addr, true);
-						bus->write(port, byte, true);
-					} else {
-						Byte byte = bus->read(port, true);
-						bus->write(addr, byte, true);
-					}
+                while (count > 0) {
+                    Byte offset = pattern.offsets[step % pattern.length];
+                    Address port = 0x2100 | ((ch.bbad() + offset) & 0xFF);
+                    Address addr = (a_bank << 16) | a_address;
 
-					if (!ch.fixed_transfer()) {
-						a_address += ch.decrement() ? -1 : 1;
-						a_address = a_address & 0xFFFF;
-					}
+                    if (!is_dma_forbidden_address(addr)) {
+                        if (ch.direction() == 0) {
+                            Byte byte = bus->read(addr, true);
+                            bus->write(port, byte, true);
+                        } else {
+                            Byte byte = bus->read(port, true);
+                            bus->write(addr, byte, true);
+                        }
+                    }
 
-					count -= 1;
-					step += 1;
-					total_cycles += 8;
-				}
+                    if (!ch.fixed_transfer()) {
+                        a_address += ch.decrement() ? -1 : 1;
+                        a_address = a_address & 0xFFFF;
+                    }
 
-				ch.set_a1t(a_address);
-				ch.set_das(count);
-			}
-		}
+                    count -= 1;
+                    step += 1;
+                    total_cycles += 8;
+                }
 
-		//std::cout << "Transfer completed" << std::endl;
-		if (cpu) {
-			cpu->add_cycles(total_cycles);
-		}
-	}
+                ch.set_a1t(a_address);
+                ch.set_das(count);
+            }
+        }
+
+        //std::cout << "Transfer completed" << std::endl;
+        if (cpu) {
+            cpu->add_cycles(total_cycles);
+        }
+    }
 }
 
 // HDMA
@@ -86,6 +99,9 @@ void DMAController::hdma_init() {
         }
 
         ch.registers[NLTR] = descriptor;
+
+        ch.hdma.repeat = descriptor > 0x80;
+        ch.hdma.line_counter = ch.hdma.repeat ? (descriptor - 0x80) : descriptor;
 
         if (ch.indirect_hdma()) {
 
@@ -158,7 +174,7 @@ CycleCount DMAController::perform_hdma_transfer(DMAChannel& ch) {
         ch.hdma.indirect_address = source;
     }
     else {
-    	//std::cout << "PERFORMED COMMON HDMA\n";
+        //std::cout << "PERFORMED COMMON HDMA\n";
         ch.set_a2a(source);
         ch.hdma.table_address = source;
     }
@@ -183,20 +199,8 @@ void DMAController::execute_hdma() {
 
         cycles += 8;
 
-        Byte nltr = ch.nltr();
-
-        bool repeat =
-            (nltr & 0x80) != 0;
-
-        Byte count =
-            nltr & 0x7F;
-
-        if (count == 0) {
-            continue;
-        }
-
         bool perform_transfer =
-            ch.hdma.first_line || repeat;
+            ch.hdma.first_line || ch.hdma.repeat;
 
         if (perform_transfer) {
             cycles += perform_hdma_transfer(ch);
@@ -204,14 +208,13 @@ void DMAController::execute_hdma() {
 
         ch.hdma.first_line = false;
 
-        count--;
+        ch.hdma.line_counter--;
 
-        if (count == 0) {
+        ch.registers[NLTR] =
+            (ch.hdma.repeat ? 0x80 : 0x00) | (ch.hdma.line_counter & 0x7F);
+
+        if (ch.hdma.line_counter == 0) {
             cycles += load_hdma_descriptor(ch);
-        }
-        else {
-            ch.registers[NLTR] =
-                (repeat ? 0x80 : 0x00) | count;
         }
     }
 
@@ -237,6 +240,11 @@ CycleCount DMAController::load_hdma_descriptor(DMAChannel& ch) {
     }
 
     ch.registers[NLTR] = descriptor;
+
+    ch.hdma.repeat = (descriptor & 0x80) != 0;
+
+    uint8_t count = descriptor & 0x7F;
+    ch.hdma.line_counter = (count == 0) ? 128 : count;
 
     if (ch.indirect_hdma()) {
 

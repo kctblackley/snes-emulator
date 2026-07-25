@@ -208,8 +208,7 @@ namespace Ricoh5A22SpecialFunctions {
 	}
 
 	void WAIT(CPU& cpu, bool skipped) {
-		// WAIT BEHAVIOUR TO OCCUR HERE
-		// Places hardware in waiting state (cycle continues forever, until interrupt - I think)?
+		cpu.poll_interrupts();
 		return;
 	}
 }
@@ -519,17 +518,33 @@ namespace Ricoh5A22Functions {
 		}
 
 		if constexpr (std::is_same_v<BranchingRoutine, Branching::FlagEmulation>) {
-			cpu.BufferAddress = (int16_t)((int8_t)(get_lo(cpu.BufferOperand))) + cpu.regs.PC + 1;
+			/*cpu.BufferAddress = (int16_t)((int8_t)(get_lo(cpu.BufferOperand))) + cpu.regs.PC + 1;
 			cpu.BoundaryCrossed = (get_hi(cpu.BufferAddress) != get_hi(cpu.regs.PC + 1));
 			if (!cpu.Branching || !cpu.BoundaryCrossed) {
 				cpu.poll_interrupts();
-			}
+			}*/
+			int16_t offset = static_cast<int8_t>(cpu.BufferOperand & 0xFF);
+
+		    cpu.BufferAddress =
+		        static_cast<uint16_t>(cpu.regs.PC + 1 + offset);
+
+		    cpu.BoundaryCrossed =
+		        ((cpu.regs.PC + 1) & 0xFF00) !=
+		        (cpu.BufferAddress & 0xFF00);
+
+		    if (!cpu.Branching || !cpu.BoundaryCrossed) {
+		        cpu.poll_interrupts();
+		    }
 		}
 		if constexpr (std::is_same_v<BranchingRoutine, Branching::FlagNative>) {
-			cpu.BufferAddress = (int16_t)((int8_t)(get_lo(cpu.BufferOperand))) + cpu.regs.PC + 1;
-			if (!cpu.Branching) {
-				cpu.poll_interrupts();
-			}
+			int16_t offset = static_cast<int8_t>(cpu.BufferOperand & 0xFF);
+
+		    cpu.BufferAddress =
+		        static_cast<uint16_t>(cpu.regs.PC + 1 + offset);
+
+		    if (!cpu.Branching) {
+		        cpu.poll_interrupts();
+		    }
 		}
 
 		INSTRUCTION_END_CHECK_ROUTINE
@@ -560,7 +575,7 @@ namespace Ricoh5A22Functions {
 		if constexpr (std::is_same_v<From, ReadFrom::Operand>) {
 			from = &cpu.BufferOperand;
 		}
-		if constexpr (std::is_same_v<To, ReadFrom::PC>) {
+		if constexpr (std::is_same_v<From, ReadFrom::PC>) {
 			from = &cpu.regs.PC;
 		}
 
@@ -2182,8 +2197,8 @@ namespace Ricoh5A22Functions {
 	}
 
 	void JMPOp(CPU& cpu, bool skipped) {
-		cpu.BufferPointer += cpu.regs.X;
-		cpu.BufferBank = cpu.regs.PB;
+	    cpu.BufferPointer = (cpu.BufferPointer + cpu.regs.X) & 0xFFFF;
+	    cpu.BufferBank = cpu.regs.PB;
 	}
 
 	void JMLDCRead(CPU& cpu, bool skipped) {
@@ -2644,6 +2659,10 @@ namespace Ricoh5A22Functions {
 
 	template <typename CPUMode>
 	void RTI(CPU& cpu, bool skipped) {
+		// Note: cpu.regs.PB is already restored directly by the preceding
+		// Read<ReadFrom::Stack3, ReadTo::PB> micro-op in the native-mode
+		// opcode table (see the Read<> template's ReadTo::PB branch, which
+		// writes straight to cpu.regs.PB rather than cpu.BufferBank).
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.S += 3;
 			cpu.regs.PC = cpu.BufferOperand;
@@ -2659,6 +2678,8 @@ namespace Ricoh5A22Functions {
 
 	template <typename CPUMode>
 	void RTL(CPU& cpu, bool skipped) {
+		// Note: cpu.regs.PB is already restored directly by the preceding
+		// Read<ReadFrom::Stack3, ReadTo::PB> micro-op (see RTI's note above).
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.S += 3;
 		} else {
@@ -2794,6 +2815,7 @@ Instruction n_nmi = {
     MakeHandler(Ricoh5A22Functions::COP),
     NEXT_OPCODE
 };
+
 Instruction e_nmi = {
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),

@@ -3,17 +3,21 @@
 
 Byte Mapper::read(SNESAddress address) {
 	if (auto idx = rom_idx(address)) {
-		return rom[(*idx) % rom.size()];
+		Byte value = rom[(*idx) % rom.size()];
+		cpu->set_open_bus(value);
+		return value;
 	}
 
 	if (auto idx = sram_idx(address)) {
 		if (sram.size() == 0) {
-			return 0x00;
+			return cpu->get_open_bus();
 		}
-		return sram[(*idx) % sram.size()];
+		Byte value = sram[(*idx) % sram.size()];
+		cpu->set_open_bus(value);
+		return value;
 	}
 
-	return 0x00; // Might need to change this to consider open bus!
+	return cpu->get_open_bus();
 }
 
 void Mapper::write(SNESAddress address, Byte value) {

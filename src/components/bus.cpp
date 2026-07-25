@@ -10,6 +10,14 @@ Bus::Bus() {
 	cartridge = std::make_unique<Cartridge>();
 }
 
+Byte Bus::get_open_bus() {
+	return cpu->get_open_bus();
+}
+
+void Bus::set_open_bus(Byte value) {
+	cpu->set_open_bus(value);
+}
+
 Bus::~Bus() = default;
 
 void Bus::connect_cpu(Ricoh5A22* cpu) {
@@ -39,11 +47,15 @@ Store* Bus::system_area(SNESAddress address) {
 	if (address.offset >= OPEN_BUS_SECTION && address.offset < PPU_PORTS_SECTION) {
 		return open_bus.get();
 	}
-	if (address.offset >= WRAM_ACCESS_SECTION && address.offset < CPU_PORTS_SECTION) {
-		return wram.get(); // UNIMPLEMENTED
+	if (address.offset >= WMDATA_ADDRESS && address.offset <= WMADDH_ADDRESS) {
+		return wram.get();
+	}
+	if (address.offset > WMADDH_ADDRESS && address.offset < CPU_PORTS_SECTION) {
+		return open_bus.get();
 	}
 	if (address.offset >= EXPANSION_DATA_SECTION && address.offset < CARTRIDGE_SECTION) {
-		return open_bus.get(); // UNIMPLEMENTED
+		//std::cout << "ACCESSING EXPANSION DATA\n";
+		return cartridge.get();
 	}
 	if (address.offset >= CARTRIDGE_SECTION && address.offset <= MAX_OFFSET_SECTION) {
 		return cartridge.get();
@@ -107,6 +119,8 @@ inline Store* Bus::route(SNESAddress address) {
 }
 
 void Bus::write(Address addr, Byte value, bool is_dma) {
+	cpu->set_open_bus(value);
+
 	if (test_mode) {
 		test_memory[addr & 0xFFFFFF] = value;
 		return;
@@ -143,6 +157,7 @@ Byte Bus::read(Address addr, bool is_dma) {
 	Component* component = route_to_component(address);
 	if (component) {
 		data_bus = component->communication_read(address);
+		cpu->set_open_bus(data_bus);
 		return data_bus;
 	}
 
@@ -150,16 +165,19 @@ Byte Bus::read(Address addr, bool is_dma) {
 
 	if (store->is_not_open_bus()) {
 		data_bus = store->read(address);
+		cpu->set_open_bus(data_bus);
 		if (!is_dma) {
 			callback(store->penalty());
 		}
+	} else {
+		data_bus = cpu->get_open_bus();
 	}
 
 	return data_bus;
 }
 
-void Bus::load_cartridge(const std::string& directory) {
-	cartridge->load_cartridge(directory);
+void Bus::load_cartridge(const std::string& directory, Ricoh5A22* ricoh) {
+	cartridge->load_cartridge(directory, ricoh);
 }
 
 void Bus::enable_test_mode() {

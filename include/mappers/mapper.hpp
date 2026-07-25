@@ -27,7 +27,11 @@ public:
 	}
 
 	void connect_cpu(Ricoh5A22* cpu) {
+		std::cout << "CARTRIDGE LOADED...\n";
 		this->cpu = cpu;
+		if (cpu) {
+			std::cout << "SUCCESSFULLY!\n";
+		}
 	}
 
 protected:

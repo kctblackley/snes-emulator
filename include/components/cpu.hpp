@@ -55,6 +55,16 @@ public:
 	bool Branching = 0;
 	bool BoundaryCrossed = 0;
 
+	Byte open_bus = 0x00;
+
+	Byte get_open_bus() {
+		return open_bus;
+	}
+
+	void set_open_bus(Byte value) {
+		open_bus = value;
+	}
+
 	virtual void apply_invariants() = 0;
 	virtual void poll_interrupts() = 0;
 

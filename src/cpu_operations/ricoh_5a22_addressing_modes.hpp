@@ -366,8 +366,8 @@
 #define NATIVE_FLAG_BRANCH_LOGIC \
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand, false, Branching::FlagNative>), \
 	MakeHandler(Ricoh5A22Functions::IncrementPC), \
-	MakeHandler(Ricoh5A22Functions::PollInterrupts, Ricoh5A22Predicates::NoBranching), \
-	MakeHandler(Ricoh5A22Functions::Copy<ReadFrom::Address, ReadTo::PC>, Ricoh5A22Predicates::NoBranching),
+	MakeHandler(Ricoh5A22Functions::Copy<ReadFrom::Address, ReadTo::PC>, Ricoh5A22Predicates::NoBranching), \
+	MakeHandler(Ricoh5A22Functions::PollInterrupts, Ricoh5A22Predicates::NoBranching),
 
 #define EMULATION_FLAG_BRANCH_LOGIC \
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand, false, Branching::FlagEmulation>), \

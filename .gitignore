@@ -1,5 +1,8 @@
 rom/*
 tests/*
 !rom/.gitkeep
-build
+build/*
+tests/*
+logs/*
 README.md
+*.zip

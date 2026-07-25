@@ -35,7 +35,7 @@ public:
 	void write(Address addr, Byte value, bool is_dma = false);
 	Byte read(Address addr, bool is_dma = false);
 
-	void load_cartridge(const std::string& directory);
+	void load_cartridge(const std::string& directory, Ricoh5A22* ricoh);
 
 	void enable_test_mode();
 	void disable_test_mode();
@@ -45,6 +45,16 @@ public:
 
 	void connect_cpu_to_cartridge(Ricoh5A22* cpu) {
 		cartridge->connect_cpu(cpu);
+	}
+
+	Byte get_open_bus();
+	void set_open_bus(Byte value);
+
+	// True if `addr` is routed to the cartridge Store by the bus's own
+	// mapping logic (i.e. would legitimately hold ROM code/data). Used by
+	// the CPU to detect wild jumps into WRAM / open bus / registers.
+	bool is_cartridge_mapped(Address addr) {
+		return route(split_address(addr)) == cartridge.get();
 	}
 
 private:

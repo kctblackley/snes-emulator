@@ -31,6 +31,11 @@ struct HDMAState {
 	bool repeat = false;
 	bool terminated = false;
 	bool first_line = false;
+	// Scanlines remaining for the current descriptor. Note: a descriptor
+	// byte of 0x80 means "128 scanlines, non-repeat" on real hardware --
+	// NOT "0 scanlines, repeat" -- so this must not be derived from the
+	// byte via a plain (byte & 0x7F) each tick. See scanline_counter().
+	Byte line_counter = 0;
 };
 
 enum Registers {
@@ -68,7 +73,11 @@ public:
 	bool fixed_transfer() { return (dmap() >> 3) & 0b1; }
 	bool decrement() { return (dmap() >> 4) & 0b1; }
 	Byte transfer_pattern() { return dmap() & 7; }
-	Byte scanline_counter() { return nltr() & 0x7F; }
+	// A raw value of 0x00 in the low 7 bits (i.e. NLTR == 0x80) does not mean
+	// "0 scanlines remaining" -- it's real hardware's encoding for 128
+	// scanlines (the maximum-length non-repeat entry). Masking with 0x7F
+	// alone collapses that case to 0, which desyncs the HDMA table parse.
+	Byte scanline_counter() { Byte c = nltr() & 0x7F; return c == 0 ? 128 : c; }
 	bool reload_flag() { return (nltr() >> 7) & 0b1; }
 
 	Word a1t() { return (a1th() << 8) | a1tl(); }
@@ -106,7 +115,7 @@ public:
 	}
 
 	Byte read(Address addr) override {
-		return 0xFF;
+		return cpu->get_open_bus();
 	};
 
 	void write(Address addr, Byte value) override {

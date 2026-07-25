@@ -20,6 +20,7 @@ SNES::SNES() : master_cycle(0) {
 
 	ricoh_5a22->connect_renderer(renderer.get());
 	ricoh_5a22->connect_ppu(ppu);
+	ppu->connect_cpu(ricoh_5a22);
 
 	bus->connect_cpu(ricoh_5a22);
 	bus->connect_apu(spc_700.get());
@@ -41,9 +42,9 @@ SNES::SNES() : master_cycle(0) {
 }
 
 void SNES::load_cartridge(const std::string& directory) {
-	bus->load_cartridge(directory);
+	std::cout << "LOADING CARTRIDGE!";
+	bus->load_cartridge(directory, ricoh_5a22);
 	initialise();
-	bus->connect_cpu_to_cartridge(ricoh_5a22);
 }
 
 void SNES::tick_snes() {
@@ -72,7 +73,8 @@ void SNES::run() {
 	int total_ticks = 0;
 
 	auto fps_timer = std::chrono::steady_clock::now();
-	int fps_frames = 0;
+	int fps_frames = 0;	
+	int frame_count = 0;
 
 	while (running) {
 		CycleCount prev_master_cycle = master_cycle;
@@ -84,6 +86,7 @@ void SNES::run() {
 			ppu->frame_finished = false;
 
 			fps_frames++;
+			frame_count++;
 
 			auto now = std::chrono::steady_clock::now();
 	        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -92,8 +95,8 @@ void SNES::run() {
 
 	        if (elapsed.count() >= 1000) {
 	            double fps = fps_frames * 1000.0 / elapsed.count();
-
-	            std::cout << "\rFPS: " << fps << std::flush;
+	       
+	            //std::cout << "\rFPS: " << fps << std::flush;
 
 	            fps_frames = 0;
 	            fps_timer = now;
@@ -113,6 +116,7 @@ void SNES::run() {
 
     std::cout << "Time taken: " << elapsed.count() << " seconds\n";
 	std::cout << std::dec << (int)(ricoh_5a22->get_tick()) << std::endl;
+	std::cout << "Frames: " << (int)(frame_count) << std::endl;
 }
 
 void SNES::reset() {
@@ -128,4 +132,3 @@ void SNES::initialise() {
 	}
 	dma_controller->initialise();
 }
-
