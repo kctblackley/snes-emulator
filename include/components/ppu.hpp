@@ -67,8 +67,6 @@ public:
 
 		object_buffer.reserve(MAX_OBJECTS);
 
-		// Always-on OAM sprite viewer buffer -- 16x8 grid of 64x64 cells,
-		// one cell per OAM sprite (128 total).
 		oam_view_framebuffer.assign(oam_view_width * oam_view_height, 0x000000FF);
 	}
 
@@ -138,12 +136,10 @@ public:
 			renderer->display_separate_framebuffers(this->bg1.framebuffer, this->bg2.framebuffer, this->bg3.framebuffer, this->bg4.framebuffer, this->obj.framebuffer);
 		}
 
-		// OAM sprite viewer -- always runs, regardless of DEBUG_WINDOW.
 		render_oam_view();
 		renderer->display_oam_view(this->oam_view_framebuffer);
 	}
 
-	// 16x8 grid of 128 sprites, 64x64 px/cell -- 64 is the largest possible sprite size
 	static constexpr int oam_cell_size = 64;
 	static constexpr int oam_view_width  = 16 * oam_cell_size;
 	static constexpr int oam_view_height = 8  * oam_cell_size;

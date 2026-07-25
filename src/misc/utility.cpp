@@ -4,10 +4,6 @@
 constexpr size_t COPIER_HEADER_SIZE = 512;
 
 bool has_copier_header(size_t file_size) {
-    // Real SNES ROM images are always a multiple of 32KB (0x8000),
-    // since that's the smallest bank size. If the file is exactly
-    // COPIER_HEADER_SIZE bytes larger than a clean multiple, those
-    // extra leading bytes are a copier header, not ROM data.
     if (file_size <= COPIER_HEADER_SIZE) {
         return false;
     }

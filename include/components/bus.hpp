@@ -50,9 +50,6 @@ public:
 	Byte get_open_bus();
 	void set_open_bus(Byte value);
 
-	// True if `addr` is routed to the cartridge Store by the bus's own
-	// mapping logic (i.e. would legitimately hold ROM code/data). Used by
-	// the CPU to detect wild jumps into WRAM / open bus / registers.
 	bool is_cartridge_mapped(Address addr) {
 		return route(split_address(addr)) == cartridge.get();
 	}

@@ -205,12 +205,6 @@ void compare_memory(const std::vector<MemoryEntry>& expected, CPUType& cpu, std:
 	}
 }
 
-// ===================== SPC-700 ============================================
-//
-// The SPC-700's SingleStepTests layout is flatter than the 65816's: no bank
-// registers, no emulation-mode flag, an 8-bit accumulator/index registers,
-// and a single flat 64KB address space (see tests/00.json for the shape).
-
 struct SPCRegisterState {
 	Word pc = 0;
 	Byte a = 0;
@@ -262,10 +256,6 @@ void apply_initial_state(SPC700& cpu, const SPCTestCase& test_case) {
 	}
 }
 
-// Feeds the opcode straight into the optable via BufferOpCode, the same way
-// SPC700::run_half_cycle() reads it, rather than relying on a real fetch
-// cycle -- this lets the harness drive any handler directly regardless of
-// how much of real opcode fetch/dispatch has been wired up yet.
 void run_instruction(SPC700& cpu, Byte opcode_value) {
 	cpu.BufferOpCode = opcode_value;
 

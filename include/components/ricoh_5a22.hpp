@@ -188,13 +188,6 @@ public:
 			divisor.completed = false;
 		}
 
-		if (addr.offset == HVBJOY_ADDRESS) {
-			// HVBJOY ($4212) is read-only on real hardware; writes from the
-			// CPU (or DMA landing here by mistake) are ignored. It is only
-			// ever updated internally via set_hvbjoy_flag(), driven by the
-			// PPU's own H/V-blank timing.
-		}
-
 		// Interrupts
 		if (addr.offset == NMITIMEN_ADDRESS) {
 			Byte irq_bits_before = mregs.NMITIMEN & 0x30;
@@ -226,19 +219,8 @@ public:
 			mregs.VTIMEH = value;
 			ppu->v_time_target = (mregs.VTIMEH << 8) | mregs.VTIMEL;
 		}
-		// RDNMI ($4210) and TIMEUP ($4211) are read-only on real hardware;
-		// writes from the CPU (or DMA landing here by mistake) are ignored.
-		// They are only ever updated internally, via signal_nmi_start(),
-		// signal_nmi_end(), and signal_irq(), driven by the PPU's own
-		// V-blank/H/V-IRQ timing -- never by a bus write.
 	}
 
-	// --- Internal-only interrupt signalling -------------------------------
-	// These are called directly by the PPU (never routed through the bus),
-	// so a stray or corrupted DMA/CPU write can never forge an interrupt or
-	// corrupt these flags. This intentionally mirrors real hardware, where
-	// RDNMI/TIMEUP/HVBJOY are read-only registers driven purely by internal
-	// timing logic.
 	void signal_nmi_start() {
 		mregs.RDNMI = mregs.RDNMI | 0x80;
 		if (nmi_enabled) {

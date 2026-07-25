@@ -1,10 +1,4 @@
 #pragma once
-// Minimal, self-contained JSON reader.
-//
-// This is NOT a general-purpose JSON library -- it's just enough to read the
-// SingleStepTests-style opcode test files (array of objects, nested objects,
-// arrays of [address, value] pairs, numbers and strings). It has no external
-// dependencies, so it drops straight into the project.
 
 #include <cctype>
 #include <fstream>
@@ -30,8 +24,6 @@ public:
 	const std::string& as_string() const { return string_value; }
 	bool as_bool() const { return bool_value; }
 
-	// Object access. Missing keys return a shared Null value rather than throwing,
-	// which keeps call sites simple.
 	const JsonValue& operator[](const std::string& key) const {
 		static const JsonValue null_value;
 		auto it = object_value.find(key);
@@ -41,7 +33,6 @@ public:
 		return it->second;
 	}
 
-	// Array access.
 	const JsonValue& operator[](size_t index) const {
 		return array_value.at(index);
 	}
@@ -218,7 +209,6 @@ private:
 	}
 };
 
-// Reads and parses an entire JSON file in one go.
 inline JsonValue parse_json_file(const std::string& path) {
 	std::ifstream file(path);
 	if (!file.is_open()) {

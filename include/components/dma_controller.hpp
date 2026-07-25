@@ -5,7 +5,6 @@
 #define MDMAEN_ADDRESS 0x420b
 #define HDMAEN_ADDRESS 0x420c
 
-// This still needs to be wired up to the bus and SNES!
 // Do not add to devices!
 
 struct Pattern {
@@ -31,10 +30,6 @@ struct HDMAState {
 	bool repeat = false;
 	bool terminated = false;
 	bool first_line = false;
-	// Scanlines remaining for the current descriptor. Note: a descriptor
-	// byte of 0x80 means "128 scanlines, non-repeat" on real hardware --
-	// NOT "0 scanlines, repeat" -- so this must not be derived from the
-	// byte via a plain (byte & 0x7F) each tick. See scanline_counter().
 	Byte line_counter = 0;
 };
 
@@ -60,7 +55,7 @@ public:
 	Byte bbad() { return registers[Registers::BBAD]; }
 	Byte a1tl() { return registers[Registers::A1TL]; }
 	Byte a1th() { return registers[Registers::A1TH]; }
-	Byte  a1b() { return registers[Registers::A1B]; }
+	Byte  a1b() { return registers[Registers::A1B];  }
 	Byte dasl() { return registers[Registers::DASL]; }
 	Byte dash() { return registers[Registers::DASH]; }
 	Byte dasb() { return registers[Registers::DASB]; }
@@ -73,10 +68,6 @@ public:
 	bool fixed_transfer() { return (dmap() >> 3) & 0b1; }
 	bool decrement() { return (dmap() >> 4) & 0b1; }
 	Byte transfer_pattern() { return dmap() & 7; }
-	// A raw value of 0x00 in the low 7 bits (i.e. NLTR == 0x80) does not mean
-	// "0 scanlines remaining" -- it's real hardware's encoding for 128
-	// scanlines (the maximum-length non-repeat entry). Masking with 0x7F
-	// alone collapses that case to 0, which desyncs the HDMA table parse.
 	Byte scanline_counter() { Byte c = nltr() & 0x7F; return c == 0 ? 128 : c; }
 	bool reload_flag() { return (nltr() >> 7) & 0b1; }
 
@@ -141,21 +132,16 @@ public:
 	}
 
 	void communication_write(SNESAddress addr, Byte value) override {
-		// MDMAEN and HDMAEN to be added!
 		if (addr.offset == MDMAEN_ADDRESS) { // GPDMA implementation goes here
 			mdmaen = value;
 			execute_gpdma();
-			//std::cout << "CALL GPDMA\n" << (int)value;
 			mdmaen = 0;
 			return;
 		}
 		if (addr.offset == HDMAEN_ADDRESS) { // HDMA implementation goes here
 			hdmaen = value;
-			// Games write to this to specify which channels should retrigger on every HBlank!
-			//std::cout << "CALL HDMA\n";
 			return;
 		}
-		// Also add guards
 		Byte channel_number = (addr.offset >> 4) & 0x07;
 		Byte register_number = addr.offset & 0x0F;
 		channels[channel_number].registers[register_number] = value;
@@ -169,7 +155,6 @@ public:
 		this->bus = bus;
 	}
 
-	// Unused (overrided to allow DMAController to be a Component)
 	void add_cycles(CycleCount cycles) override {
 		return;
 	}

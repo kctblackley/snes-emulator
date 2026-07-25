@@ -24,11 +24,6 @@ public:
 	void enable_ipl()  { ipl_enabled = true; }
 	void disable_ipl() { ipl_enabled = false; }
 
-	// --- Test-harness hooks -------------------------------------------
-	// The APU's 64KB space is just a flat array already (no cartridge-style
-	// restrictions to bypass), so "test mode" only needs to make sure the
-	// IPL ROM overlay doesn't shadow raw RAM contents, and that each test
-	// case starts from a clean slate.
 	void enable_test_mode()  { disable_ipl(); }
 	void disable_test_mode() { return; }
 

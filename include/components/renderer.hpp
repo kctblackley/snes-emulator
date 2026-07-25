@@ -68,9 +68,6 @@ public:
 			SDL_SCALEMODE_NEAREST
 		);
 
-		// OAM sprite viewer window -- always created regardless of DEBUG_WINDOW,
-		// so it's available whether or not the separate-layers debug window is.
-		// Lays out all 128 OAM sprites in a 16x8 grid, one cell per sprite.
 		oam_window = SDL_CreateWindow(
 			"OAM Sprite Viewer",
 			oam_view_width,
@@ -145,8 +142,6 @@ public:
 		return;
 	}
 
-	// This displays the current OAM sprites -- always runs, regardless of
-	// DEBUG_WINDOW, in its own dedicated window.
 	void display_oam_view(std::vector<uint32_t>& oam_buffer) {
 		int window_width;
 		int window_height;
@@ -189,7 +184,6 @@ public:
 		return;
 	}
 
-	// This displays the layers separately
 	void display_separate_framebuffers(std::vector<uint32_t>& bg1,
 									   std::vector<uint32_t>& bg2,
 									   std::vector<uint32_t>& bg3,
@@ -300,12 +294,12 @@ private:
 
 	SDL_FRect bg1_r, bg2_r, bg3_r, bg4_r, obj_r;
 
-	// OAM sprite viewer window (always-on, independent of DEBUG_WINDOW)
+	// OAM sprite viewer window (always on, independent of DEBUG_WINDOW)
 	SDL_Window* oam_window = nullptr;
 	SDL_Renderer* oam_renderer = nullptr;
 	SDL_Texture* oam_texture = nullptr;
 	SDL_FRect oam_dst;
-	// 16x8 grid of 128 sprites, 64x64 px/cell -- 64 is the largest possible sprite size
+	
 	static constexpr int oam_cell_size = 64;
 	static constexpr int oam_view_width  = 16 * oam_cell_size;
 	static constexpr int oam_view_height = 8  * oam_cell_size;
