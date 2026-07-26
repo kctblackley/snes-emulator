@@ -39,7 +39,7 @@ void PPU::window_mask(std::array<Pixel, 512>& scanline, bool window1_enabled, bo
 	}
 }
 
-
+// TO DO: ADD TILE CACHING OPTIMISATION!
 Pixel PPU::fetch_bg_pixel(BG& bg, uint16_t xcounter) {
 	// hcounter is not being used as the scanline is calculated at the start of hblank
 	// using temporary 'xcounter' instead
@@ -65,8 +65,8 @@ Pixel PPU::fetch_bg_pixel(BG& bg, uint16_t xcounter) {
 	int map_width_tiles  = bg.horizontal_tilemap_count ? 64 : 32;
 	int map_height_tiles = bg.vertical_tilemap_count   ? 64 : 32;
 
-	tile_x = tile_x % map_width_tiles;
-	tile_y = tile_y % map_height_tiles;
+	tile_x = tile_x & (map_width_tiles - 1);
+	tile_y = tile_y & (map_height_tiles - 1);
 
 	int screen_x = tile_x >> 5;
 	int screen_y = tile_y >> 5;
@@ -181,6 +181,7 @@ Pixel PPU::fetch_bg_pixel(BG& bg, uint16_t xcounter) {
 	return px;
 }
 
+// Note: tile caching cannot apply here
 Pixel PPU::fetch_mode7_pixel(BG& bg, uint16_t xcounter) {
 	int screen_x = xcounter;
 	int screen_y = vcounter;
@@ -210,24 +211,36 @@ Pixel PPU::fetch_mode7_pixel(BG& bg, uint16_t xcounter) {
 	uint32_t char_word_addr = ((tile_number * 64) + pixel_offset) & 0x3FFF;
 	Byte colour = get_hi(vram.data[char_word_addr]);
 
+	bool extbg_priority = false;
+	if (bg.layer == 2 && extbg_mode) {
+		extbg_priority = (colour & 0x80);
+		colour = colour & 0x7F;
+	}
+
 	Word snes_colour = cgram.data[colour];
 	Pixel px;
 	px.transparent = (colour == 0);
 	px.colour = snes_colour;
-	px.layer = 1;
-	px.priority = priority_order.H1;
+	
+	if (bg.layer == 1) {
+		px.layer = 1;
+		px.priority = priority_order.L1;
+	} else {
+		px.layer = 2;
+		if (extbg_priority) {
+			px.priority = priority_order.H2;
+		} else {
+			px.priority = priority_order.L2;
+		}
+		if (!extbg_mode) {
+			px.transparent = true;
+		}
+	}
 
 	return px;
 }
 
-// Decodes every OAM sprite (all 128 entries, regardless of whether they're
-// currently positioned on-screen) directly out of OAM/VRAM/CGRAM and lays
-// them out in a 16x8 grid, one sprite per cell. This is a debug view: it
-// reads whatever is currently sitting in OAM/VRAM/CGRAM, ignoring vblank/
-// forced-blank access restrictions, so it stays useful even mid-upload.
 void PPU::render_oam_view() {
-	// Clear to black first so empty/unused sprites and any leftover area
-	// from a previous, larger sprite don't show stale data.
 	std::fill(oam_view_framebuffer.begin(), oam_view_framebuffer.end(), 0x000000FF);
 
 	for (int i = 0; i < 128; i++) {
@@ -634,7 +647,7 @@ void PPU::composite(std::array<Pixel, 512>& final_scanline) {
 	sub_default_pixel.colour = (col.blue << 10) | (col.green << 5) | col.red;
 	sub_default_pixel.colour_math = col.backdrop_colour_math_enabled;
 	sub_default_pixel.priority = 0;
-	// THIS WILL NEED TO CHANGE TO GET A SUB AND MAIN SCREEN PIXEL ON WHICH TO DO COLOUR MATH
+	
 	for (int dot = 0; dot < 512; dot++) {
 		int n = 0;
 		if (bg1.main_screen) { candidates[n++] = bg1.main_scanline[dot]; }
@@ -760,6 +773,7 @@ void PPU::render_scanline() {
 			add_to_framebuffer(bg1.framebuffer, bg1.main_scanline);
 		}
 	}
+
 	if (bg_mode != 6) {
 		render_bg_scanline(bg2);
 		if constexpr (DEBUG_WINDOW) {

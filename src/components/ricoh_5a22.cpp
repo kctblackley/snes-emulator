@@ -75,7 +75,7 @@ void Ricoh5A22::run_half_cycle() {
 	apply_invariants();
 	//log();
 	tick_multiply_divisor();
-	if constexpr (DEBUG_WINDOW) {
+	if constexpr (DEBUG_WINDOW && SHOW_LOGS) {
 		if (instruction_cycle == 0) {
 			const OpCodeInfo& info = ricoh_5a22_opcode_info[BufferOpCode];
 			std::cout <<

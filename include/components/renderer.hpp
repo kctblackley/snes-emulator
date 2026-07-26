@@ -67,28 +67,46 @@ public:
 			texture,
 			SDL_SCALEMODE_NEAREST
 		);
+		if constexpr (DEBUG_WINDOW) {
+			oam_window = SDL_CreateWindow(
+				"OAM Sprite Viewer",
+				oam_view_width,
+				oam_view_height,
+				SDL_WINDOW_RESIZABLE
+			);
 
-		oam_window = SDL_CreateWindow(
-			"OAM Sprite Viewer",
-			oam_view_width,
-			oam_view_height,
-			SDL_WINDOW_RESIZABLE
-		);
+			oam_renderer = SDL_CreateRenderer(oam_window, nullptr);
 
-		oam_renderer = SDL_CreateRenderer(oam_window, nullptr);
+			oam_texture = SDL_CreateTexture(
+				oam_renderer,
+				SDL_PIXELFORMAT_RGBA8888,
+				SDL_TEXTUREACCESS_STREAMING,
+				oam_view_width,
+				oam_view_height
+			);
 
-		oam_texture = SDL_CreateTexture(
-			oam_renderer,
-			SDL_PIXELFORMAT_RGBA8888,
-			SDL_TEXTUREACCESS_STREAMING,
-			oam_view_width,
-			oam_view_height
-		);
+			SDL_SetTextureScaleMode(
+				oam_texture,
+				SDL_SCALEMODE_NEAREST
+			);
+		}
 
-		SDL_SetTextureScaleMode(
-			oam_texture,
-			SDL_SCALEMODE_NEAREST
-		);
+		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+
+		int count = 0;
+		SDL_JoystickID* joysticks = SDL_GetJoysticks(&count);
+
+		if (count > 0) {
+		    joystick = SDL_OpenJoystick(joysticks[0]);
+
+		    if (joystick) {
+		        std::cout << "Opened joystick: "
+		                  << SDL_GetJoystickName(joystick)
+		                  << '\n';
+		    }
+		}
+
+		SDL_free(joysticks);
 	}
 
 	Byte get_joypad(uint16_t offset) {
@@ -143,44 +161,46 @@ public:
 	}
 
 	void display_oam_view(std::vector<uint32_t>& oam_buffer) {
-		int window_width;
-		int window_height;
+		if constexpr (DEBUG_WINDOW) {
+			int window_width;
+			int window_height;
 
-		SDL_GetWindowSize(oam_window, &window_width, &window_height);
+			SDL_GetWindowSize(oam_window, &window_width, &window_height);
 
-		int scale = std::max(1, std::min(
-			window_width  / oam_view_width,
-			window_height / oam_view_height
-		));
+			int scale = std::max(1, std::min(
+				window_width  / oam_view_width,
+				window_height / oam_view_height
+			));
 
-		float render_width  = static_cast<float>(oam_view_width  * scale);
-		float render_height = static_cast<float>(oam_view_height * scale);
+			float render_width  = static_cast<float>(oam_view_width  * scale);
+			float render_height = static_cast<float>(oam_view_height * scale);
 
-		SDL_UpdateTexture(
-			oam_texture,
-			nullptr,
-			oam_buffer.data(),
-			oam_view_width * sizeof(uint32_t)
-		);
+			SDL_UpdateTexture(
+				oam_texture,
+				nullptr,
+				oam_buffer.data(),
+				oam_view_width * sizeof(uint32_t)
+			);
 
-		SDL_SetRenderDrawColor(oam_renderer, 0, 0, 0, 255);
-		SDL_RenderClear(oam_renderer);
+			SDL_SetRenderDrawColor(oam_renderer, 0, 0, 0, 255);
+			SDL_RenderClear(oam_renderer);
 
-		oam_dst = {
-			(window_width  - render_width)  * 0.5f,
-			(window_height - render_height) * 0.5f,
-			render_width,
-			render_height
-		};
+			oam_dst = {
+				(window_width  - render_width)  * 0.5f,
+				(window_height - render_height) * 0.5f,
+				render_width,
+				render_height
+			};
 
-		SDL_RenderTexture(
-			oam_renderer,
-			oam_texture,
-			nullptr,
-			&oam_dst
-		);
+			SDL_RenderTexture(
+				oam_renderer,
+				oam_texture,
+				nullptr,
+				&oam_dst
+			);
 
-		SDL_RenderPresent(oam_renderer);
+			SDL_RenderPresent(oam_renderer);
+		}
 		return;
 	}
 
@@ -238,30 +258,73 @@ public:
 
 	void loop() {
 		SDL_Event event;
-	    while (SDL_PollEvent(&event)) {
-	        if (event.type == SDL_EVENT_QUIT || event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
-	            running = false;
-	        }
-	    }
+		while (SDL_PollEvent(&event)) {
+		    switch (event.type) {
+		    case SDL_EVENT_QUIT:
+		    case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+		        running = false;
+		        break;
+
+		    case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
+		        gamepad_buttons[event.jbutton.button] = true;
+		        break;
+
+		    case SDL_EVENT_JOYSTICK_BUTTON_UP:
+		        gamepad_buttons[event.jbutton.button] = false;
+		        break;
+
+		    case SDL_EVENT_JOYSTICK_AXIS_MOTION:
+		        if (event.jaxis.axis == 0) {
+		            axis_x = event.jaxis.value;
+		        }
+		        else if (event.jaxis.axis == 1) {
+		            axis_y = event.jaxis.value;
+		        }
+		        break;
+		    }
+		}
 
 	    const bool* keys = SDL_GetKeyboardState(nullptr);
 		
-		joy1l = (keys[SDL_SCANCODE_S]     << 7)  // A
-              | (keys[SDL_SCANCODE_D]     << 6)  // X
-              | (keys[SDL_SCANCODE_Q]     << 5)  // L
-              | (keys[SDL_SCANCODE_W]     << 4); // R
+		bool up    = keys[SDL_SCANCODE_UP]    || axis_y < -AXIS_THRESHOLD;
+		bool down  = keys[SDL_SCANCODE_DOWN]  || axis_y >  AXIS_THRESHOLD;
+		bool left  = keys[SDL_SCANCODE_LEFT]  || axis_x < -AXIS_THRESHOLD;
+		bool right = keys[SDL_SCANCODE_RIGHT] || axis_x >  AXIS_THRESHOLD;
 
-        joy1h = (keys[SDL_SCANCODE_Z]     << 7)  // B
-		      | (keys[SDL_SCANCODE_X]     << 6)  // Y
-		      | (keys[SDL_SCANCODE_A]     << 5)  // Select
-			  | (keys[SDL_SCANCODE_RETURN]<< 4)  // Start
-			  | (keys[SDL_SCANCODE_UP]    << 3)  // D-Pad
-			  | (keys[SDL_SCANCODE_DOWN]  << 2)
-			  | (keys[SDL_SCANCODE_LEFT]  << 1)
-			  | (keys[SDL_SCANCODE_RIGHT] << 0);
+		bool select = keys[SDL_SCANCODE_A]      || gamepad_buttons[8];
+		bool start  = keys[SDL_SCANCODE_RETURN] || gamepad_buttons[9];
+
+		bool x = keys[SDL_SCANCODE_D] || gamepad_buttons[0];
+		bool a = keys[SDL_SCANCODE_S] || gamepad_buttons[1];
+		bool b = keys[SDL_SCANCODE_Z] || gamepad_buttons[2];
+		bool y = keys[SDL_SCANCODE_X] || gamepad_buttons[3];
+
+		bool l = keys[SDL_SCANCODE_Q] || gamepad_buttons[4];
+		bool r = keys[SDL_SCANCODE_W] || gamepad_buttons[5];
+
+		joy1l =
+		      (a << 7)
+		    | (x << 6)
+		    | (l << 5)
+		    | (r << 4);
+
+		joy1h =
+		      (b      << 7)
+		    | (y      << 6)
+		    | (select << 5)
+		    | (start  << 4)
+		    | (up     << 3)
+		    | (down   << 2)
+		    | (left   << 1)
+		    | (right  << 0);
+
 	}
 
 	void close_window() {
+		if (joystick) {
+		    SDL_CloseJoystick(joystick);
+		    joystick = nullptr;
+		}
 		SDL_DestroyWindow(window);
 		if constexpr (DEBUG_WINDOW) {
 			SDL_DestroyWindow(debug_window);
@@ -306,6 +369,15 @@ private:
 
 	bool closed = true;
 	Byte joy1l, joy1h = 0x00;
+
+	SDL_Joystick* joystick = nullptr;
+
+	bool gamepad_buttons[10]{};
+
+	int16_t axis_x = 0;
+	int16_t axis_y = 0;
+
+	static constexpr int AXIS_THRESHOLD = 16000;
 
 	int screen_width;
 	int screen_height;

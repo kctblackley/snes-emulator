@@ -55,7 +55,8 @@ target_include_directories(snes_emulator PRIVATE
 target_link_libraries(snes_emulator PRIVATE SDL3::SDL3)
 
 target_compile_options(snes_emulator PRIVATE
-     $<$<CONFIG:Release>:-O3;-march=native;-mtune=native;-flto;-fomit-frame-pointer>
+    $<$<CONFIG:Release>:-O3;-march=native;-mtune=native;-flto>
+    $<$<CONFIG:RelWithDebInfo>:-O3;-march=native;-mtune=native;-flto;-g>
 )
 
 

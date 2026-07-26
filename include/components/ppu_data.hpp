@@ -296,12 +296,17 @@ struct Mode7 {
 	bool non_tilemap_fill = false;
 	bool tilemap_repeat = false;
 
-	int16_t m7hofs, m7vofs;
-	Byte latch;
+	int16_t m7hofs = 0x00;
+	int16_t m7vofs = 0x00;
+	Byte latch = 0x00;
 
-	uint32_t mpy;
-	Byte last_m7b;
+	uint32_t mpy = 0x00;
+	int8_t last_m7b = 0x00;
 
-	int16_t m7a, m7b, m7c, m7d;
-	int16_t m7x, m7y;
+	int16_t m7a = 0x00;
+	int16_t m7b = 0x00;
+	int16_t m7c = 0x00;
+	int16_t m7d = 0x00;
+	int16_t m7x = 0x00;
+	int16_t m7y = 0x00;
 };

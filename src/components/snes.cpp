@@ -96,7 +96,7 @@ void SNES::run() {
 	        if (elapsed.count() >= 1000) {
 	            double fps = fps_frames * 1000.0 / elapsed.count();
 	       
-	            //std::cout << "\rFPS: " << fps << std::flush;
+	            std::cout << "\rFPS: " << fps << std::flush;
 
 	            fps_frames = 0;
 	            fps_timer = now;

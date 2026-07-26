@@ -134,10 +134,9 @@ public:
 		renderer->display_framebuffer(this->framebuffer);
 		if constexpr (DEBUG_WINDOW) {
 			renderer->display_separate_framebuffers(this->bg1.framebuffer, this->bg2.framebuffer, this->bg3.framebuffer, this->bg4.framebuffer, this->obj.framebuffer);
+			render_oam_view();
+			renderer->display_oam_view(this->oam_view_framebuffer);
 		}
-
-		render_oam_view();
-		renderer->display_oam_view(this->oam_view_framebuffer);
 	}
 
 	static constexpr int oam_cell_size = 64;
@@ -261,7 +260,6 @@ public:
 		priority_order = priorities[bg_mode];
 		if (bg_mode == 1 && bg3_priority) {
 			priority_order.H3 = 20; // just a random value for now, will change later
-			priority_order.L3 = 19;
 		}
 
 		if (bg_mode == 0) {
@@ -503,7 +501,8 @@ public:
 		    mode7.latch = value;
 		}
 		if (addr.offset == M7VOFS_ADDRESS) {
-			mode7.m7vofs = (value << 8) | mode7.latch;
+			uint16_t val = (value << 8) | mode7.latch;
+			mode7.m7vofs = signed_13(val);
 			mode7.latch = value;
 		}
 		if (addr.offset == M7A_ADDRESS) {
