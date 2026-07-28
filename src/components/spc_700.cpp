@@ -3,6 +3,7 @@
 // Need to create APU bus mechanics!
 SPC700::SPC700() : cycle(0), instruction_cycle(0) {
 	bus = std::make_unique<APUBus>();
+	initialise();
 }
 
 void SPC700::add_cycles(CycleCount cycles) {
@@ -30,19 +31,36 @@ void SPC700::run_half_cycle() {
 	op.function(*this, op.skipped);
 }
 
+void SPC700::accumulate(CycleCount delta) {
+	accumulated_cycles += (double)delta;
+	while (accumulated_cycles > SPC_700_CYCLE_CONSTANT) {
+		tick_component();
+		accumulated_cycles -= SPC_700_CYCLE_CONSTANT;
+	}
+}
+
 void SPC700::tick_component() { // when the component is ticked, it does a half tick in actuality
+	tick_timer(0, 128);
+	tick_timer(1, 128);
+	tick_timer(2, 16);
 	tick++;
 	if constexpr (!HALF_CYCLES) {
 		run_half_cycle();
 	}
 	run_half_cycle();
-	// this->add_cycles(RICOH_5A22_CYCLE); (THIS WILL WORK DIFFERENTLY)
 }
 
 void SPC700::reset() { // RUN IPL ROM HERE! MEMORY MAP THE IPL ROM!
-	return;
+	regs.A = 0x00;
+	regs.X = 0x00;
+	regs.Y = 0x00;
+	regs.S = 0xEF;
+	regs.P = 0x00;
+	regs.PC = 0xFFC0;
+	accumulated_cycles = 0;
+	BufferOpCode = read(regs.PC);
 }
 
 void SPC700::initialise() {
-	return;
+	reset();
 }

@@ -49,11 +49,11 @@ void SNES::load_cartridge(const std::string& directory) {
 
 void SNES::tick_snes() {
 	if (ricoh_5a22->get_cycle() <= ppu->get_cycle()) {
-		ricoh_5a22->tick_component();
 		master_cycle = ricoh_5a22->get_cycle();
+		ricoh_5a22->tick_component();
 	} else {
-		ppu->tick_component();
 		master_cycle = ppu->get_cycle();
+		ppu->tick_component();
 	}
 }
 
@@ -79,7 +79,8 @@ void SNES::run() {
 	while (running) {
 		CycleCount prev_master_cycle = master_cycle;
 		tick_snes();
-
+		spc_700->accumulate(master_cycle - prev_master_cycle);
+		
 		if (ppu->frame_finished) {
 			ppu->push_framebuffer();
 			renderer->loop();
@@ -123,6 +124,7 @@ void SNES::reset() {
 	for (const auto& d : devices) {
 		d->reset();
 	}
+	spc_700->reset();
 	dma_controller->reset();
 }
 
@@ -130,5 +132,6 @@ void SNES::initialise() {
 	for (const auto& d : devices) {
 		d->initialise();
 	}
+	spc_700->initialise();
 	dma_controller->initialise();
 }

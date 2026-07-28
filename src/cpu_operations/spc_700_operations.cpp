@@ -2955,7 +2955,7 @@ Instruction s_78 = {
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::Address, ReadTo::Operand0>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::CMP, Value::Operand0, Value::Operand1>),
-	MakeHandler(SPC700Functions::Write<WriteValue::Operand0, WriteTo::Address>),
+	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::Next)
 };
@@ -3053,7 +3053,7 @@ Instruction s_69 = {
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::Address, ReadTo::Operand0>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::CMP, Value::Operand0, Value::Operand1>),
-	MakeHandler(SPC700Functions::Write<WriteValue::Operand0, WriteTo::Address>),
+	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::Next)
 };
@@ -3139,7 +3139,7 @@ Instruction s_79 = {
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::Read<ReadFrom::YPSW, ReadTo::Operand1>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::CMP, Value::Operand0, Value::Operand1>),
-	MakeHandler(SPC700Functions::Write<WriteValue::Operand0, WriteTo::XPSW>),
+	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::Next)
 };

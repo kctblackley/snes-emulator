@@ -4,9 +4,21 @@
 #include "common.hpp"
 #include "apubus.hpp"
 
+#define SPC_700_CYCLE_CONSTANT 20.9738991477
+
 enum class APUStubState {
 	WaitForCC,
 	Transfer
+};
+
+struct SPCTimer {
+	bool enabled = false;
+
+	Byte target = 0;
+	Byte output = 0;
+
+	uint16_t divider_counter = 0;
+	uint16_t internal_counter = 0;
 };
 
 class SPC700 : public CPU {
@@ -16,118 +28,108 @@ public:
 	void add_cycles(CycleCount cycles) override;
 
 	void run_half_cycle();
+	void accumulate(CycleCount delta);
 	void tick_component() override;
 	CycleCount get_cycle() override;
 	TickCount get_tick() override;
 
 	void reset() override;
 	void initialise() override;
-
-	// STUB I GOT ONLINE! WILL NEED TO REPLACE WHEN I WORK ON THIS MYSELF!!!
-	// For communication from main CPU bus
-	//
-	// This stub fakes the CPU<->SPC700 handshake without running real SPC700
-	// code. Two mechanisms:
-	//  1) Immediate echo: whatever the CPU writes to a port becomes readable
-	//     on that same port right away. This satisfies "wait until $2140
-	//     equals what I just wrote" loops, which cover most of the standard
-	//     IPL upload protocol.
-	//  2) Stall recovery: real games commonly upload a tiny bootstrap loader
-	//     to SPC RAM, jump to it, and then wait for *that* code to announce
-	//     readiness the same way the original IPL ROM did (by putting $AA on
-	//     port 0 and $BB on port 1) before starting a second transfer stage.
-	//     Since no real SPC700 code ever actually runs here, that
-	//     announcement never happens on its own, and the CPU spins forever.
-	//     We detect "reading the same unchanged value over and over with no
-	//     new writes" as a stall and re-arm ports 0/1 back to $AA/$BB, as if
-	//     a loader had just come up and announced it's ready. This unblocks
-	//     the CPU without needing real SPC700 execution -- games proceed with
-	//     no audio instead of hanging.
+	
 	Byte communication_read(SNESAddress addr) override {
-		/*Byte port = addr.offset & 3;
-		return apu_to_cpu_ports[port];*/
-
-		/*Byte port = addr.offset & 0x3;
-		if (port == 0 || port == 1) {
-			handshake_active = true;
-
-			if (apu_to_cpu_ports[port] == last_polled_value[port]) {
-				stall_counter++;
-			} else {
-				stall_counter = 0;
-			}
-			last_polled_value[port] = apu_to_cpu_ports[port];
-
-			if (stall_counter > STALL_THRESHOLD) {
-				std::cout << "[APU-STALL-RECOVERY] port=" << (int)port
-				          << " stuck_value=0x" << std::hex << (int)apu_to_cpu_ports[port] << std::dec
-				          << " re-arming ports 0/1 to 0xAA/0xBB\n";
-				apu_to_cpu_ports[0] = 0xAA;
-				apu_to_cpu_ports[1] = 0xBB;
-				stall_counter = 0;
-			}
-		}
-		//std::cout << "Reading from APU to CPU: Port " << (int)(port) << "\n";
-		//std::cout << "Value is: " << (int)(apu_to_cpu_ports[port]) << "\n";
-		return apu_to_cpu_ports[port];*/
-		int channel_id = (addr.offset - 0x2140) % 4;
-		int value = channel_data[channel_id];
-
-		switch(channel_id) {
-		case 0:
-			channel_data[channel_id] = 0xAA;
-			break;
-		case 1:
-			channel_data[channel_id] = 0xBB;
-			break;
-		default:
-			channel_data[channel_id] = 0;
-			break;
-		}
-		return value;
+		return spc_to_cpu_ports[(addr.offset - 0x2140) & 3];
 	}
 
 	void communication_write(SNESAddress addr, Byte value) override {
-		/*if (addr.offset == 0x2140 && value == 0xCC && state == APUStubState::WaitForCC) {
-			apu_to_cpu_ports[0] = 0xCC;
-			state = APUStubState::Transfer;
-		}
-		if (addr.offset == 0x2140 && state == APUStubState::Transfer) {
-			apu_to_cpu_ports[0] = value;
-		}
-		if (addr.offset == 0x2141) {
-			last_apuio1 = value;
-		}
-		if (addr.offset == 0x2140 && state == APUStubState::Transfer && last_apuio1 == 0x00) {
-			apu_program_running = true;
-		}*/
-
-		/*Byte port = addr.offset & 3;
-		cpu_to_apu_ports[port] = value;
-		apu_to_cpu_ports[port] = value;*/
-
-		/*Byte port = addr.offset & 0x3;
-		stall_counter = 0; // any write counts as forward progress
-		if (handshake_active) {
-			apu_to_cpu_ports[port] = value;
-		}
-		static uint64_t write_seq = 0;
-		std::cout << "[APU-WRITE] #" << write_seq++ << " port=" << (int)port
-		          << " value=0x" << std::hex << (int)value << std::dec << "\n";
-		cpu_to_apu_ports[port] = value;*/
-
-		int channel_id = (addr.offset - 0x2140) % 4;
-		channel_data[channel_id] = value;
-
+		cpu_to_spc_ports[(addr.offset - 0x2140) & 3] = value;
 	}
 
-	// Stubbed until I implement the SPC700 in full!
 	Byte read(Address addr) override {
+		if (addr >= 0xFD && addr <= 0xFF) {
+			Byte value = timers[addr - 0xFD].output;
+			timers[addr - 0xFD].output = 0;
+			return value;
+		}
+		if (addr >= 0xF4 && addr <= 0xF7) {
+			return cpu_to_spc_ports[addr - 0xF4];
+		}
+		if (ipl_rom_enabled && addr >= 0xFFC0) {
+			return ipl_rom[addr - 0xFFC0];
+		}
 		return bus->read(addr);
 	}
 
 	void write(Address addr, Byte value) override {
+		if (addr >= 0xFA && addr <= 0xFC) {
+			timers[addr - 0xFA].target = value;
+			return;
+		}
+		if (addr == 0xF1) {
+
+		    bool old0 = timers[0].enabled;
+		    bool old1 = timers[1].enabled;
+		    bool old2 = timers[2].enabled;
+
+		    timers[0].enabled = value & 0x01;
+		    timers[1].enabled = value & 0x02;
+		    timers[2].enabled = value & 0x04;
+
+		    if (!old0 && timers[0].enabled) {
+			    timers[0].output = 0;
+			    timers[0].divider_counter = 0;
+			    timers[0].internal_counter = 0;
+			}
+
+		    if (!old1 && timers[1].enabled) {
+			    timers[1].output = 0;
+			    timers[1].divider_counter = 0;
+			    timers[1].internal_counter = 0;
+			}
+
+		    if (!old2 && timers[2].enabled) {
+			    timers[2].output = 0;
+			    timers[2].divider_counter = 0;
+			    timers[2].internal_counter = 0;
+			}
+
+		    ipl_rom_enabled = value & 0x80;
+		    return;
+		}
+		if (addr >= 0xF4 && addr <= 0xF7) {
+			spc_to_cpu_ports[addr - 0xF4] = value;
+			return;
+		}
 		bus->write(addr, value);
+	}
+
+	void tick_timer(int index, int divider) {
+		SPCTimer& timer = timers[index];
+
+		if (!timer.enabled) {
+			return;
+		}
+
+		timer.divider_counter++;
+
+		if (timer.divider_counter < divider) {
+			return;
+		}
+
+		timer.divider_counter = 0;
+		timer.internal_counter++;
+
+		uint16_t target;
+		if (timer.target == 0) {
+			target = 256;
+		} else {
+			target = timer.target;
+		}
+
+		if (timer.internal_counter >= target) {
+			timer.internal_counter = 0;
+
+			timer.output = (timer.output + 1) & 0x0F;
+		}
 	}
 
 	void apply_invariants() override;
@@ -220,25 +222,29 @@ public:
 	}
 
 private:
-	std::array<Byte, 4> channel_data {}; // FOR STUB
-
-	APUStubState state = APUStubState::WaitForCC;
-	Byte last_apuio1 = 1;
-	bool apu_program_running = false;
-
 	std::unique_ptr<APUBus> bus;
 
-	Byte cpu_to_apu_ports[4] = {0x00, 0x00, 0x00, 0x00};
-	Byte apu_to_cpu_ports[4] = {0xAA, 0xBB, 0x00, 0x00};
+	Byte cpu_to_spc_ports[4] {};
+	Byte spc_to_cpu_ports[4] {};
 
 	CycleCount cycle; 
 	CycleCount instruction_cycle; 
 	TickCount tick;
 
-	bool handshake_active = false;
+	double accumulated_cycles = 0;
 
-	// Stall recovery state (see communication_read)
-	static constexpr int STALL_THRESHOLD = 500;
-	int stall_counter = 0;
-	Byte last_polled_value[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+	bool ipl_rom_enabled = true;
+
+	std::array<Byte, 64> ipl_rom = {
+	    0xcd, 0xef, 0xbd, 0xe8, 0x00, 0xc6, 0x1d, 0xd0,
+	    0xfc, 0x8f, 0xaa, 0xf4, 0x8f, 0xbb, 0xf5, 0x78,
+	    0xcc, 0xf4, 0xd0, 0xfb, 0x2f, 0x19, 0xeb, 0xf4,
+	    0xd0, 0xfc, 0x7e, 0xf4, 0xd0, 0x0b, 0xe4, 0xf5,
+	    0xcb, 0xf4, 0xd7, 0x00, 0xfc, 0xd0, 0xf3, 0xab,
+	    0x01, 0x10, 0xef, 0x7e, 0xf4, 0x10, 0xeb, 0xba,
+	    0xf6, 0xda, 0x00, 0xba, 0xf4, 0xc4, 0xf4, 0xdd,
+	    0x5d, 0xd0, 0xdb, 0x1f, 0x00, 0x00, 0xc0, 0xff
+	};
+
+	SPCTimer timers[3];
 };
