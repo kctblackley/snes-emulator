@@ -32,12 +32,18 @@ public:
 	Word BufferPointer = 0;
 	Word BufferAddress = 0;
 	Word BufferOperand = 0;
+	Word BufferOperand16 = 0; // Additional operand buffer just for 16-bit ops in SPC-700
 	Word BufferOperand0 = 0;
 	Word BufferOperand1 = 0;
 	Word BufferBank = 0;
 	Word BufferOrig = 0;
 	Word BufferMVDest = 0;
 	Word BufferStackAddress = 0;
+	Word BufferTmp  = 0;
+	Word BufferTmpR = 0;
+	Word BufferUnderflow = 0;
+	Word BufferOverflow = 0;
+	Word BufferLowZero = 0;
 	Word Vector = 0;
 
 	Word YABuffer = 0; // just a buffer, does not give actual value of YA for SPC-700

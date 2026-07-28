@@ -28,6 +28,14 @@ namespace ReadFrom {
 	struct FFDF {};
 
 	struct Address {};
+	struct Pointer {};
+	struct PointerPlusOne {};
+	struct AddressPlusOnePSW {};
+
+	struct Address1FFF {};
+
+	struct XPSW {}; // (X | ((PSW & 0x20) << 3))
+	struct YPSW {}; // (X | ((PSW & 0x20) << 3))
 }
 
 namespace ReadTo {
@@ -41,9 +49,18 @@ namespace ReadTo {
 	struct PCLow  {};
 	struct PCHigh {};
 
+	struct PointerLow  {};
+	struct PointerHigh {};
+
 	struct Operand  {};
 	struct Operand0 {};
 	struct Operand1 {};
+
+	struct Operand16Low  {};
+	struct Operand16High {};
+
+	struct AddressLow  {};
+	struct AddressHigh {};
 
 	struct Discard {};
 }
@@ -71,6 +88,13 @@ namespace WriteTo {
 	struct Stack2      {};
 
 	struct Address {};
+	struct Pointer {};
+
+	struct AddressPlusOnePSW {};
+
+	struct Address1FFF {};
+
+	struct XPSW {}; // (X | ((PSW & 0x20) << 3))
 }
 
 enum class SubFunc {
@@ -78,11 +102,34 @@ enum class SubFunc {
 	ClearISetX,
 	SetNZFlagRegisterA,
 	SetNZFlagRegisterX,
+	SetNZFlagRegisterY,	
 	SetNZFlagRegisterYA,
 	SetNZFlagOperand,
+	SetNZFlagOperand0,
 	SetSubFunc,
-
+	IncrementAddressByX,
+	IncrementAddressByY
 };
+
+enum class Bitwise {
+	OR,
+	AND,
+	EOR,
+	ADC,
+	SBC,
+	CMP
+};
+
+namespace Value {
+	struct A {};
+	struct Operand0 {};
+
+	struct Operand  {};
+	struct Operand1 {};
+
+	struct X {};
+	struct Y {};
+}
 
 // Useful code (for templating)
 // if constexpr (std::is_same_v<Branch, BranchMode::N_Zero>)

@@ -7,168 +7,168 @@ constexpr Optable optable = {
     &s_01, // 0x01
     &s_02, // 0x02
     &s_03, // 0x03
-    &s_nop, // 0x04
-    &s_nop, // 0x05
-    &s_nop, // 0x06
-    &s_nop, // 0x07
-    &s_nop, // 0x08
-    &s_nop, // 0x09
-    &s_nop, // 0x0A
-    &s_nop, // 0x0B
-    &s_nop, // 0x0C
+    &s_04, // 0x04
+    &s_05, // 0x05
+    &s_06, // 0x06
+    &s_07, // 0x07
+    &s_08, // 0x08
+    &s_09, // 0x09
+    &s_0a, // 0x0A
+    &s_0b, // 0x0B
+    &s_0c, // 0x0C
     &s_0d, // 0x0D
-    &s_nop, // 0x0E
+    &s_0e, // 0x0E
     &s_0f, // 0x0F
 
-    &s_nop, // 0x10
+    &s_10, // 0x10
     &s_11, // 0x11
     &s_12, // 0x12
     &s_13, // 0x13
-    &s_nop, // 0x14
-    &s_nop, // 0x15
-    &s_nop, // 0x16
-    &s_nop, // 0x17
-    &s_nop, // 0x18
-    &s_nop, // 0x19
-    &s_nop, // 0x1A
-    &s_nop, // 0x1B
-    &s_nop, // 0x1C
-    &s_nop, // 0x1D
-    &s_nop, // 0x1E
-    &s_nop, // 0x1F
+    &s_14, // 0x14
+    &s_15, // 0x15
+    &s_16, // 0x16
+    &s_17, // 0x17
+    &s_18, // 0x18
+    &s_19, // 0x19
+    &s_1a, // 0x1A
+    &s_1b, // 0x1B
+    &s_1c, // 0x1C
+    &s_1d, // 0x1D
+    &s_1e, // 0x1E
+    &s_1f, // 0x1F
 
     &s_20, // 0x20
     &s_21, // 0x21
     &s_22, // 0x22
     &s_23, // 0x23
-    &s_nop, // 0x24
-    &s_nop, // 0x25
-    &s_nop, // 0x26
-    &s_nop, // 0x27
-    &s_nop, // 0x28
-    &s_nop, // 0x29
-    &s_nop, // 0x2A
-    &s_nop, // 0x2B
-    &s_nop, // 0x2C
+    &s_24, // 0x24
+    &s_25, // 0x25
+    &s_26, // 0x26
+    &s_27, // 0x27
+    &s_28, // 0x28
+    &s_29, // 0x29
+    &s_2a, // 0x2A
+    &s_2b, // 0x2B
+    &s_2c, // 0x2C
     &s_2d, // 0x2D
-    &s_nop, // 0x2E
-    &s_nop, // 0x2F
+    &s_2e, // 0x2E
+    &s_2f, // 0x2F
 
-    &s_nop, // 0x30
+    &s_30, // 0x30
     &s_31, // 0x31
     &s_32, // 0x32
     &s_33, // 0x33
-    &s_nop, // 0x34
-    &s_nop, // 0x35
-    &s_nop, // 0x36
-    &s_nop, // 0x37
-    &s_nop, // 0x38
-    &s_nop, // 0x39
-    &s_nop, // 0x3A
-    &s_nop, // 0x3B
-    &s_nop, // 0x3C
-    &s_nop, // 0x3D
-    &s_nop, // 0x3E
-    &s_nop, // 0x3F
+    &s_34, // 0x34
+    &s_35, // 0x35
+    &s_36, // 0x36
+    &s_37, // 0x37
+    &s_38, // 0x38
+    &s_39, // 0x39
+    &s_3a, // 0x3A
+    &s_3b, // 0x3B
+    &s_3c, // 0x3C
+    &s_3d, // 0x3D
+    &s_3e, // 0x3E
+    &s_3f, // 0x3F
 
     &s_40, // 0x40
     &s_41, // 0x41
     &s_42, // 0x42
     &s_43, // 0x43
-    &s_nop, // 0x44
-    &s_nop, // 0x45
-    &s_nop, // 0x46
-    &s_nop, // 0x47
-    &s_nop, // 0x48
-    &s_nop, // 0x49
-    &s_nop, // 0x4A
-    &s_nop, // 0x4B
-    &s_nop, // 0x4C
+    &s_44, // 0x44
+    &s_45, // 0x45
+    &s_46, // 0x46
+    &s_47, // 0x47
+    &s_48, // 0x48
+    &s_49, // 0x49
+    &s_4a, // 0x4A
+    &s_4b, // 0x4B
+    &s_4c, // 0x4C
     &s_4d, // 0x4D
-    &s_nop, // 0x4E
-    &s_nop, // 0x4F
+    &s_4e, // 0x4E
+    &s_4f, // 0x4F
 
-    &s_nop, // 0x50
+    &s_50, // 0x50
     &s_51, // 0x51
     &s_52, // 0x52
     &s_53, // 0x53
-    &s_nop, // 0x54
-    &s_nop, // 0x55
-    &s_nop, // 0x56
-    &s_nop, // 0x57
-    &s_nop, // 0x58
-    &s_nop, // 0x59
-    &s_nop, // 0x5A
-    &s_nop, // 0x5B
-    &s_nop, // 0x5C
+    &s_54, // 0x54
+    &s_55, // 0x55
+    &s_56, // 0x56
+    &s_57, // 0x57
+    &s_58, // 0x58
+    &s_59, // 0x59
+    &s_5a, // 0x5A
+    &s_5b, // 0x5B
+    &s_5c, // 0x5C
     &s_5d, // 0x5D
-    &s_nop, // 0x5E
-    &s_nop, // 0x5F
+    &s_5e, // 0x5E
+    &s_5f, // 0x5F
 
     &s_60, // 0x60
     &s_61, // 0x61
     &s_62, // 0x62
     &s_63, // 0x63
-    &s_nop, // 0x64
-    &s_nop, // 0x65
-    &s_nop, // 0x66
-    &s_nop, // 0x67
-    &s_nop, // 0x68
-    &s_nop, // 0x69
-    &s_nop, // 0x6A
-    &s_nop, // 0x6B
-    &s_nop, // 0x6C
+    &s_64, // 0x64
+    &s_65, // 0x65
+    &s_66, // 0x66
+    &s_67, // 0x67
+    &s_68, // 0x68
+    &s_69, // 0x69
+    &s_6a, // 0x6A
+    &s_6b, // 0x6B
+    &s_6c, // 0x6C
     &s_6d, // 0x6D
-    &s_nop, // 0x6E
+    &s_6e, // 0x6E
     &s_6f, // 0x6F
 
-    &s_nop, // 0x70
+    &s_70, // 0x70
     &s_71, // 0x71
     &s_72, // 0x72
     &s_73, // 0x73
-    &s_nop, // 0x74
-    &s_nop, // 0x75
-    &s_nop, // 0x76
-    &s_nop, // 0x77
-    &s_nop, // 0x78
-    &s_nop, // 0x79
-    &s_nop, // 0x7A
-    &s_nop, // 0x7B
-    &s_nop, // 0x7C
+    &s_74, // 0x74
+    &s_75, // 0x75
+    &s_76, // 0x76
+    &s_77, // 0x77
+    &s_78, // 0x78
+    &s_79, // 0x79
+    &s_7a, // 0x7A
+    &s_7b, // 0x7B
+    &s_7c, // 0x7C
     &s_7d, // 0x7D
-    &s_nop, // 0x7E
+    &s_7e, // 0x7E
     &s_7f, // 0x7F
 
     &s_80, // 0x80
     &s_81, // 0x81
     &s_82, // 0x82
     &s_83, // 0x83
-    &s_nop, // 0x84
-    &s_nop, // 0x85
-    &s_nop, // 0x86
-    &s_nop, // 0x87
-    &s_nop, // 0x88
-    &s_nop, // 0x89
-    &s_nop, // 0x8A
-    &s_nop, // 0x8B
-    &s_nop, // 0x8C
+    &s_84, // 0x84
+    &s_85, // 0x85
+    &s_86, // 0x86
+    &s_87, // 0x87
+    &s_88, // 0x88
+    &s_89, // 0x89
+    &s_8a, // 0x8A
+    &s_8b, // 0x8B
+    &s_8c, // 0x8C
     &s_8d, // 0x8D
     &s_8e, // 0x8E
     &s_8f, // 0x8F
 
-    &s_nop, // 0x90
+    &s_90, // 0x90
     &s_91, // 0x91
     &s_92, // 0x92
     &s_93, // 0x93
-    &s_nop, // 0x94
-    &s_nop, // 0x95
-    &s_nop, // 0x96
-    &s_nop, // 0x97
-    &s_nop, // 0x98
-    &s_nop, // 0x99
-    &s_nop, // 0x9A
-    &s_nop, // 0x9B
-    &s_nop, // 0x9C
+    &s_94, // 0x94
+    &s_95, // 0x95
+    &s_96, // 0x96
+    &s_97, // 0x97
+    &s_98, // 0x98
+    &s_99, // 0x99
+    &s_9a, // 0x9A
+    &s_9b, // 0x9B
+    &s_9c, // 0x9C
     &s_9d, // 0x9D
     &s_9e, // 0x9E
     &s_9f, // 0x9F
@@ -177,105 +177,106 @@ constexpr Optable optable = {
     &s_a1, // 0xA1
     &s_a2, // 0xA2
     &s_a3, // 0xA3
-    &s_nop, // 0xA4
-    &s_nop, // 0xA5
-    &s_nop, // 0xA6
-    &s_nop, // 0xA7
-    &s_nop, // 0xA8
-    &s_nop, // 0xA9
-    &s_nop, // 0xAA
-    &s_nop, // 0xAB
-    &s_nop, // 0xAC
-    &s_nop, // 0xAD
+    &s_a4, // 0xA4
+    &s_a5, // 0xA5
+    &s_a6, // 0xA6
+    &s_a7, // 0xA7
+    &s_a8, // 0xA8
+    &s_a9, // 0xA9
+    &s_aa, // 0xAA
+    &s_ab, // 0xAB
+    &s_ac, // 0xAC
+    &s_ad, // 0xAD
     &s_ae, // 0xAE
     &s_af, // 0xAF
 
-    &s_nop, // 0xB0
+    &s_b0, // 0xB0
     &s_b1, // 0xB1
     &s_b2, // 0xB2
     &s_b3, // 0xB3
-    &s_nop, // 0xB4
-    &s_nop, // 0xB5
-    &s_nop, // 0xB6
-    &s_nop, // 0xB7
-    &s_nop, // 0xB8
-    &s_nop, // 0xB9
-    &s_nop, // 0xBA
-    &s_nop, // 0xBB
-    &s_nop, // 0xBC
-    &s_nop, // 0xBD
+    &s_b4, // 0xB4
+    &s_b5, // 0xB5
+    &s_b6, // 0xB6
+    &s_b7, // 0xB7
+    &s_b8, // 0xB8
+    &s_b9, // 0xB9
+    &s_ba, // 0xBA
+    &s_bb, // 0xBB
+    &s_bc, // 0xBC
+    &s_bd, // 0xBD
     &s_be, // 0xBE
-    &s_nop, // 0xBF
+    &s_bf, // 0xBF
 
     &s_c0, // 0xC0
     &s_c1, // 0xC1
     &s_c2, // 0xC2
     &s_c3, // 0xC3
-    &s_nop, // 0xC4
-    &s_nop, // 0xC5
-    &s_nop, // 0xC6
-    &s_nop, // 0xC7
-    &s_nop, // 0xC8
-    &s_nop, // 0xC9
-    &s_nop, // 0xCA
-    &s_nop, // 0xCB
-    &s_nop, // 0xCC
-    &s_nop, // 0xCD
+    &s_c4, // 0xC4
+    &s_c5, // 0xC5
+    &s_c6, // 0xC6
+    &s_c7, // 0xC7
+    &s_c8, // 0xC8
+    &s_c9, // 0xC9
+    &s_ca, // 0xCA
+    &s_cb, // 0xCB
+    &s_cc, // 0xCC
+    &s_cd, // 0xCD
     &s_ce, // 0xCE
     &s_cf, // 0xCF
 
-    &s_nop, // 0xD0
+    &s_d0, // 0xD0
     &s_d1, // 0xD1
     &s_d2, // 0xD2
     &s_d3, // 0xD3
-    &s_nop, // 0xD4
-    &s_nop, // 0xD5
-    &s_nop, // 0xD6
-    &s_nop, // 0xD7
-    &s_nop, // 0xD8
-    &s_nop, // 0xD9
-    &s_nop, // 0xDA
-    &s_nop, // 0xDB
-    &s_nop, // 0xDC
-    &s_nop, // 0xDD
-    &s_nop, // 0xDE
+    &s_d4, // 0xD4
+    &s_d5, // 0xD5
+    &s_d6, // 0xD6
+    &s_d7, // 0xD7
+    &s_d8, // 0xD8
+    &s_d9, // 0xD9
+    &s_da, // 0xDA
+    &s_db, // 0xDB
+    &s_dc, // 0xDC
+    &s_dd, // 0xDD
+    &s_de, // 0xDE
     &s_df, // 0xDF
 
     &s_e0, // 0xE0
     &s_e1, // 0xE1
     &s_e2, // 0xE2
     &s_e3, // 0xE3
-    &s_nop, // 0xE4
-    &s_nop, // 0xE5
-    &s_nop, // 0xE6
-    &s_nop, // 0xE7
-    &s_nop, // 0xE8
-    &s_nop, // 0xE9
-    &s_nop, // 0xEA
-    &s_nop, // 0xEB
-    &s_nop, // 0xEC
+    &s_e4, // 0xE4
+    &s_e5, // 0xE5
+    &s_e6, // 0xE6
+    &s_e7, // 0xE7
+    &s_e8, // 0xE8
+    &s_e9, // 0xE9
+    &s_ea, // 0xEA
+    &s_eb, // 0xEB
+    &s_ec, // 0xEC
     &s_ed, // 0xED
     &s_ee, // 0xEE
-    &s_nop, // 0xEF
+    &s_ef, // 0xEF
 
-    &s_nop, // 0xF0
+    &s_f0, // 0xF0
     &s_f1, // 0xF1
     &s_f2, // 0xF2
     &s_f3, // 0xF3
-    &s_nop, // 0xF4
-    &s_nop, // 0xF5
-    &s_nop, // 0xF6
-    &s_nop, // 0xF7
-    &s_nop, // 0xF8
-    &s_nop, // 0xF9
-    &s_nop, // 0xFA
-    &s_nop, // 0xFB
-    &s_nop, // 0xFC
-    &s_nop, // 0xFD
-    &s_nop, // 0xFE
-    &s_nop, // 0xFF
+    &s_f4, // 0xF4
+    &s_f5, // 0xF5
+    &s_f6, // 0xF6
+    &s_f7, // 0xF7
+    &s_f8, // 0xF8
+    &s_f9, // 0xF9
+    &s_fa, // 0xFA
+    &s_fb, // 0xFB
+    &s_fc, // 0xFC
+    &s_fd, // 0xFD
+    &s_fe, // 0xFE
+    &s_ff, // 0xFF
 
-    &s_nop, // NMI interrupt routine
-    &s_nop  // IRQ interrupt routine
+    // Below are stubs (required for Ricoh 5A22, not for SPC-700)
+    &s_nop,
+    &s_nop
 
 };
