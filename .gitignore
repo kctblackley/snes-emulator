@@ -3,6 +3,7 @@ tests/*
 !rom/.gitkeep
 build/*
 tests/*
+ipl/ipl.rom
 logs/*
 README.md
 *.zip
