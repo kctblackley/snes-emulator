@@ -1,7 +1,36 @@
 #include "spc_700.hpp"
+#include <fstream>
+#include <iostream>
+#include <filesystem>
+#include <cstdlib>
 
 // Need to create APU bus mechanics!
 SPC700::SPC700() : cycle(0), instruction_cycle(0) {
+	std::cout << "Loading SPC700 IPL ROM\n";
+
+	std::ifstream file("ipl/ipl.rom", std::ios::binary);
+
+	if (!file) {
+		std::cerr << "Missing IPL ROM.\n";
+		std::cerr << "Please provide the IPL ROM, named 'ipl.rom', in the folder 'ipl'.\n";
+		std::cerr << "Refer to README.md for instructions.\n";
+		std::exit(EXIT_FAILURE);
+	}
+
+	file.read(
+		reinterpret_cast<char*>(ipl_rom.data()),
+		ipl_rom.size()
+	);
+
+	if (file.gcount() != 64) {
+		std::cerr << "The IPL ROM provided is of the incorrect size.\n";
+		std::cerr << "It must be 64 bytes in size to be valid.\n";
+		std::cerr << "Refer to README.md for instructions.\n";
+		std::exit(EXIT_FAILURE);
+	}
+
+	std::cout << "Loaded SPC700 IPL ROM\n";
+
 	bus = std::make_unique<APUBus>();
 	initialise();
 }
