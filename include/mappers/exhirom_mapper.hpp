@@ -1,13 +1,14 @@
 #include "mapper.hpp"
 
-class ExHiROM : public Mapper {
+class ExHiROM : public Mapper<ExHiROM> {
+	friend class Mapper<ExHiROM>;
 public:
-	void to_string() override {
+	void to_string() {
 		std::cout << "ExHiROM\n";
 		log_info();
 	}
 protected:
-	std::optional<Address> rom_idx(SNESAddress address) const override {
+	std::optional<Address> rom_idx(SNESAddress address) const {
 		if (address.bank >= 0xC0) {
 			return ((address.bank & 0x3F) << 16) | address.offset;
 		}
@@ -27,7 +28,7 @@ protected:
 		return std::nullopt;
 	}
 
-	std::optional<Address> sram_idx(SNESAddress address) const override {
+	std::optional<Address> sram_idx(SNESAddress address) const {
 		if (!( (address.bank >= 0x20 && address.bank <= 0x3F) || (address.bank >= 0xA0 && address.bank <= 0xBF) )) {
 			return std::nullopt;
 		}

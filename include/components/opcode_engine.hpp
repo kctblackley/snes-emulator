@@ -1,33 +1,59 @@
 #pragma once
 #include "cpu.hpp"
-#include <functional>
 
 // Handler stores pointer to half-cycle instruction
 
 // bool is for handling skipped 
 
-using HandlerFn = void(*)(CPU&, bool);
-using PredicateFn = bool(*)(CPU&);
+template <class CpuT>
+using HandlerFn = void(*)(CpuT&, bool);
 
+template <class CpuT>
+using PredicateFn = bool(*)(CpuT&);
+
+template <class CpuT>
 struct Handler {
-	HandlerFn function;
-	PredicateFn predicate;
+	HandlerFn<CpuT> function;
+	PredicateFn<CpuT> predicate;
 };
 
-inline bool DefaultPredicate(CPU&) {
-	return false;
-}
-constexpr Handler MakeHandler(HandlerFn fn, PredicateFn pred = DefaultPredicate) {
-	return Handler{fn, pred};
+template<class CpuT>
+constexpr Handler<CpuT> MakeHandler(
+    void(*fn)(CpuT&, bool),
+    bool(*pred)(CpuT&) = nullptr)
+{
+    return {fn, pred};
 }
 
-using Instruction = std::vector<Handler>;
-using Optable = std::array<Instruction*, 258>;
+template <class CpuT>
+using Instruction = std::vector<Handler<CpuT>>;
 
+template <class CpuT>
+using Optable = std::array<Instruction<CpuT>*, 258>;
+
+template <class CpuT>
 struct Opcode {
-	HandlerFn function;
+	HandlerFn<CpuT> function;
 	CycleCount idx;
 	bool skipped;
 };
 
-Opcode get_opcode(const Optable& optable, Word opcode, CycleCount& idx, CPU& cpu);
+template <class CpuT>
+Opcode<CpuT> get_opcode(const Optable<CpuT>& optable, Word opcode, CycleCount& idx, CpuT& cpu) {
+	Instruction<CpuT>& instruction = *optable[opcode];
+	
+	Handler<CpuT>* handler = nullptr;
+	bool skipped = false;
+	bool predicate = true;
+	while(predicate && idx < instruction.size()) {
+		handler = &instruction[idx++];
+		predicate = handler->predicate ? handler->predicate(cpu) : false;
+		if (predicate) {
+			skipped = true;
+		}
+	}
+
+	if (idx >= instruction.size() ) { idx = 0; }
+
+	return Opcode{ handler->function, idx, skipped };
+}

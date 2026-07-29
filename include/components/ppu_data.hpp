@@ -117,7 +117,7 @@ struct Pixel {
 	bool transparent = false;
 	uint8_t priority = 0x00;
 	uint16_t colour = 0x00;
-	int layer = 0;
+	uint8_t layer = 0;
 	bool colour_math = false;
 };
 
@@ -309,4 +309,16 @@ struct Mode7 {
 	int16_t m7d = 0x00;
 	int16_t m7x = 0x00;
 	int16_t m7y = 0x00;
+};
+
+// BG fetching optimisation structs
+
+struct DecodedRow {
+	bool valid = false;
+	std::array<Byte, 8> data {}; // Important note to self: this contains colour indices, not actual colours!
+};
+
+struct DecodedTile {
+	bool valid = false;
+	std::array<DecodedRow, 8> rows {};
 };

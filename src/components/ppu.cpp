@@ -39,148 +39,6 @@ void PPU::window_mask(std::array<Pixel, 512>& scanline, bool window1_enabled, bo
 	}
 }
 
-// TO DO: ADD TILE CACHING OPTIMISATION!
-Pixel PPU::fetch_bg_pixel(BG& bg, uint16_t xcounter) {
-	// hcounter is not being used as the scanline is calculated at the start of hblank
-	// using temporary 'xcounter' instead
-
-	int bg_x, bg_y;
-
-	if (bg.mosaic) {
-		int mosaic_x = xcounter - (xcounter % (mosaic_size + 1));
-		int mosaic_y = vcounter - (vcounter % (mosaic_size + 1));
-
-		bg_x = (mosaic_x + bg.bghofs) & 0x3FF;
-		bg_y = (mosaic_y + bg.bgvofs) & 0x3FF;
-	} else {
-		bg_x = (xcounter + bg.bghofs) & 0x3FF;
-		bg_y = (vcounter + bg.bgvofs) & 0x3FF;
-	}
-	int tile_x = bg_x >> 3;
-	int tile_y = bg_y >> 3;
-
-	int pixel_x = bg_x & 7;
-	int pixel_y = bg_y & 7;
-
-	int map_width_tiles  = bg.horizontal_tilemap_count ? 64 : 32;
-	int map_height_tiles = bg.vertical_tilemap_count   ? 64 : 32;
-
-	tile_x = tile_x & (map_width_tiles - 1);
-	tile_y = tile_y & (map_height_tiles - 1);
-
-	int screen_x = tile_x >> 5;
-	int screen_y = tile_y >> 5;
-	int screen = 0;
-
-	if (bg.horizontal_tilemap_count) {
-		screen = screen | screen_x;
-	}
-
-	if (bg.vertical_tilemap_count) {
-		screen = screen | (screen_y << 1);
-	}
-
-	int local_x = tile_x & 31;
-	int local_y = tile_y & 31;
-
-	Word tilemap_address = (bg.tilemap_vram_address + (screen * 0x400) + (local_y * 32) + local_x) & 0x7FFF;
-	Word entry = vram.data[tilemap_address];
-
-	int tile_number = entry & 0x3FF;
-	bool hflip = entry & 0x4000;
-	bool vflip = entry & 0x8000;
-
-	int palette = (entry >> 10) & 0x7;
-	int priority = (entry >> 13) & 0x1;
-
-	if (bg.character_size) {
-	    int sub_x = (bg_x >> 3) & 1;
-	    int sub_y = (bg_y >> 3) & 1;
-
-	    if (hflip) { sub_x ^= 1; }
-	    if (vflip) { sub_y ^= 1; }
-
-	    tile_number += sub_x;
-	    tile_number += sub_y * 16;
-	}
-
-	if (hflip) {
-	    pixel_x = pixel_x ^ 7;
-	}
-	if (vflip) {
-	    pixel_y = pixel_y ^ 7;
-	}
-
-	Word tile_address = (bg.word_address + tile_number * (4 * bg.bpp)) & 0x7FFF;
-
-	Word plane01, plane23, plane45, plane67;
-
-	if (bg.bpp >= 2) { plane01 = vram.data[(tile_address +      pixel_y) & 0x7FFF]; }
-	if (bg.bpp >= 4) { plane23 = vram.data[(tile_address + 8  + pixel_y) & 0x7FFF]; }
-	if (bg.bpp == 8) { plane45 = vram.data[(tile_address + 16 + pixel_y) & 0x7FFF]; }
-	if (bg.bpp == 8) { plane67 = vram.data[(tile_address + 24 + pixel_y) & 0x7FFF]; }
-
-	Byte p0, p1, p2, p3, p4, p5, p6, p7;
-
-	int bit = 7 - pixel_x;
-	p0 = get_lo(plane01);
-	p1 = get_hi(plane01);
-	if (bg.bpp >= 4) {
-		p2 = get_lo(plane23);
-		p3 = get_hi(plane23);
-		if (bg.bpp == 8) {
-			p4 = get_lo(plane45);
-			p5 = get_hi(plane45);
-			p6 = get_lo(plane67);
-			p7 = get_hi(plane67);
-		}
-	}
-	
-	Byte colour = 0x00;
-	if (bg.bpp == 2) {
-		colour = ((p0 >> bit) & 1) | (((p1 >> bit) & 1) << 1);
-	} else if (bg.bpp == 4) {
-		colour = ((p0 >> bit) & 1)       | (((p1 >> bit) & 1) << 1) |
-				(((p2 >> bit) & 1) << 2) | (((p3 >> bit) & 1) << 3);
-	} else if (bg.bpp == 8) { // Direct colour not considered yet!
-		colour = ((p0 >> bit) & 1)       | (((p1 >> bit) & 1) << 1) |
-				(((p2 >> bit) & 1) << 2) | (((p3 >> bit) & 1) << 3) |
-				(((p4 >> bit) & 1) << 4) | (((p5 >> bit) & 1) << 5) |
-				(((p6 >> bit) & 1) << 6) | (((p7 >> bit) & 1) << 7);
-	}
-
-	// Direct colour not implemented yet!
-	int cgram_index;
-
-	if (bg.bpp == 2) { cgram_index = palette * 4   + colour; }
-	if (bg.bpp == 4) { cgram_index = palette * 16  + colour; }
-	if (bg.bpp == 8) { cgram_index =                 colour; } // THIS IS WRONG!
-	
-	bool transparent = (colour == 0);
-
-	Word snes_colour = cgram.data[cgram_index];
-
-	Pixel px;
-	px.transparent = transparent;
-
-	if (priority) {
-		if (bg.layer == 1) { px.priority = priority_order.H1; }
-		if (bg.layer == 2) { px.priority = priority_order.H2; }
-		if (bg.layer == 3) { px.priority = priority_order.H3; }
-		if (bg.layer == 4) { px.priority = priority_order.H4; }
-	} else {
-		if (bg.layer == 1) { px.priority = priority_order.L1; }
-		if (bg.layer == 2) { px.priority = priority_order.L2; }
-		if (bg.layer == 3) { px.priority = priority_order.L3; }
-		if (bg.layer == 4) { px.priority = priority_order.L4; }
-	}
-
-	px.colour = snes_colour;
-	px.layer = bg.layer;
-
-	return px;
-}
-
 // Note: tile caching cannot apply here
 Pixel PPU::fetch_mode7_pixel(BG& bg, uint16_t xcounter) {
 	int screen_x = xcounter;
@@ -313,7 +171,7 @@ void PPU::render_oam_view() {
 							  (((p3 >> bit) & 1) << 3);
 
 				if (colour == 0) {
-					continue; // leave backdrop black, like transparent pixels elsewhere
+					continue;
 				}
 
 				Byte cgram_index = 128 + (palette * 16) + colour;
@@ -328,6 +186,163 @@ void PPU::render_oam_view() {
 	}
 }
 
+void PPU::push_pixel(BG& bg, Pixel px, int& dot) {
+	bg.main_scanline[dot] = px;
+	bg.sub_scanline[dot]  = px;
+	dot++;
+
+	if (!hires_mode) {
+		bg.main_scanline[dot] = px;
+		bg.sub_scanline [dot]  = px;
+		dot++;
+	}
+}
+
+void PPU::render_bg_scanline(BG& bg) {
+	Pixel fetched_pixel;
+
+	int sub_px = bg.bghofs & 7;
+	int dot = 0;
+	
+	while (dot < 512) {
+
+		uint16_t xcounter = hires_mode ? dot : (dot >> 1);
+		if (bg_mode == 7) {
+			fetched_pixel = fetch_mode7_pixel(bg, xcounter);
+			push_pixel(bg, fetched_pixel, dot);
+		} else {
+			int bg_x, bg_y;
+			int mosaic_x, mosaic_y;
+			
+			if (bg.mosaic) {
+				mosaic_x = xcounter - (xcounter % (mosaic_size + 1));
+				mosaic_y = vcounter - (vcounter % (mosaic_size + 1));
+
+				bg_x = (mosaic_x + bg.bghofs) & 0x3FF;
+				bg_y = (mosaic_y + bg.bgvofs) & 0x3FF;
+			} else {
+				bg_x = (xcounter + bg.bghofs) & 0x3FF;
+				bg_y = (vcounter + bg.bgvofs) & 0x3FF;
+			}
+
+			int tile_x = bg_x >> 3;
+			int tile_y = bg_y >> 3;
+
+			int pixel_x = bg_x & 7;
+			int pixel_y = bg_y & 7;
+
+			int map_width_tiles  = bg.horizontal_tilemap_count ? 64 : 32;
+			int map_height_tiles = bg.vertical_tilemap_count   ? 64 : 32;
+
+			tile_x = tile_x & (map_width_tiles - 1);
+			tile_y = tile_y & (map_height_tiles - 1);
+
+			int screen_x = tile_x >> 5;
+			int screen_y = tile_y >> 5;
+			int screen = 0;
+
+			if (bg.horizontal_tilemap_count) {
+				screen = screen | screen_x;
+			}
+
+			if (bg.vertical_tilemap_count) {
+				screen = screen | (screen_y << 1);
+			}
+
+			int local_x = tile_x & 31;
+			int local_y = tile_y & 31;
+
+			Word tilemap_address = (bg.tilemap_vram_address + (screen * 0x400) + (local_y * 32) + local_x) & 0x7FFF;
+			Word entry = vram.data[tilemap_address];
+
+			int tile_number = entry & 0x3FF;
+			bool hflip = entry & 0x4000;
+			bool vflip = entry & 0x8000;
+
+			int palette  = (entry >> 10) & 0x7;
+			int priority = (entry >> 13) & 0x1;
+
+			if (bg.character_size) {
+				int sub_x = (bg_x >> 3) & 1;
+				int sub_y = (bg_y >> 3) & 1;
+
+				if (hflip) { sub_x ^= 1; }
+				if (vflip) { sub_y ^= 1; }
+
+				tile_number += sub_x;
+				tile_number += sub_y * 16;
+			}
+
+			if (vflip) {
+				pixel_y = pixel_y ^ 7;
+			}
+
+			Word tile_address = (bg.word_address + tile_number * (4 * bg.bpp)) & 0x7FFF;
+
+			DecodedRow* row = get_tile_row(tile_address, pixel_y, bg.bpp);
+			const auto& row_data = row->data;
+
+			int priority_value = 0;
+
+			if (priority) {
+				if (bg.layer == 1) { priority_value = priority_order.H1; }
+				if (bg.layer == 2) { priority_value = priority_order.H2; }
+				if (bg.layer == 3) { priority_value = priority_order.H3; }
+				if (bg.layer == 4) { priority_value = priority_order.H4; }
+			} else {
+				if (bg.layer == 1) { priority_value = priority_order.L1; }
+				if (bg.layer == 2) { priority_value = priority_order.L2; }
+				if (bg.layer == 3) { priority_value = priority_order.L3; }
+				if (bg.layer == 4) { priority_value = priority_order.L4; }
+			}
+
+			int stride = 0;
+			if (bg.bpp == 2) { stride = 4; }
+			if (bg.bpp == 4) { stride = 16; }
+
+			int palette_base = palette * stride;
+
+			// ONCE WORKING, ADD MOSAIC
+
+			Pixel px;
+			px.priority = priority_value;
+			px.layer = bg.layer;
+			px.colour_math = bg.enable_colour_math;
+
+			while (sub_px < 8 && dot < 512) {
+				Byte colour;
+
+				if (hflip) {
+					colour = row_data[7 - sub_px];
+				} else {
+					colour = row_data[sub_px];
+				}
+
+				int cgram_index = palette_base + colour;
+				Word snes_colour = cgram.data[cgram_index];
+
+				px.transparent = (colour == 0);
+				px.colour = snes_colour;
+			
+				push_pixel(bg, px, dot);
+
+				sub_px++;
+			}
+
+			sub_px = 0;
+		}
+
+	}
+
+	if (bg.windows_on_subscreen) {
+		window_mask(bg.sub_scanline, bg.window1_enabled, bg.window2_enabled, bg.window1_inverted, bg.window2_inverted, bg.mask_logic, bg.enable_colour_math);
+	}
+	if (bg.windows_on_main_screen) {
+		window_mask(bg.main_scanline, bg.window1_enabled, bg.window2_enabled, bg.window1_inverted, bg.window2_inverted, bg.mask_logic, bg.enable_colour_math);
+	}
+}
+
+/*
 void PPU::render_bg_scanline(BG& bg) {
 	Pixel fetched_pixel;
 
@@ -359,7 +374,7 @@ void PPU::render_bg_scanline(BG& bg) {
 	if (bg.windows_on_main_screen) {
 		window_mask(bg.main_scanline, bg.window1_enabled, bg.window2_enabled, bg.window1_inverted, bg.window2_inverted, bg.mask_logic, bg.enable_colour_math);
 	}
-}
+}*/
 
 void PPU::fetch_objects() {
 
@@ -415,6 +430,10 @@ void PPU::fetch_objects() {
 		if (line_in_sprite < height) {
 			Object obj;
 
+			/*std::cout << "Object index" << (int)(i) << " ";
+			std::cout << "X-POS: " << (int)(signed_x) << " ";
+			std::cout << "Y-POS: " << (int)(y_coordinate) << "\n";*/
+
 			obj.x_coordinate = signed_x;
 			obj.y_coordinate = y_coordinate;
 			obj.tile_number = tile_number;
@@ -447,58 +466,56 @@ void PPU::render_obj_scanline(ObjectLayer& obj) {
 
 	fetch_objects();
 
-	// Render each object into scanline here
 	for (auto& o : object_buffer) {
 		int x = hires_mode ? o.x_coordinate : (o.x_coordinate * 2);
 
+		int sprite_y = o.line_in_sprite;
+
+		if (o.vertical_flip) {
+			if (o.width == o.height) {
+				sprite_y = o.height - 1 - sprite_y;
+			} else if (sprite_y < o.width) {
+				sprite_y = o.width - 1 - sprite_y;
+			} else {
+				sprite_y = o.width + (o.width - 1) - (sprite_y - o.width);
+			}
+		}
+
+		int tile_row = sprite_y / 8;
+		int pixel_y = sprite_y & 7;
+
+		int base_col = o.tile_number & 0xF;
+		int base_row = (o.tile_number >> 4) & 0xF;
+
+		bool second_base = (o.tile_number & 0x100) != 0;
+		Word tile_base = second_base ? oam.second_base : oam.first_base;
+
+		int last_tile_col = -1;
+		DecodedRow* row_data = nullptr;
+
 		for (int i = 0; i < o.width; i++) {
-			
+
 			int sprite_x = i;
-			int sprite_y = o.line_in_sprite;
 
 			if (o.horizontal_flip) {
 				sprite_x = o.width - 1 - sprite_x;
 			}
-			if (o.vertical_flip) {
-				if (o.width == o.height) {
-					sprite_y = o.height - 1 - sprite_y;
-				} else if (sprite_y < o.width) {
-					sprite_y = o.width - 1 - sprite_y;
-				} else {
-					sprite_y = o.width + (o.width - 1) - (sprite_y - o.width);
-				}
-			}
 
 			int tile_col = sprite_x / 8;
-			int tile_row = sprite_y / 8;
-
 			int pixel_x = sprite_x & 7;
-			int pixel_y = sprite_y & 7;
 
-			int base_col = o.tile_number & 0xF;
-			int base_row = (o.tile_number >> 4) & 0xF;
+			if (tile_col != last_tile_col) {
+				int col = (base_col + tile_col) & 0xF;
+				int row = (base_row + tile_row) & 0xF;
 
-			int col = (base_col + tile_col) & 0xF;
-			int row = (base_row + tile_row) & 0xF;
+				int tile_index = (row << 4) | col;
 
-			int tile_index = (row << 4) | col;
+				Word tile_address = (tile_base + (tile_index * 16)) & 0x7FFF;
+				row_data = get_tile_row(tile_address, pixel_y, 4);
+				last_tile_col = tile_col;
+			}
 
-			bool second_base = (o.tile_number & 0x100) != 0;
-			Word tile_base = second_base ? oam.second_base : oam.first_base;
-			Word tile_address = (tile_base + (tile_index * 16)) & 0x7FFF;
-			Word p01 = vram.data[(tile_address + 0 + pixel_y) & 0x7FFF];
-			Word p23 = vram.data[(tile_address + 8 + pixel_y) & 0x7FFF];
-
-			Byte p0 = get_lo(p01);
-			Byte p1 = get_hi(p01);
-			Byte p2 = get_lo(p23);
-			Byte p3 = get_hi(p23);
-
-			int bit = 7 - pixel_x;
-			Byte colour = (((p0 >> bit) & 1) << 0) |
-			 			  (((p1 >> bit) & 1) << 1) |
-			 			  (((p2 >> bit) & 1) << 2) |
-			 			  (((p3 >> bit) & 1) << 3);
+			Byte colour = row_data->data[pixel_x];
 
 			Pixel px;
 
@@ -634,8 +651,6 @@ Pixel PPU::colour_math(Pixel main, Pixel sub, bool ignore_half) {
 
 void PPU::composite(std::array<Pixel, 512>& final_scanline) {
 	// JUST RESOLVES PRIORITIES, NO COLOUR MATH JUST YET!
-	std::array<Pixel, 5> candidates;
-
 	Pixel main_default_pixel;
 	main_default_pixel.transparent = false;
 	main_default_pixel.colour = cgram.data[0];
@@ -647,64 +662,51 @@ void PPU::composite(std::array<Pixel, 512>& final_scanline) {
 	sub_default_pixel.colour = (col.blue << 10) | (col.green << 5) | col.red;
 	sub_default_pixel.colour_math = col.backdrop_colour_math_enabled;
 	sub_default_pixel.priority = 0;
-	
-	for (int dot = 0; dot < 512; dot++) {
-		int n = 0;
-		if (bg1.main_screen) { candidates[n++] = bg1.main_scanline[dot]; }
-		if (bg2.main_screen) { candidates[n++] = bg2.main_scanline[dot]; }
-		if (bg3.main_screen) { candidates[n++] = bg3.main_scanline[dot]; }
-		if (bg_mode == 0) {
-			if (bg4.main_screen) { candidates[n++] = bg4.main_scanline[dot]; }
+
+	bool has_bg4 = (bg_mode == 0);
+
+	std::array<bool, 512> cm_window;
+	if (col.window1_enabled || col.window2_enabled) {
+		for (int dot = 0; dot < 512; dot++) {
+			uint16_t screen_x = hires_mode ? dot : (dot >> 1);
+			cm_window[dot] = is_colour_math_window(screen_x);
 		}
-		if (obj.main_screen) { candidates[n++] = obj.main_scanline[dot]; }
-		
-	
+	}
+
+	for (int dot = 0; dot < 512; dot++) {
 		Pixel* winner = nullptr;
 
-		for (int c = 0; c < n; c++) {
-			Pixel& px = candidates[c];
+		auto consider = [&winner](bool enabled, Pixel& px) {
+			if (!enabled || px.transparent) { return; }
+			if (!winner || px.priority > winner->priority ||
+				(px.priority == winner->priority && px.layer > winner->layer)) {
+				winner = &px;
+			}
+		};
 
-		    if (px.transparent) {
-		        continue;
-		    }
-
-		    if (!winner || px.priority > winner->priority || (px.priority == winner->priority && px.layer > winner->layer)) {
-		        winner = &px;
-		    }
-		}
+		consider(bg1.main_screen, bg1.main_scanline[dot]);
+		consider(bg2.main_screen, bg2.main_scanline[dot]);
+		consider(bg3.main_screen, bg3.main_scanline[dot]);
+		if (has_bg4) { consider(bg4.main_screen, bg4.main_scanline[dot]); }
+		consider(obj.main_screen, obj.main_scanline[dot]);
 
 		Pixel main_screen_px = winner ? *winner : main_default_pixel;
 
-		// Repeat for sub_screen (could create function out of this...)
-		n = 0;
-		if (bg1.sub_screen) { candidates[n++] = bg1.sub_scanline[dot]; }
-		if (bg2.sub_screen) { candidates[n++] = bg2.sub_scanline[dot]; }
-		if (bg3.sub_screen ) { candidates[n++] = bg3.sub_scanline[dot]; }
-		if (bg_mode == 0) {
-			if (bg4.sub_screen) { candidates[n++] = bg4.sub_scanline[dot]; }
-		}
-		if (obj.sub_screen) { candidates[n++] = obj.sub_scanline[dot]; }
-		
-	
 		winner = nullptr;
 
-		for (int c = 0; c < n; c++) {
-			Pixel& px = candidates[c];
-
-		    if (px.transparent) {
-		        continue;
-		    }
-
-		    if (!winner || px.priority > winner->priority || (px.priority == winner->priority && px.layer > winner->layer)) {
-		        winner = &px;
-		    }
-		}
+		consider(bg1.sub_screen, bg1.sub_scanline[dot]);
+		consider(bg2.sub_screen, bg2.sub_scanline[dot]);
+		consider(bg3.sub_screen, bg3.sub_scanline[dot]);
+		if (has_bg4) { consider(bg4.sub_screen, bg4.sub_scanline[dot]); }
+		consider(obj.sub_screen, obj.sub_scanline[dot]);
 
 		Pixel sub_screen_px = winner ? *winner : sub_default_pixel;
 		bool sub_is_backdrop = (winner == nullptr);
 
-		uint16_t screen_x = hires_mode ? dot : (dot >> 1);
-		bool is_window = is_colour_math_window(screen_x);
+		bool is_window = false;
+		if (col.window1_enabled || col.window2_enabled) {
+			is_window = cm_window[dot];
+		}
 		bool main_forced_black = resolve_main_screen_px(main_screen_px, is_window);
 		resolve_sub_screen_px(sub_screen_px, is_window);
 
@@ -761,56 +763,72 @@ uint32_t PPU::convert_to_rgba(uint16_t colour) {
 }
 
 void PPU::render_scanline() {
-	// Calculations go here
-	for (int x = 0; x < 512; x ++) {
-		int even_x = x / 2;
-		window1_dots[x] = (even_x >= window1.left_position) && (even_x <= window1.right_position);
-		window2_dots[x] = (even_x >= window2.left_position) && (even_x <= window2.right_position);
+	bool any_window_used =
+		bg1.windows_on_subscreen || bg1.windows_on_main_screen ||
+		bg2.windows_on_subscreen || bg2.windows_on_main_screen ||
+		bg3.windows_on_subscreen || bg3.windows_on_main_screen ||
+		bg4.windows_on_subscreen || bg4.windows_on_main_screen ||
+		obj.windows_on_subscreen || obj.windows_on_main_screen;
+
+	if (any_window_used) {
+		for (int x = 0; x < 512; x ++) {
+			int even_x = x / 2;
+			window1_dots[x] = (even_x >= window1.left_position) && (even_x <= window1.right_position);
+			window2_dots[x] = (even_x >= window2.left_position) && (even_x <= window2.right_position);
+		}
 	}
-	render_bg_scanline(bg1);
+	if (bg1.main_screen || bg1.sub_screen) { render_bg_scanline(bg1); }
 	if constexpr (DEBUG_WINDOW) {
 		if (!forced_blank) {
 			add_to_framebuffer(bg1.framebuffer, bg1.main_scanline);
 		}
 	}
 
-	if (bg_mode != 6) {
-		render_bg_scanline(bg2);
-		if constexpr (DEBUG_WINDOW) {
-			if (!forced_blank) {
-				add_to_framebuffer(bg2.framebuffer, bg2.main_scanline);
+	if (bg2.main_screen || bg2.sub_screen) {
+		if (bg_mode != 6) {
+			render_bg_scanline(bg2);
+			if constexpr (DEBUG_WINDOW) {
+				if (!forced_blank) {
+					add_to_framebuffer(bg2.framebuffer, bg2.main_scanline);
+				}
 			}
 		}
 	}
-	if (bg_mode != 3 && bg_mode != 5 && bg_mode != 7) {
-		render_bg_scanline(bg3);
-		if constexpr (DEBUG_WINDOW) {
-			if (!forced_blank) {
-				add_to_framebuffer(bg3.framebuffer, bg3.main_scanline);
+
+	if (bg3.main_screen || bg3.sub_screen) {
+		if (bg_mode != 3 && bg_mode != 5 && bg_mode != 7) {
+			render_bg_scanline(bg3);
+			if constexpr (DEBUG_WINDOW) {
+				if (!forced_blank) {
+					add_to_framebuffer(bg3.framebuffer, bg3.main_scanline);
+				}
 			}
 		}
 	}
-	if (bg_mode == 0) {
-		render_bg_scanline(bg4);
-		if constexpr (DEBUG_WINDOW) {
-			if (!forced_blank) {
-				add_to_framebuffer(bg4.framebuffer, bg4.main_scanline);
+
+	if (bg4.main_screen || bg4.sub_screen) {
+		if (bg_mode == 0) {
+			render_bg_scanline(bg4);
+			if constexpr (DEBUG_WINDOW) {
+				if (!forced_blank) {
+					add_to_framebuffer(bg4.framebuffer, bg4.main_scanline);
+				}
 			}
 		}
 	}
-	render_obj_scanline(obj);
-	if constexpr (DEBUG_WINDOW) {
-		if (!forced_blank) {
-			add_to_framebuffer(obj.framebuffer, obj.main_scanline);
+
+	if (obj.main_screen || obj.sub_screen) {
+		render_obj_scanline(obj);
+		if constexpr (DEBUG_WINDOW) {
+			if (!forced_blank) {
+				add_to_framebuffer(obj.framebuffer, obj.main_scanline);
+			}
 		}
 	}
 
 	std::array<Pixel, 512> final_scanline;
 	composite(final_scanline);
 	
-	// Pushing calculated scanline into framebuffer goes here
-	// With considerations for interlace modes!
-
 	int idx1 = screen_width * (2 * vcounter);
 	int idx2 = screen_width * ((2 * vcounter) + 1);
 	
@@ -884,6 +902,9 @@ void PPU::enter_vblank() {
 	if (cpu) {
 		cpu->set_hvbjoy_flag(0b1 << 7, true);
 	}
+	
+	oam.oamadd = oam.reload << 1;
+
 	call_nmi();
 }
 
@@ -964,4 +985,97 @@ void PPU::tick_component() {
 
 void PPU::connect_dma_controller(DMAController* dma_controller) {
 	this->dma_controller = dma_controller;
+}
+
+// Moved here to avoid circular dependency
+
+Byte PPU::communication_read(SNESAddress addr) {
+	Byte fetched = bus->get_open_bus();
+	// OAM
+	if (addr.offset == OAMDATAREAD_ADDRESS) {
+		if (oam.oamadd < 0x200) {
+			fetched = oam.data[oam.oamadd];
+		} else {
+			fetched = oam.data[0x200 + ((oam.oamadd - 0x200) & 0x1F)];
+		}
+		oam.oamadd = (oam.oamadd + 1) & 0x3FF;
+	}
+
+	// CGRAM
+	if (addr.offset == CGDATAREAD_ADDRESS) {
+		if (cgram.cgram_byte == 0) {
+			fetched = get_lo(cgram.data[cgram.cgram_address]);
+		} else {
+			fetched = get_hi(cgram.data[cgram.cgram_address]);
+			cgram.cgram_address++;
+		}
+		cgram.cgram_byte = !cgram.cgram_byte;
+	}
+
+	// VRAM
+	if (addr.offset == VMDATALREAD_ADDRESS) {
+		fetched = get_lo(vram.vram_latch);
+		if (vram.address_increment_mode == 0) {
+			vram.vram_latch = vram.data[remap_vmadd(vram.vmadd)];
+			vram.vmadd = (vram.vmadd + vram.address_increment) & 0x7FFF;
+		}
+	}
+	if (addr.offset == VMDATAHREAD_ADDRESS) {
+		fetched = get_hi(vram.vram_latch);
+		if (vram.address_increment_mode == 1) {
+			vram.vram_latch = vram.data[remap_vmadd(vram.vmadd)];
+			vram.vmadd = (vram.vmadd + vram.address_increment) & 0x7FFF;
+		}
+	}
+
+	// Multiplication result
+	if (addr.offset == MPYH_ADDRESS || addr.offset == MPYM_ADDRESS || addr.offset == MPYL_ADDRESS) {
+		mode7.mpy = mode7.m7a * mode7.last_m7b;
+		if (addr.offset == MPYL_ADDRESS) {
+			fetched = (mode7.mpy >> 0) & 0xFF;
+		}
+		if (addr.offset == MPYM_ADDRESS) {
+			fetched = (mode7.mpy >> 8) & 0xFF;
+		}
+		if (addr.offset == MPYH_ADDRESS) {
+			fetched = (mode7.mpy >> 16) & 0xFF;
+		}
+	}
+
+	// H/V Counters
+
+	if (addr.offset == SLHV_ADDRESS) {
+		counter_latch = true;
+		ophct = hcounter / 4;
+		opvct = vcounter;
+	}
+	if (addr.offset == OPHCT_ADDRESS) {
+		if (ophct_byte == 0) {
+			fetched = get_lo(ophct);
+		} else {
+			fetched = get_hi (ophct);
+		}
+		ophct_byte = !ophct_byte;
+	}
+	if (addr.offset == OPVCT_ADDRESS) {
+		if (opvct_byte == 0) {
+			fetched = get_lo(opvct);
+		} else {
+			fetched = get_hi (opvct);
+		}
+		opvct_byte = !opvct_byte;
+	}
+
+	// Status
+	if (addr.offset == STAT77_ADDRESS) {
+	    fetched = (time_over << 7) | (range_over << 6) | (master_slave_mode << 5) | (ppu1_version & 0xFF);
+	}
+	if (addr.offset == STAT78_ADDRESS) {
+	    fetched = (field << 7) | (counter_latch << 5) | (region << 4) | (ppu2_version & 0xFF);
+	    counter_latch = false;
+	    ophct_byte = false;
+	    opvct_byte = false;
+	}
+
+	return fetched;
 }

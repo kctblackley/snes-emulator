@@ -3,11 +3,20 @@
 #include "ricoh_5a22.hpp"
 #include "ppu.hpp"
 #include "dma_controller.hpp"
+#include "cartridge.hpp"
 
 Bus::Bus() {
 	open_bus = std::make_unique<OpenBus>();
 	wram = std::make_unique<WRAM>();
 	cartridge = std::make_unique<Cartridge>();
+}
+
+void Bus::connect_cpu_to_cartridge(Ricoh5A22* cpu) {
+	cartridge->connect_cpu(cpu);
+}
+
+bool Bus::is_cartridge_mapped(Address addr) {
+	return route(split_address(addr)) == cartridge.get();
 }
 
 Byte Bus::get_open_bus() {

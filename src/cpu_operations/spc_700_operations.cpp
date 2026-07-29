@@ -1,30 +1,31 @@
 #include "spc_700_operations.hpp"
 #include "spc_700_addressing_modes.hpp"
+#include "spc_700.hpp"
 
-// TO-DO WHEN COMPLETED, ORDER ALL INSTRUCTIONS BY OPCODE
+// TO-DO WHEN COMPLETED, ORDER ALL Instruction<SPC700>S BY OPCODE
 
 namespace SPC700Predicates {
-	bool NoJump(CPU& cpu) {
+	bool NoJump(SPC700& cpu) {
 		return !cpu.BufferJump;
 	}
 }
 
 namespace SPC700SpecialFunctions {
-	void Sleep(CPU& cpu, bool skipped) {
+	void Sleep(SPC700& cpu, bool skipped) {
 		return;
 	}
 
-	void Stop(CPU& cpu, bool skipped) {
+	void Stop(SPC700& cpu, bool skipped) {
 		return;
 	}
 }
 
 namespace SPC700Functions {
-	Word ya(CPU& cpu) {
+	Word ya(SPC700& cpu) {
 		return ((uint8_t)(cpu.regs.Y) << 8) | get_lo(cpu.regs.A);
 	}
 
-	void SetNZ(CPU& cpu, bool skipped, Word value) {
+	void SetNZ(SPC700& cpu, bool skipped, Word value) {
 		if (value & 0x80) {
 			cpu.set_flag_N();
 		} else {
@@ -37,23 +38,23 @@ namespace SPC700Functions {
 		}
 	}
 
-	void SetFuncOperand(CPU& cpu, bool skipped) {
+	void SetFuncOperand(SPC700& cpu, bool skipped) {
 		cpu.BufferAddress = (cpu.BufferOperand | ((cpu.regs.P & 0x20) << 3));
 	}
 
-	void SetFuncOperandPlusX(CPU& cpu, bool skipped) {
+	void SetFuncOperandPlusX(SPC700& cpu, bool skipped) {
 		cpu.BufferAddress = (((cpu.BufferOperand + cpu.regs.X) & 0xFF) | ((cpu.regs.P & 0x20) << 3));
 	}
 
-	void SetFuncOperandPlusY(CPU& cpu, bool skipped) {
+	void SetFuncOperandPlusY(SPC700& cpu, bool skipped) {
 		cpu.BufferAddress = (((cpu.BufferOperand + cpu.regs.Y) & 0xFF) | ((cpu.regs.P & 0x20) << 3));
 	}
 
-	void SetFuncX(CPU& cpu, bool skipped) {
+	void SetFuncX(SPC700& cpu, bool skipped) {
 		cpu.BufferAddress = (cpu.regs.X | ((cpu.regs.P & 0x20) << 3));
 	}
 
-	void sub_func(CPU& cpu, bool skipped, SubFunc func) {
+	void sub_func(SPC700& cpu, bool skipped, SubFunc func) {
 		switch(func) {
 		case SubFunc::ClearISetX:
 			cpu.clear_flag_I();
@@ -89,33 +90,33 @@ namespace SPC700Functions {
 		}
 	}
 
-	void NOP(CPU& cpu, bool skipped) {
+	void NOP(SPC700& cpu, bool skipped) {
 		return;
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void IncrementPC(CPU& cpu, bool skipped) {
+	void IncrementPC(SPC700& cpu, bool skipped) {
 		cpu.regs.PC++;
 		sub_func(cpu, skipped, func);
 	}
 
-	void Next(CPU& cpu, bool skipped) {
+	void Next(SPC700& cpu, bool skipped) {
 		cpu.BufferOpCode = cpu.read(cpu.regs.PC);
 	}
 
-	void CLRC(CPU& cpu, bool skipped) { cpu.regs.P = (cpu.regs.P & ~0x01); }
-	void SETC(CPU& cpu, bool skipped) { cpu.regs.P = (cpu.regs.P |  0x01); }
-	void CLRP(CPU& cpu, bool skipped) { cpu.regs.P = (cpu.regs.P & ~0x20); }
-	void SETP(CPU& cpu, bool skipped) { cpu.regs.P = (cpu.regs.P |  0x20); }
-	void DI(CPU& cpu, bool skipped)   { cpu.regs.P = (cpu.regs.P & ~0x04); }
-	void EI(CPU& cpu, bool skipped)   { cpu.regs.P = (cpu.regs.P |  0x04); }
+	void CLRC(SPC700& cpu, bool skipped) { cpu.regs.P = (cpu.regs.P & ~0x01); }
+	void SETC(SPC700& cpu, bool skipped) { cpu.regs.P = (cpu.regs.P |  0x01); }
+	void CLRP(SPC700& cpu, bool skipped) { cpu.regs.P = (cpu.regs.P & ~0x20); }
+	void SETP(SPC700& cpu, bool skipped) { cpu.regs.P = (cpu.regs.P |  0x20); }
+	void DI(SPC700& cpu, bool skipped)   { cpu.regs.P = (cpu.regs.P & ~0x04); }
+	void EI(SPC700& cpu, bool skipped)   { cpu.regs.P = (cpu.regs.P |  0x04); }
 
-	void CLRV(CPU& cpu, bool skipped) {
+	void CLRV(SPC700& cpu, bool skipped) {
 		cpu.clear_flag_V();
 		cpu.clear_flag_H();
 	}
 
-	void NOTC(CPU& cpu, bool skipped) {
+	void NOTC(SPC700& cpu, bool skipped) {
 		if (cpu.get_flag_C() ^ 1) {
 			cpu.set_flag_C();
 		} else {
@@ -124,7 +125,7 @@ namespace SPC700Functions {
 	}
 
 	template <typename From, typename To>
-	void Read(CPU& cpu, bool skipped) {
+	void Read(SPC700& cpu, bool skipped) {
 		Word address;
 
 		// read from...
@@ -173,7 +174,7 @@ namespace SPC700Functions {
 	}
 
 	template <typename Value, typename To>
-	void Write(CPU& cpu, bool skipped) {
+	void Write(SPC700& cpu, bool skipped) {
 		// write the value...
 		Byte value;
 		if constexpr (std::is_same_v<Value, WriteValue::P>)      { value = cpu.regs.P; }
@@ -207,43 +208,43 @@ namespace SPC700Functions {
 	}
 
 	template <int value = 1, SubFunc func = SubFunc::None>
-	void DecrementS(CPU& cpu, bool skipped) {
+	void DecrementS(SPC700& cpu, bool skipped) {
 		cpu.regs.S = (uint8_t)(cpu.regs.S - value);
 		SPC700Functions::sub_func(cpu, skipped, func);
 	}
 
 	template <int value = 1, SubFunc func = SubFunc::None>
-	void IncrementS(CPU& cpu, bool skipped) {
+	void IncrementS(SPC700& cpu, bool skipped) {
 		cpu.regs.S = (uint8_t)(cpu.regs.S + value);
 		SPC700Functions::sub_func(cpu, skipped, func);
 	}
 
 	template <int value = 1, SubFunc func = SubFunc::None>
-	void DecrementX(CPU& cpu, bool skipped) {
+	void DecrementX(SPC700& cpu, bool skipped) {
 		cpu.regs.X = (uint8_t)(cpu.regs.X - value);
 		SPC700Functions::sub_func(cpu, skipped, func);
 	}
 
 	template <int value = 1, SubFunc func = SubFunc::None>
-	void IncrementX(CPU& cpu, bool skipped) {
+	void IncrementX(SPC700& cpu, bool skipped) {
 		cpu.regs.X = (uint8_t)(cpu.regs.X + value);
 		SPC700Functions::sub_func(cpu, skipped, func);
 	}
 
 	template<int call = 0>
-	void TCallLow(CPU& cpu, bool skipped) {
+	void TCallLow(SPC700& cpu, bool skipped) {
 		Byte value = cpu.read(0xFFDE - (2 * call));
 		cpu.regs.PC = (get_hi(cpu.regs.PC) << 8) | value;
 	}
 
 	template<int call = 0>
-	void TCallHigh(CPU& cpu, bool skipped) {
+	void TCallHigh(SPC700& cpu, bool skipped) {
 		Byte value = cpu.read(0xFFDF - (2 * call));
 		cpu.regs.PC = (value << 8) | get_lo(cpu.regs.PC);
 	}
 
 	template <int step = 1>
-	void DAA(CPU& cpu, bool skipped) {
+	void DAA(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			if (cpu.get_flag_C() || cpu.regs.A > 0x99) {
@@ -270,7 +271,7 @@ namespace SPC700Functions {
 	}
 
 	template <int step = 1>
-	void DAS(CPU& cpu, bool skipped) {
+	void DAS(SPC700& cpu, bool skipped) {
 		switch (step) {
 		case 1:
 			if (!cpu.get_flag_C() || cpu.regs.A > 0x99) {
@@ -297,7 +298,7 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void XCN(CPU& cpu, bool skipped) {
+	void XCN(SPC700& cpu, bool skipped) {
 		Byte value = cpu.regs.A;
 		value = (value >> 7) | (value << 1);
 		cpu.regs.A = (uint8_t)(value);
@@ -305,7 +306,7 @@ namespace SPC700Functions {
 	}
 
 	template<int step = 1, SubFunc func = SubFunc::None>
-	void DIV(CPU& cpu, bool skipped) {
+	void DIV(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			if ((cpu.regs.Y & 15) >= (cpu.regs.X & 15)) {
@@ -344,7 +345,7 @@ namespace SPC700Functions {
 	// write the value...
 
 	template<int step = 1, SubFunc func = SubFunc::None>
-	void MUL(CPU& cpu, bool skipped) {
+	void MUL(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.YABuffer = cpu.regs.Y * cpu.regs.A;
@@ -358,29 +359,29 @@ namespace SPC700Functions {
 	}
 
 	template<int shift = 0>
-	void SET(CPU& cpu, bool skipped) {
+	void SET(SPC700& cpu, bool skipped) {
 		Byte mask = (1 << shift);
 		cpu.BufferOperand = ((cpu.BufferOperand & ~mask) | mask);
 	}
 
 	template<int shift = 0>
-	void CLR(CPU& cpu, bool skipped) {
+	void CLR(SPC700& cpu, bool skipped) {
 		Byte mask = (1 << shift);
 		cpu.BufferOperand = ((cpu.BufferOperand & ~mask) | 0x00);
 	}
 
 	template<int shift = 0>
-	void BBS(CPU& cpu, bool skipped) {
+	void BBS(SPC700& cpu, bool skipped) {
 		cpu.BufferJump = ((cpu.BufferOperand & (1 << shift)) == (1 << shift));
 	}
 
 	template<int shift = 0>
-	void BBC(CPU& cpu, bool skipped) {
+	void BBC(SPC700& cpu, bool skipped) {
 		cpu.BufferJump = ((cpu.BufferOperand & (1 << shift)) == (0 << shift));
 	}
 
 	template <int step = 0>
-	void Branch(CPU& cpu, bool skipped) {
+	void Branch(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.BufferAddress = cpu.regs.PC + (int8_t)(cpu.BufferOperand);
@@ -393,57 +394,57 @@ namespace SPC700Functions {
 	}
 
 	template <int step = 0>
-	void MOV_5D(CPU& cpu, bool skipped) {
+	void MOV_5D(SPC700& cpu, bool skipped) {
 		cpu.regs.X = (uint8_t)cpu.regs.A;
 	}
 
 	template <int step = 0>
-	void MOV_7D(CPU& cpu, bool skipped) {
+	void MOV_7D(SPC700& cpu, bool skipped) {
 		cpu.regs.A = (uint8_t)cpu.regs.X;
 	}
 
 	template <int step = 0>
-	void MOV_Operand_To_Y(CPU& cpu, bool skipped) {
+	void MOV_Operand_To_Y(SPC700& cpu, bool skipped) {
 		cpu.regs.Y = (uint8_t)cpu.BufferOperand;
 	}
 
 	template <int step = 0>
-	void MOV_8F(CPU& cpu, bool skipped) {
+	void MOV_8F(SPC700& cpu, bool skipped) {
 		cpu.BufferOperand = (uint8_t)cpu.regs.A;
 	}
 
 	template <int step = 0>
-	void MOV_9D(CPU& cpu, bool skipped) {
+	void MOV_9D(SPC700& cpu, bool skipped) {
 		cpu.regs.X = (uint8_t)cpu.regs.S;
 	}
 
 	template <int step = 0>
-	void MOV_BD(CPU& cpu, bool skipped) {
+	void MOV_BD(SPC700& cpu, bool skipped) {
 		cpu.regs.S = (uint8_t)cpu.regs.X;
 	}
 
 	template <int step = 0>
-	void MOV_DD(CPU& cpu, bool skipped) {
+	void MOV_DD(SPC700& cpu, bool skipped) {
 		cpu.regs.A = (uint8_t)cpu.regs.Y;
 	}
 
 	template <int step = 0>
-	void MOV_FD(CPU& cpu, bool skipped) {
+	void MOV_FD(SPC700& cpu, bool skipped) {
 		cpu.regs.Y = (uint8_t)cpu.regs.A;
 	}
 
 	template <int step = 0>
-	void MOV_Operand_To_A(CPU& cpu, bool skipped) {
+	void MOV_Operand_To_A(SPC700& cpu, bool skipped) {
 		cpu.regs.A = (uint8_t)cpu.BufferOperand;
 	}
 
 	template <int step = 0>
-	void MOV_Operand_To_X(CPU& cpu, bool skipped) {
+	void MOV_Operand_To_X(SPC700& cpu, bool skipped) {
 		cpu.regs.X = (uint8_t)cpu.BufferOperand;
 	}
 
 	template <int code = 0, int step = 0, SubFunc func = SubFunc::None, bool pc_increment = false>
-	void MOV(CPU& cpu, bool skipped) {
+	void MOV(SPC700& cpu, bool skipped) {
 		if (pc_increment) { cpu.regs.PC++; }
 		switch (code) {
 		case 0x5D: SPC700Functions::MOV_5D<step>(cpu, skipped); break;
@@ -481,7 +482,7 @@ namespace SPC700Functions {
 	}
 
 	template <Bitwise bitwise = Bitwise::OR, typename ApplyTo, typename With, SubFunc func = SubFunc::None, bool increment_pc = false>
-	void BITWISE(CPU& cpu, bool skipped) {
+	void BITWISE(SPC700& cpu, bool skipped) {
 		Word val = 0x00;
 		if constexpr (increment_pc) {
 			cpu.regs.PC++;
@@ -566,27 +567,27 @@ namespace SPC700Functions {
 		SPC700Functions::sub_func(cpu, skipped, func);
 	}
 
-	void SetPointerXPlusAddress(CPU& cpu, bool skipped) {
+	void SetPointerXPlusAddress(SPC700& cpu, bool skipped) {
 		cpu.BufferPointer = cpu.regs.X + cpu.BufferAddress;
 	}
 
-	void SetPointerYPlusAddress(CPU& cpu, bool skipped) {
+	void SetPointerYPlusAddress(SPC700& cpu, bool skipped) {
 		cpu.BufferPointer = cpu.regs.Y + cpu.BufferAddress;
 	}
 
 	template <int AndVal, int EqVal>
-	void Jump(CPU& cpu, bool skipped) {
+	void Jump(SPC700& cpu, bool skipped) {
 		cpu.regs.PC++;
 		cpu.BufferJump = ((cpu.regs.P & AndVal) == EqVal);
 	}
 
-	void JumpAlways(CPU& cpu, bool skipped) {
+	void JumpAlways(SPC700& cpu, bool skipped) {
 		cpu.regs.PC++;
 		cpu.BufferJump = true;
 	}
 
 	template <int step>
-	void DoJump(CPU& cpu, bool skipped) {
+	void DoJump(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.BufferAddress = cpu.regs.PC + (int8_t)(cpu.BufferOperand);
@@ -599,55 +600,55 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void IncrementOperand(CPU& cpu, bool skipped) {
+	void IncrementOperand(SPC700& cpu, bool skipped) {
 		cpu.BufferOperand += 1;
 		sub_func(cpu, skipped, func);
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void DecrementOperand(CPU& cpu, bool skipped) {
+	void DecrementOperand(SPC700& cpu, bool skipped) {
 		cpu.BufferOperand -= 1;
 		sub_func(cpu, skipped, func);
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void IncrementRegA(CPU& cpu, bool skipped) {
+	void IncrementRegA(SPC700& cpu, bool skipped) {
 		cpu.regs.A = (cpu.regs.A + 1) & 0xFF;
 		sub_func(cpu, skipped, func);
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void DecrementRegA(CPU& cpu, bool skipped) {
+	void DecrementRegA(SPC700& cpu, bool skipped) {
 		cpu.regs.A = (cpu.regs.A - 1) & 0xFF;
 		sub_func(cpu, skipped, func);
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void IncrementRegX(CPU& cpu, bool skipped) {
+	void IncrementRegX(SPC700& cpu, bool skipped) {
 		cpu.regs.X = (cpu.regs.X + 1) & 0xFF;
 		sub_func(cpu, skipped, func);
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void DecrementRegX(CPU& cpu, bool skipped) {
+	void DecrementRegX(SPC700& cpu, bool skipped) {
 		cpu.regs.X = (cpu.regs.X - 1) & 0xFF;
 		sub_func(cpu, skipped, func);
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void IncrementRegY(CPU& cpu, bool skipped) {
+	void IncrementRegY(SPC700& cpu, bool skipped) {
 		cpu.regs.Y = (cpu.regs.Y + 1) & 0xFF;
 		sub_func(cpu, skipped, func);
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void DecrementRegY(CPU& cpu, bool skipped) {
+	void DecrementRegY(SPC700& cpu, bool skipped) {
 		cpu.regs.Y = (cpu.regs.Y - 1) & 0xFF;
 		sub_func(cpu, skipped, func);
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void ASL(CPU& cpu, bool skipped) {
+	void ASL(SPC700& cpu, bool skipped) {
 		if (cpu.BufferOperand & 0x80) {
 			cpu.set_flag_C();
 		} else {
@@ -660,7 +661,7 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void ASL_A(CPU& cpu, bool skipped) {
+	void ASL_A(SPC700& cpu, bool skipped) {
 		if (cpu.regs.A & 0x80) {
 			cpu.set_flag_C();
 		} else {
@@ -673,7 +674,7 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void LSR(CPU& cpu, bool skipped) {
+	void LSR(SPC700& cpu, bool skipped) {
 		if (cpu.BufferOperand & 0x01) {
 			cpu.set_flag_C();
 		} else {
@@ -686,7 +687,7 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void LSR_A(CPU& cpu, bool skipped) {
+	void LSR_A(SPC700& cpu, bool skipped) {
 		if (cpu.regs.A & 0x01) {
 			cpu.set_flag_C();
 		} else {
@@ -699,7 +700,7 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void ROL(CPU& cpu, bool skipped) {
+	void ROL(SPC700& cpu, bool skipped) {
 		cpu.BufferTmp = cpu.get_flag_C();
 		if (cpu.BufferOperand & 0x80) {
 			cpu.set_flag_C();
@@ -712,7 +713,7 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void ROL_A(CPU& cpu, bool skipped) {
+	void ROL_A(SPC700& cpu, bool skipped) {
 		cpu.BufferTmp = cpu.get_flag_C();
 		if (cpu.regs.A & 0x80) {
 			cpu.set_flag_C();
@@ -725,7 +726,7 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void ROR(CPU& cpu, bool skipped) {
+	void ROR(SPC700& cpu, bool skipped) {
 		cpu.BufferTmp = (cpu.get_flag_C() << 7);
 		if (cpu.BufferOperand & 0x01) {
 			cpu.set_flag_C();
@@ -738,7 +739,7 @@ namespace SPC700Functions {
 	}
 
 	template <SubFunc func = SubFunc::None>
-	void ROR_A(CPU& cpu, bool skipped) {
+	void ROR_A(SPC700& cpu, bool skipped) {
 		cpu.BufferTmp = (cpu.get_flag_C() << 7);
 		if (cpu.regs.A & 0x01) {
 			cpu.set_flag_C();
@@ -750,11 +751,11 @@ namespace SPC700Functions {
 		sub_func(cpu, skipped, func);
 	}
 
-	void SetAddressXPSW(CPU& cpu, bool skipped) {
+	void SetAddressXPSW(SPC700& cpu, bool skipped) {
 		cpu.BufferAddress = (cpu.regs.X | ((cpu.regs.P & 0x20) << 3));
 	}
 
-	void OR1Neq(CPU& cpu, bool skipped) {
+	void OR1Neq(SPC700& cpu, bool skipped) {
 		Byte bit = cpu.BufferAddress >> 13;
 		bool flag = cpu.get_flag_C();
 		if (flag || (cpu.BufferOperand & (1 << bit)) != 0) {
@@ -764,7 +765,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void OR1Eq(CPU& cpu, bool skipped) {
+	void OR1Eq(SPC700& cpu, bool skipped) {
 		Byte bit = cpu.BufferAddress >> 13;
 		bool flag = cpu.get_flag_C();
 		if (flag || (cpu.BufferOperand & (1 << bit)) == 0) {
@@ -774,7 +775,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void EOR1(CPU& cpu, bool skipped) {
+	void EOR1(SPC700& cpu, bool skipped) {
 		Byte bit = cpu.BufferAddress >> 13;
 		bool flag = cpu.get_flag_C();
 		if (flag ^ (cpu.BufferOperand & (1 << bit)) != 0) {
@@ -784,7 +785,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void AND1Neq(CPU& cpu, bool skipped) {
+	void AND1Neq(SPC700& cpu, bool skipped) {
 		Byte bit = cpu.BufferAddress >> 13;
 		bool flag = cpu.get_flag_C();
 		if (flag && (cpu.BufferOperand & (1 << bit)) != 0) {
@@ -794,7 +795,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void AND1Eq(CPU& cpu, bool skipped) {
+	void AND1Eq(SPC700& cpu, bool skipped) {
 		Byte bit = cpu.BufferAddress >> 13;
 		bool flag = cpu.get_flag_C();
 		if (flag && (cpu.BufferOperand & (1 << bit)) == 0) {
@@ -804,7 +805,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void MOV1_AA(CPU& cpu, bool skipped) {
+	void MOV1_AA(SPC700& cpu, bool skipped) {
 		Byte bit = cpu.BufferAddress >> 13;
 		if ((cpu.BufferOperand & (1 << bit)) != 0) {
 			cpu.set_flag_C();
@@ -813,7 +814,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void MOV1_CA(CPU& cpu, bool skipped) {
+	void MOV1_CA(SPC700& cpu, bool skipped) {
 		Byte bit = cpu.BufferAddress >> 13;
 		if (cpu.get_flag_C()) {
 			cpu.BufferOperand = cpu.BufferOperand | (1 << bit);
@@ -822,12 +823,12 @@ namespace SPC700Functions {
 		}
 	}
 
-	void NOT1(CPU& cpu, bool skipped) {
+	void NOT1(SPC700& cpu, bool skipped) {
 		Byte bit = cpu.BufferAddress >> 13;
 		cpu.BufferOperand = cpu.BufferOperand ^ (1 << bit);
 	}
 
-	void TSET1(CPU& cpu, bool skipped) {
+	void TSET1(SPC700& cpu, bool skipped) {
 		cpu.BufferTmp = cpu.regs.A - cpu.BufferOperand;
 		cpu.BufferOperand = cpu.BufferOperand | cpu.regs.A;
 		if (cpu.BufferTmp == 0) {
@@ -842,7 +843,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void TCLR1(CPU& cpu, bool skipped) {
+	void TCLR1(SPC700& cpu, bool skipped) {
 		cpu.BufferTmp = cpu.regs.A - cpu.BufferOperand;
 		cpu.BufferOperand = cpu.BufferOperand & ~cpu.regs.A;
 		if (cpu.BufferTmp == 0) {
@@ -858,7 +859,7 @@ namespace SPC700Functions {
 	}
 
 	template <int step>
-	void CBNE(CPU& cpu, bool skipped) {
+	void CBNE(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.BufferJump = (cpu.regs.A != cpu.BufferOperand);
@@ -874,7 +875,7 @@ namespace SPC700Functions {
 	}
 
 	template <int step>
-	void DBNZ_6E(CPU& cpu, bool skipped) {
+	void DBNZ_6E(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.BufferOperand -= 1;
@@ -891,7 +892,7 @@ namespace SPC700Functions {
 	}
 
 	template <int step>
-	void DBNZ_FE(CPU& cpu, bool skipped) {
+	void DBNZ_FE(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.regs.PC += 1;
@@ -909,7 +910,7 @@ namespace SPC700Functions {
 	}
 
 	template <int step>
-	void DECW(CPU& cpu, bool skipped) {
+	void DECW(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.BufferUnderflow = (cpu.BufferOperand == 0);
@@ -932,7 +933,7 @@ namespace SPC700Functions {
 	}
 
 	template <int step>
-	void INCW(CPU& cpu, bool skipped) {
+	void INCW(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.BufferOverflow = (cpu.BufferOperand == 0xFF);
@@ -954,7 +955,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void CMPW(CPU& cpu, bool skipped) {
+	void CMPW(SPC700& cpu, bool skipped) {
 		int tmp = ya(cpu) - cpu.BufferOperand16;
 		if (tmp >= 0) {
 			cpu.set_flag_C();
@@ -974,7 +975,7 @@ namespace SPC700Functions {
 	}
 
 	template <bool subw>
-	void ADDSUBW(CPU& cpu, bool skipped) {
+	void ADDSUBW(SPC700& cpu, bool skipped) {
 
 		int tmp_r = 0;
 
@@ -1027,7 +1028,7 @@ namespace SPC700Functions {
 		}
 	}
 
-	void MOVW(CPU& cpu, bool skipped) {
+	void MOVW(SPC700& cpu, bool skipped) {
 		if (ya(cpu) & 0x8000) {
 			cpu.set_flag_N();
 		} else {
@@ -1041,7 +1042,7 @@ namespace SPC700Functions {
 	}
 
 	template <int step>
-	void CALL_3F(CPU& cpu, bool skipped) {
+	void CALL_3F(SPC700& cpu, bool skipped) {
 		switch(step) {
 		case 1:
 			cpu.regs.PC = (get_hi(cpu.regs.PC) << 8) | (get_lo(cpu.BufferAddress));
@@ -1052,21 +1053,21 @@ namespace SPC700Functions {
 		}
 	}
 
-	void PCALL(CPU& cpu, bool skipped) {
+	void PCALL(SPC700& cpu, bool skipped) {
 		cpu.regs.PC = 0xFF00 | get_lo(cpu.BufferAddress);
 	}
 
-	void SetPCToAddress(CPU& cpu, bool skipped) {
+	void SetPCToAddress(SPC700& cpu, bool skipped) {
 		cpu.regs.PC = cpu.BufferAddress;
 	}
 
-	void IncrementPointerByY(CPU& cpu, bool skipped) {
+	void IncrementPointerByY(SPC700& cpu, bool skipped) {
 		cpu.BufferPointer = (cpu.BufferPointer + cpu.regs.Y) & 0xFFFF;
 	}
 }
 
 // NOP (00)
-Instruction s_00 = {
+Instruction<SPC700> s_00 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -1074,7 +1075,7 @@ Instruction s_00 = {
 };
 
 // TCALL0 (01)
-Instruction s_01 = {
+Instruction<SPC700> s_01 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1094,7 +1095,7 @@ Instruction s_01 = {
 };
 
 // SET1 (02)
-Instruction s_02 = {
+Instruction<SPC700> s_02 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1106,7 +1107,7 @@ Instruction s_02 = {
 };
 
 // BBS0 (03)
-Instruction s_03 = {
+Instruction<SPC700> s_03 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1124,7 +1125,7 @@ Instruction s_03 = {
 };
 
 // PUSH (0D)
-Instruction s_0d = {
+Instruction<SPC700> s_0d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1136,7 +1137,7 @@ Instruction s_0d = {
 };
 
 // BRK (0F)
-Instruction s_0f = {
+Instruction<SPC700> s_0f = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1156,7 +1157,7 @@ Instruction s_0f = {
 };
 
 // TCALL1 (11)
-Instruction s_11 = {
+Instruction<SPC700> s_11 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1176,7 +1177,7 @@ Instruction s_11 = {
 };
 
 // CLR1 (12)
-Instruction s_12 = {
+Instruction<SPC700> s_12 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1188,7 +1189,7 @@ Instruction s_12 = {
 };
 
 // BBC0 (13)
-Instruction s_13 = {
+Instruction<SPC700> s_13 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1206,7 +1207,7 @@ Instruction s_13 = {
 };
 
 // CLRP (20)
-Instruction s_20 = {
+Instruction<SPC700> s_20 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::CLRP),
@@ -1214,7 +1215,7 @@ Instruction s_20 = {
 };
 
 // TCALL2 (21)
-Instruction s_21 = {
+Instruction<SPC700> s_21 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1234,7 +1235,7 @@ Instruction s_21 = {
 };
 
 // SET2 (22)
-Instruction s_22 = {
+Instruction<SPC700> s_22 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1246,7 +1247,7 @@ Instruction s_22 = {
 };
 
 // BBS1 (23)
-Instruction s_23 = {
+Instruction<SPC700> s_23 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1264,7 +1265,7 @@ Instruction s_23 = {
 };
 
 // PUSH (2D)
-Instruction s_2d = {
+Instruction<SPC700> s_2d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1276,7 +1277,7 @@ Instruction s_2d = {
 };
 
 // TCALL3 (31)
-Instruction s_31 = {
+Instruction<SPC700> s_31 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1296,7 +1297,7 @@ Instruction s_31 = {
 };
 
 // CLR2 (32)
-Instruction s_32 = {
+Instruction<SPC700> s_32 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1308,7 +1309,7 @@ Instruction s_32 = {
 };
 
 // BBC1 (33)
-Instruction s_33 = {
+Instruction<SPC700> s_33 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1326,7 +1327,7 @@ Instruction s_33 = {
 };
 
 // SETP (40)
-Instruction s_40 = {
+Instruction<SPC700> s_40 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::SETP),
@@ -1334,7 +1335,7 @@ Instruction s_40 = {
 };
 
 // TCALL4 (41)
-Instruction s_41 = {
+Instruction<SPC700> s_41 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1354,7 +1355,7 @@ Instruction s_41 = {
 };
 
 // SET3 (42)
-Instruction s_42 = {
+Instruction<SPC700> s_42 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1366,7 +1367,7 @@ Instruction s_42 = {
 };
 
 // BBS2 (43)
-Instruction s_43 = {
+Instruction<SPC700> s_43 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1384,7 +1385,7 @@ Instruction s_43 = {
 };
 
 // PUSH (4D)
-Instruction s_4d = {
+Instruction<SPC700> s_4d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1396,7 +1397,7 @@ Instruction s_4d = {
 };
 
 // TCALL5 (51)
-Instruction s_51 = {
+Instruction<SPC700> s_51 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1416,7 +1417,7 @@ Instruction s_51 = {
 };
 
 // CLR3 (52)
-Instruction s_52 = {
+Instruction<SPC700> s_52 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1428,7 +1429,7 @@ Instruction s_52 = {
 };
 
 // BBC2 (53)
-Instruction s_53 = {
+Instruction<SPC700> s_53 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1446,7 +1447,7 @@ Instruction s_53 = {
 };
 
 // MOV (5D) (Implied)
-Instruction s_5d = {
+Instruction<SPC700> s_5d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::MOV<0x5D, 0, SubFunc::SetNZFlagRegisterX>),
@@ -1454,7 +1455,7 @@ Instruction s_5d = {
 };
 
 // CLRC (60)
-Instruction s_60 = {
+Instruction<SPC700> s_60 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::CLRC),
@@ -1462,7 +1463,7 @@ Instruction s_60 = {
 };
 
 // TCALL6 (61)
-Instruction s_61 = {
+Instruction<SPC700> s_61 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1482,7 +1483,7 @@ Instruction s_61 = {
 };
 
 // SET4 (62)
-Instruction s_62 = {
+Instruction<SPC700> s_62 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1494,7 +1495,7 @@ Instruction s_62 = {
 };
 
 // BBS3 (63)
-Instruction s_63 = {
+Instruction<SPC700> s_63 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1512,7 +1513,7 @@ Instruction s_63 = {
 };
 
 // PUSH (6D)
-Instruction s_6d = {
+Instruction<SPC700> s_6d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1524,7 +1525,7 @@ Instruction s_6d = {
 };
 
 // RET (6F)
-Instruction s_6f = {
+Instruction<SPC700> s_6f = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1538,7 +1539,7 @@ Instruction s_6f = {
 };
 
 // TCALL7 (71)
-Instruction s_71 = {
+Instruction<SPC700> s_71 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1558,7 +1559,7 @@ Instruction s_71 = {
 };
 
 // CLR4 (72)
-Instruction s_72 = {
+Instruction<SPC700> s_72 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1570,7 +1571,7 @@ Instruction s_72 = {
 };
 
 // BBC3 (73)
-Instruction s_73 = {
+Instruction<SPC700> s_73 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1588,7 +1589,7 @@ Instruction s_73 = {
 };
 
 // MOV (7D) (Implied)
-Instruction s_7d = {
+Instruction<SPC700> s_7d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::MOV<0x7D, 0, SubFunc::SetNZFlagRegisterA>),
@@ -1596,7 +1597,7 @@ Instruction s_7d = {
 };
 
 // RETI (7F)
-Instruction s_7f = {
+Instruction<SPC700> s_7f = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1612,7 +1613,7 @@ Instruction s_7f = {
 };
 
 // SETC (80)
-Instruction s_80 = {
+Instruction<SPC700> s_80 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::SETC),
@@ -1620,7 +1621,7 @@ Instruction s_80 = {
 };
 
 // TCALL8 (81)
-Instruction s_81 = {
+Instruction<SPC700> s_81 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1640,7 +1641,7 @@ Instruction s_81 = {
 };
 
 // SET5 (82)
-Instruction s_82 = {
+Instruction<SPC700> s_82 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1652,7 +1653,7 @@ Instruction s_82 = {
 };
 
 // BBS4 (83)
-Instruction s_83 = {
+Instruction<SPC700> s_83 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1670,7 +1671,7 @@ Instruction s_83 = {
 };
 
 // MOV (8D) (Immediate)
-Instruction s_8d = {
+Instruction<SPC700> s_8d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::MOV<0x8D, 0, SubFunc::SetNZFlagOperand, true>),
@@ -1678,7 +1679,7 @@ Instruction s_8d = {
 };
 
 // POP (8E)
-Instruction s_8e = {
+Instruction<SPC700> s_8e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1690,14 +1691,14 @@ Instruction s_8e = {
 };
 
 // MOV (8F) (Immediate Data to Direct Page d, #i (Read/Modify/Write))
-Instruction s_8f = {
+Instruction<SPC700> s_8f = {
 	IMMEDIATE_DATA_TO_DIRECT_PAGE_D_READ_MODIFY_WRITE_START
 	MakeHandler(SPC700Functions::MOV<0x8f, 0, SubFunc::None>),
 	IMMEDIATE_DATA_TO_DIRECT_PAGE_D_READ_MODIFY_WRITE_END
 };
 
 // TCALL9 (91)
-Instruction s_91 = {
+Instruction<SPC700> s_91 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1717,7 +1718,7 @@ Instruction s_91 = {
 };
 
 // CLR5 (92)
-Instruction s_92 = {
+Instruction<SPC700> s_92 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1729,7 +1730,7 @@ Instruction s_92 = {
 };
 
 // BBC4 (93)
-Instruction s_93 = {
+Instruction<SPC700> s_93 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1747,7 +1748,7 @@ Instruction s_93 = {
 };
 
 // MOV (9D)
-Instruction s_9d = {
+Instruction<SPC700> s_9d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::MOV<0x9d, 0, SubFunc::SetNZFlagRegisterX>),
@@ -1755,7 +1756,7 @@ Instruction s_9d = {
 };
 
 // DIV (9E)
-Instruction s_9e = {
+Instruction<SPC700> s_9e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::DIV<1>),
@@ -1783,7 +1784,7 @@ Instruction s_9e = {
 };
 
 // XCN (9F)
-Instruction s_9f = {
+Instruction<SPC700> s_9f = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::XCN),
@@ -1797,7 +1798,7 @@ Instruction s_9f = {
 };
 
 // EI (A0)
-Instruction s_a0 = {
+Instruction<SPC700> s_a0 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -1807,7 +1808,7 @@ Instruction s_a0 = {
 };
 
 // TCALL10 (A1)
-Instruction s_a1 = {
+Instruction<SPC700> s_a1 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1827,7 +1828,7 @@ Instruction s_a1 = {
 };
 
 // SET6 (A2)
-Instruction s_a2 = {
+Instruction<SPC700> s_a2 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1839,7 +1840,7 @@ Instruction s_a2 = {
 };
 
 // BBS5 (A3)
-Instruction s_a3 = {
+Instruction<SPC700> s_a3 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1857,7 +1858,7 @@ Instruction s_a3 = {
 };
 
 // POP (AE)
-Instruction s_ae = {
+Instruction<SPC700> s_ae = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1869,7 +1870,7 @@ Instruction s_ae = {
 };
 
 // MOV (AF)
-Instruction s_af = {
+Instruction<SPC700> s_af = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::SetFuncX),
@@ -1881,7 +1882,7 @@ Instruction s_af = {
 };
 
 // TCALL11 (B1)
-Instruction s_b1 = {
+Instruction<SPC700> s_b1 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1901,7 +1902,7 @@ Instruction s_b1 = {
 };
 
 // CLR6 (B2)
-Instruction s_b2 = {
+Instruction<SPC700> s_b2 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1913,7 +1914,7 @@ Instruction s_b2 = {
 };
 
 // BBC5 (B3)
-Instruction s_b3 = {
+Instruction<SPC700> s_b3 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1931,7 +1932,7 @@ Instruction s_b3 = {
 };
 
 // DAS  (BE)
-Instruction s_be = {
+Instruction<SPC700> s_be = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::DAS<1>),
@@ -1941,7 +1942,7 @@ Instruction s_be = {
 };
 
 // DI (C0)
-Instruction s_c0 = {
+Instruction<SPC700> s_c0 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -1951,7 +1952,7 @@ Instruction s_c0 = {
 };
 
 // TCALL12 (C1)
-Instruction s_c1 = {
+Instruction<SPC700> s_c1 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -1971,7 +1972,7 @@ Instruction s_c1 = {
 };
 
 // SET7 (C2)
-Instruction s_c2 = {
+Instruction<SPC700> s_c2 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -1983,7 +1984,7 @@ Instruction s_c2 = {
 };
 
 // BBS6 (C3)
-Instruction s_c3 = {
+Instruction<SPC700> s_c3 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2001,7 +2002,7 @@ Instruction s_c3 = {
 };
 
 // POP (CE)
-Instruction s_ce = {
+Instruction<SPC700> s_ce = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -2013,7 +2014,7 @@ Instruction s_ce = {
 };
 
 // MUL (CF)
-Instruction s_cf = {
+Instruction<SPC700> s_cf = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -2035,7 +2036,7 @@ Instruction s_cf = {
 };
 
 // TCALL13 (D1)
-Instruction s_d1 = {
+Instruction<SPC700> s_d1 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -2055,7 +2056,7 @@ Instruction s_d1 = {
 };
 
 // CLR7 (D2)
-Instruction s_d2 = {
+Instruction<SPC700> s_d2 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2067,7 +2068,7 @@ Instruction s_d2 = {
 };
 
 // BBC6 (D3)
-Instruction s_d3 = {
+Instruction<SPC700> s_d3 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2085,7 +2086,7 @@ Instruction s_d3 = {
 };
 
 // DAA  (DF)
-Instruction s_df = {
+Instruction<SPC700> s_df = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::DAA<1>),
@@ -2095,7 +2096,7 @@ Instruction s_df = {
 };
 
 // CLRV (E0)
-Instruction s_e0 = {
+Instruction<SPC700> s_e0 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::CLRV),
@@ -2103,7 +2104,7 @@ Instruction s_e0 = {
 };
 
 // TCALL14 (E1)
-Instruction s_e1 = {
+Instruction<SPC700> s_e1 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -2123,7 +2124,7 @@ Instruction s_e1 = {
 };
 
 // SET8 (E2)
-Instruction s_e2 = {
+Instruction<SPC700> s_e2 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2135,7 +2136,7 @@ Instruction s_e2 = {
 };
 
 // BBS7 (E3)
-Instruction s_e3 = {
+Instruction<SPC700> s_e3 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2153,7 +2154,7 @@ Instruction s_e3 = {
 };
 
 // MOV (E4)
-Instruction s_e4 = {
+Instruction<SPC700> s_e4 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2163,7 +2164,7 @@ Instruction s_e4 = {
 };
 
 // MOV (E5)
-Instruction s_e5 = {
+Instruction<SPC700> s_e5 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2175,7 +2176,7 @@ Instruction s_e5 = {
 };
 
 // NOTC (ED)
-Instruction s_ed = {
+Instruction<SPC700> s_ed = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -2185,7 +2186,7 @@ Instruction s_ed = {
 };
 
 // POP (EE)
-Instruction s_ee = {
+Instruction<SPC700> s_ee = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -2197,7 +2198,7 @@ Instruction s_ee = {
 };
 
 // TCALL15 (F1)
-Instruction s_f1 = {
+Instruction<SPC700> s_f1 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::NOP),
@@ -2217,7 +2218,7 @@ Instruction s_f1 = {
 };
 
 // CLR8 (F2)
-Instruction s_f2 = {
+Instruction<SPC700> s_f2 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2229,7 +2230,7 @@ Instruction s_f2 = {
 };
 
 // BBC7 (F3)
-Instruction s_f3 = {
+Instruction<SPC700> s_f3 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2247,7 +2248,7 @@ Instruction s_f3 = {
 };
 
 // MOV (F4)
-Instruction s_f4 = {
+Instruction<SPC700> s_f4 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2259,7 +2260,7 @@ Instruction s_f4 = {
 };
 
 // MOV (F5)
-Instruction s_f5 = {
+Instruction<SPC700> s_f5 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2273,7 +2274,7 @@ Instruction s_f5 = {
 };
 
 
-Instruction s_nop = {
+Instruction<SPC700> s_nop = {
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
 };
@@ -2284,7 +2285,7 @@ Instruction s_nop = {
 
 // Direct Page d (Read)
 // OR (04)
-Instruction s_04 = {
+Instruction<SPC700> s_04 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2294,7 +2295,7 @@ Instruction s_04 = {
 };
 
 // AND (24)
-Instruction s_24 = {
+Instruction<SPC700> s_24 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2304,7 +2305,7 @@ Instruction s_24 = {
 };
 
 // EOR (44)
-Instruction s_44 = {
+Instruction<SPC700> s_44 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2314,7 +2315,7 @@ Instruction s_44 = {
 };
 
 // ADC (84)
-Instruction s_84 = {
+Instruction<SPC700> s_84 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2324,7 +2325,7 @@ Instruction s_84 = {
 };
 
 // SBC (A4)
-Instruction s_a4 = {
+Instruction<SPC700> s_a4 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2334,7 +2335,7 @@ Instruction s_a4 = {
 };
 
 // CMP (64)
-Instruction s_64 = {
+Instruction<SPC700> s_64 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2346,7 +2347,7 @@ Instruction s_64 = {
 // X-Indexed Direct Page d+X (Read)
 
 // OR (14)
-Instruction s_14 = {
+Instruction<SPC700> s_14 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2358,7 +2359,7 @@ Instruction s_14 = {
 };
 
 // AND (34)
-Instruction s_34 = {
+Instruction<SPC700> s_34 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2370,7 +2371,7 @@ Instruction s_34 = {
 };
 
 // EOR (54)
-Instruction s_54 = {
+Instruction<SPC700> s_54 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2382,7 +2383,7 @@ Instruction s_54 = {
 };
 
 // ADC (94)
-Instruction s_94 = {
+Instruction<SPC700> s_94 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2394,7 +2395,7 @@ Instruction s_94 = {
 };
 
 // SBC (B4)
-Instruction s_b4 = {
+Instruction<SPC700> s_b4 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2406,7 +2407,7 @@ Instruction s_b4 = {
 };
 
 // CMP (74)
-Instruction s_74 = {
+Instruction<SPC700> s_74 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2420,7 +2421,7 @@ Instruction s_74 = {
 // Absolute !a (Read)
 
 // OR (05)
-Instruction s_05 = {
+Instruction<SPC700> s_05 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2432,7 +2433,7 @@ Instruction s_05 = {
 };
 
 // AND (25)
-Instruction s_25 = {
+Instruction<SPC700> s_25 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2444,7 +2445,7 @@ Instruction s_25 = {
 };
 
 // EOR (45)
-Instruction s_45 = {
+Instruction<SPC700> s_45 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2456,7 +2457,7 @@ Instruction s_45 = {
 };
 
 // ADC (85)
-Instruction s_85 = {
+Instruction<SPC700> s_85 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2468,7 +2469,7 @@ Instruction s_85 = {
 };
 
 // SBC (A5)
-Instruction s_a5 = {
+Instruction<SPC700> s_a5 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2480,7 +2481,7 @@ Instruction s_a5 = {
 };
 
 // CMP (65)
-Instruction s_65 = {
+Instruction<SPC700> s_65 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2494,7 +2495,7 @@ Instruction s_65 = {
 // X-Indexed Absolute !a+X (Read)
 
 // OR (15)
-Instruction s_15 = {
+Instruction<SPC700> s_15 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2508,7 +2509,7 @@ Instruction s_15 = {
 };
 
 // AND (35)
-Instruction s_35 = {
+Instruction<SPC700> s_35 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2522,7 +2523,7 @@ Instruction s_35 = {
 };
 
 // EOR (55)
-Instruction s_55 = {
+Instruction<SPC700> s_55 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2536,7 +2537,7 @@ Instruction s_55 = {
 };
 
 // ADC (95)
-Instruction s_95 = {
+Instruction<SPC700> s_95 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2550,7 +2551,7 @@ Instruction s_95 = {
 };
 
 // SBC (B5)
-Instruction s_b5 = {
+Instruction<SPC700> s_b5 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2564,7 +2565,7 @@ Instruction s_b5 = {
 };
 
 // CMP (75)
-Instruction s_75 = {
+Instruction<SPC700> s_75 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2580,7 +2581,7 @@ Instruction s_75 = {
 // Y-Indexed Absolute !a+Y (Read)
 
 // OR (16)
-Instruction s_16 = {
+Instruction<SPC700> s_16 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2594,7 +2595,7 @@ Instruction s_16 = {
 };
 
 // AND (36)
-Instruction s_36 = {
+Instruction<SPC700> s_36 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2608,7 +2609,7 @@ Instruction s_36 = {
 };
 
 // EOR (56)
-Instruction s_56 = {
+Instruction<SPC700> s_56 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2622,7 +2623,7 @@ Instruction s_56 = {
 };
 
 // ADC (96)
-Instruction s_96 = {
+Instruction<SPC700> s_96 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2636,7 +2637,7 @@ Instruction s_96 = {
 };
 
 // SBC (B6)
-Instruction s_b6 = {
+Instruction<SPC700> s_b6 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2650,7 +2651,7 @@ Instruction s_b6 = {
 };
 
 // CMP (76)
-Instruction s_76 = {
+Instruction<SPC700> s_76 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2666,7 +2667,7 @@ Instruction s_76 = {
 // Indirect X (X) (Read)
 
 // OR (06)
-Instruction s_06 = {
+Instruction<SPC700> s_06 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -2676,7 +2677,7 @@ Instruction s_06 = {
 };
 
 // AND (26)
-Instruction s_26 = {
+Instruction<SPC700> s_26 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -2686,7 +2687,7 @@ Instruction s_26 = {
 };
 
 // EOR (46)
-Instruction s_46 = {
+Instruction<SPC700> s_46 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -2696,7 +2697,7 @@ Instruction s_46 = {
 };
 
 // ADC (86)
-Instruction s_86 = {
+Instruction<SPC700> s_86 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -2706,7 +2707,7 @@ Instruction s_86 = {
 };
 
 // SBC (A6)
-Instruction s_a6 = {
+Instruction<SPC700> s_a6 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -2716,7 +2717,7 @@ Instruction s_a6 = {
 };
 
 // CMP (66)
-Instruction s_66 = {
+Instruction<SPC700> s_66 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -2728,7 +2729,7 @@ Instruction s_66 = {
 // X-Indexed Indirect [d+X] (Read)
 
 // OR (07)
-Instruction s_07 = {
+Instruction<SPC700> s_07 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2744,7 +2745,7 @@ Instruction s_07 = {
 };
 
 // AND (27)
-Instruction s_27 = {
+Instruction<SPC700> s_27 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2760,7 +2761,7 @@ Instruction s_27 = {
 };
 
 // EOR (47)
-Instruction s_47 = {
+Instruction<SPC700> s_47 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2776,7 +2777,7 @@ Instruction s_47 = {
 };
 
 // ADC (87)
-Instruction s_87 = {
+Instruction<SPC700> s_87 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2792,7 +2793,7 @@ Instruction s_87 = {
 };
 
 // SBC (A7)
-Instruction s_a7 = {
+Instruction<SPC700> s_a7 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2808,7 +2809,7 @@ Instruction s_a7 = {
 };
 
 // CMP (67)
-Instruction s_67 = {
+Instruction<SPC700> s_67 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2826,7 +2827,7 @@ Instruction s_67 = {
 // Immediate
 
 // OR (08)
-Instruction s_08 = {
+Instruction<SPC700> s_08 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::OR, Value::A, Value::Operand, SubFunc::SetNZFlagRegisterA, true>),
@@ -2834,7 +2835,7 @@ Instruction s_08 = {
 };
 
 // AND (28)
-Instruction s_28 = {
+Instruction<SPC700> s_28 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::AND, Value::A, Value::Operand, SubFunc::SetNZFlagRegisterA, true>),
@@ -2842,7 +2843,7 @@ Instruction s_28 = {
 };
 
 // EOR (48)
-Instruction s_48 = {
+Instruction<SPC700> s_48 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::EOR, Value::A, Value::Operand, SubFunc::SetNZFlagRegisterA, true>),
@@ -2850,7 +2851,7 @@ Instruction s_48 = {
 };
 
 // ADC (88)
-Instruction s_88 = {
+Instruction<SPC700> s_88 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::ADC, Value::A, Value::Operand, SubFunc::None, true>),
@@ -2858,7 +2859,7 @@ Instruction s_88 = {
 };
 
 // SBC (A8)
-Instruction s_a8 = {
+Instruction<SPC700> s_a8 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::SBC, Value::A, Value::Operand, SubFunc::None, true>),
@@ -2866,7 +2867,7 @@ Instruction s_a8 = {
 };
 
 // CMP (68)
-Instruction s_68 = {
+Instruction<SPC700> s_68 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::CMP, Value::A, Value::Operand, SubFunc::None, true>),
@@ -2877,7 +2878,7 @@ Instruction s_68 = {
 // Immediate Data to Direct Page d, #i (Read/Modify/Write)
 
 // OR (18)
-Instruction s_18 = {
+Instruction<SPC700> s_18 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand0>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2891,7 +2892,7 @@ Instruction s_18 = {
 };
 
 // AND (38)
-Instruction s_38 = {
+Instruction<SPC700> s_38 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand0>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2905,7 +2906,7 @@ Instruction s_38 = {
 };
 
 // EOR (58)
-Instruction s_58 = {
+Instruction<SPC700> s_58 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand0>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2919,7 +2920,7 @@ Instruction s_58 = {
 };
 
 // ADC (98)
-Instruction s_98 = {
+Instruction<SPC700> s_98 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand0>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2933,7 +2934,7 @@ Instruction s_98 = {
 };
 
 // SBC (B8)
-Instruction s_b8 = {
+Instruction<SPC700> s_b8 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand1>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2947,7 +2948,7 @@ Instruction s_b8 = {
 };
 
 // CMP (78)
-Instruction s_78 = {
+Instruction<SPC700> s_78 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand1>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -2963,7 +2964,7 @@ Instruction s_78 = {
 // Direct Page to Direct Page dd, ds (Read/Modify/Write)
 
 // OR (09)
-Instruction s_09 = {
+Instruction<SPC700> s_09 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2979,7 +2980,7 @@ Instruction s_09 = {
 };
 
 // AND (29)
-Instruction s_29 = {
+Instruction<SPC700> s_29 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -2995,7 +2996,7 @@ Instruction s_29 = {
 };
 
 // EOR (49)
-Instruction s_49 = {
+Instruction<SPC700> s_49 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3011,7 +3012,7 @@ Instruction s_49 = {
 };
 
 // ADC (89)
-Instruction s_89 = {
+Instruction<SPC700> s_89 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3027,7 +3028,7 @@ Instruction s_89 = {
 };
 
 // SBC (A9)
-Instruction s_a9 = {
+Instruction<SPC700> s_a9 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3043,7 +3044,7 @@ Instruction s_a9 = {
 };
 
 // CMP (69)
-Instruction s_69 = {
+Instruction<SPC700> s_69 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3061,7 +3062,7 @@ Instruction s_69 = {
 // Indirect Page to Indirect Page (Read)
 
 // OR (19)
-Instruction s_19 = {
+Instruction<SPC700> s_19 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -3075,7 +3076,7 @@ Instruction s_19 = {
 };
 
 // AND (39)
-Instruction s_39 = {
+Instruction<SPC700> s_39 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -3089,7 +3090,7 @@ Instruction s_39 = {
 };
 
 // EOR (59)
-Instruction s_59 = {
+Instruction<SPC700> s_59 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -3103,7 +3104,7 @@ Instruction s_59 = {
 };
 
 // ADC (99)
-Instruction s_99 = {
+Instruction<SPC700> s_99 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -3117,7 +3118,7 @@ Instruction s_99 = {
 };
 
 // SBC (B9)
-Instruction s_b9 = {
+Instruction<SPC700> s_b9 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -3131,7 +3132,7 @@ Instruction s_b9 = {
 };
 
 // CMP (79)
-Instruction s_79 = {
+Instruction<SPC700> s_79 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::NOP),
@@ -3146,7 +3147,7 @@ Instruction s_79 = {
 
 // Absolute !a (Read)
 // CMP X (1E)
-Instruction s_1e = {
+Instruction<SPC700> s_1e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3158,7 +3159,7 @@ Instruction s_1e = {
 };
 
 // CMP Y (5E)
-Instruction s_5e = {
+Instruction<SPC700> s_5e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3171,7 +3172,7 @@ Instruction s_5e = {
 
 // Immediate
 // CMP X (C8)
-Instruction s_c8 = {
+Instruction<SPC700> s_c8 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::CMP, Value::X, Value::Operand, SubFunc::None, true>),
@@ -3179,17 +3180,17 @@ Instruction s_c8 = {
 };
 
 // CMP Y (AD)
-Instruction s_ad = {
+Instruction<SPC700> s_ad = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::BITWISE<Bitwise::CMP, Value::Y, Value::Operand, SubFunc::None, true>),
 	MakeHandler(SPC700Functions::Next)
 };
 
-// Rest of the MOV instructions
+// Rest of the MOV Instruction<SPC700>s
 
 // MOV (F6)
-Instruction s_f6 = {
+Instruction<SPC700> s_f6 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3203,7 +3204,7 @@ Instruction s_f6 = {
 };
 
 // MOV (E6)
-Instruction s_e6 = {
+Instruction<SPC700> s_e6 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -3213,7 +3214,7 @@ Instruction s_e6 = {
 };
 
 // MOV (E7)
-Instruction s_e7 = {
+Instruction<SPC700> s_e7 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3229,7 +3230,7 @@ Instruction s_e7 = {
 };
 
 // MOV (C4)
-Instruction s_c4 = {
+Instruction<SPC700> s_c4 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3241,7 +3242,7 @@ Instruction s_c4 = {
 };
 
 // MOV (D4)
-Instruction s_d4 = {
+Instruction<SPC700> s_d4 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3255,7 +3256,7 @@ Instruction s_d4 = {
 };
 
 // MOV (C5)
-Instruction s_c5 = {
+Instruction<SPC700> s_c5 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3269,7 +3270,7 @@ Instruction s_c5 = {
 };
 
 // MOV (D5)
-Instruction s_d5 = {
+Instruction<SPC700> s_d5 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3285,7 +3286,7 @@ Instruction s_d5 = {
 };
 
 // MOV (C6)
-Instruction s_c6 = {
+Instruction<SPC700> s_c6 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::SetAddressXPSW),
@@ -3297,7 +3298,7 @@ Instruction s_c6 = {
 };
 
 // MOV (D6)
-Instruction s_d6 = {
+Instruction<SPC700> s_d6 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3313,7 +3314,7 @@ Instruction s_d6 = {
 };
 
 // MOV (C7)
-Instruction s_c7 = {
+Instruction<SPC700> s_c7 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3331,7 +3332,7 @@ Instruction s_c7 = {
 };
 
 // MOV (F8)
-Instruction s_f8 = {
+Instruction<SPC700> s_f8 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3341,7 +3342,7 @@ Instruction s_f8 = {
 };
 
 // MOV (F9)
-Instruction s_f9 = {
+Instruction<SPC700> s_f9 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3353,7 +3354,7 @@ Instruction s_f9 = {
 };
 
 // MOV (E8)
-Instruction s_e8 = {
+Instruction<SPC700> s_e8 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::MOV<0xE8, 0, SubFunc::SetNZFlagRegisterA, true>),
@@ -3361,7 +3362,7 @@ Instruction s_e8 = {
 };
 
 // MOV (D8)
-Instruction s_d8 = {
+Instruction<SPC700> s_d8 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3373,7 +3374,7 @@ Instruction s_d8 = {
 };
 
 // MOV (D9)
-Instruction s_d9 = {
+Instruction<SPC700> s_d9 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3387,7 +3388,7 @@ Instruction s_d9 = {
 };
 
 // MOV (EB)
-Instruction s_eb = {
+Instruction<SPC700> s_eb = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3397,7 +3398,7 @@ Instruction s_eb = {
 };
 
 // MOV (FB)
-Instruction s_fb = {
+Instruction<SPC700> s_fb = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3409,7 +3410,7 @@ Instruction s_fb = {
 };
 
 // MOV (EC)
-Instruction s_ec = {
+Instruction<SPC700> s_ec = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3421,7 +3422,7 @@ Instruction s_ec = {
 };
 
 // MOV (CB)
-Instruction s_cb = {
+Instruction<SPC700> s_cb = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3433,7 +3434,7 @@ Instruction s_cb = {
 };
 
 // MOV (DB)
-Instruction s_db = {
+Instruction<SPC700> s_db = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3447,7 +3448,7 @@ Instruction s_db = {
 };
 
 // MOV (CC)
-Instruction s_cc = {
+Instruction<SPC700> s_cc = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3464,7 +3465,7 @@ Instruction s_cc = {
 // Branches (all very similar)
 
 // BPL (10)
-Instruction s_10 = {
+Instruction<SPC700> s_10 = {
 	MakeHandler(SPC700Functions::Jump<0x80, 0x00>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3476,7 +3477,7 @@ Instruction s_10 = {
 };
 
 // BMI (30)
-Instruction s_30 = {
+Instruction<SPC700> s_30 = {
 	MakeHandler(SPC700Functions::Jump<0x80, 0x80>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3488,7 +3489,7 @@ Instruction s_30 = {
 };
 
 // BVC (50)
-Instruction s_50 = {
+Instruction<SPC700> s_50 = {
 	MakeHandler(SPC700Functions::Jump<0x40, 0x00>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3500,7 +3501,7 @@ Instruction s_50 = {
 };
 
 // BPL (70)
-Instruction s_70 = {
+Instruction<SPC700> s_70 = {
 	MakeHandler(SPC700Functions::Jump<0x40, 0x40>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3512,7 +3513,7 @@ Instruction s_70 = {
 };
 
 // BCC (90)
-Instruction s_90 = {
+Instruction<SPC700> s_90 = {
 	MakeHandler(SPC700Functions::Jump<0x01, 0x00>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3524,7 +3525,7 @@ Instruction s_90 = {
 };
 
 // BCS (b0)
-Instruction s_b0 = {
+Instruction<SPC700> s_b0 = {
 	MakeHandler(SPC700Functions::Jump<0x01, 0x01>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3536,7 +3537,7 @@ Instruction s_b0 = {
 };
 
 // BNE (d0)
-Instruction s_d0 = {
+Instruction<SPC700> s_d0 = {
 	MakeHandler(SPC700Functions::Jump<0x02, 0x00>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3548,7 +3549,7 @@ Instruction s_d0 = {
 };
 
 // BEQ (f0)
-Instruction s_f0 = {
+Instruction<SPC700> s_f0 = {
 	MakeHandler(SPC700Functions::Jump<0x02, 0x02>),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3560,7 +3561,7 @@ Instruction s_f0 = {
 };
 
 // BRA (2f)
-Instruction s_2f = {
+Instruction<SPC700> s_2f = {
 	MakeHandler(SPC700Functions::JumpAlways),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3576,7 +3577,7 @@ Instruction s_2f = {
 // Direct Page d (Read/Modify/Write)
 
 // INC (AB)
-Instruction s_ab = {
+Instruction<SPC700> s_ab = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3588,7 +3589,7 @@ Instruction s_ab = {
 };
 
 // DEC (8B)
-Instruction s_8b = {
+Instruction<SPC700> s_8b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3602,7 +3603,7 @@ Instruction s_8b = {
 // X-Indexed Direct Page d+X (Read/Modify/Write)
 
 // INC (BB)
-Instruction s_bb = {
+Instruction<SPC700> s_bb = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3616,7 +3617,7 @@ Instruction s_bb = {
 };
 
 // DEC (9B)
-Instruction s_9b = {
+Instruction<SPC700> s_9b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3632,7 +3633,7 @@ Instruction s_9b = {
 // Absolute !a (Read/Modify/Write)
 
 // INC (AC)
-Instruction s_ac = {
+Instruction<SPC700> s_ac = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3646,7 +3647,7 @@ Instruction s_ac = {
 };
 
 // DEC (8C)
-Instruction s_8c = {
+Instruction<SPC700> s_8c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3662,7 +3663,7 @@ Instruction s_8c = {
 // Accumulator A
 
 // INC (BC)
-Instruction s_bc = {
+Instruction<SPC700> s_bc = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::IncrementRegA<SubFunc::SetNZFlagRegisterA>),
@@ -3670,7 +3671,7 @@ Instruction s_bc = {
 };
 
 // DEC (9C)
-Instruction s_9c = {
+Instruction<SPC700> s_9c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::DecrementRegA<SubFunc::SetNZFlagRegisterA>),
@@ -3680,7 +3681,7 @@ Instruction s_9c = {
 // Implied
 
 // INC (3D)
-Instruction s_3d = {
+Instruction<SPC700> s_3d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::IncrementRegX<SubFunc::SetNZFlagRegisterX>),
@@ -3688,7 +3689,7 @@ Instruction s_3d = {
 };
 
 // DEC (1D)
-Instruction s_1d = {
+Instruction<SPC700> s_1d = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::DecrementRegX<SubFunc::SetNZFlagRegisterX>),
@@ -3698,7 +3699,7 @@ Instruction s_1d = {
 // Implied
 
 // INC (FC)
-Instruction s_fc = {
+Instruction<SPC700> s_fc = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::IncrementRegY<SubFunc::SetNZFlagRegisterY>),
@@ -3706,7 +3707,7 @@ Instruction s_fc = {
 };
 
 // DEC (DC)
-Instruction s_dc = {
+Instruction<SPC700> s_dc = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::DecrementRegY<SubFunc::SetNZFlagRegisterY>),
@@ -3716,7 +3717,7 @@ Instruction s_dc = {
 // ASL/ROL/LSR/ROR (Reuse addressing modes from Bitwise Ops)
 
 // ASL (0B)
-Instruction s_0b = {
+Instruction<SPC700> s_0b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3728,7 +3729,7 @@ Instruction s_0b = {
 };
 
 // ROL (2B)
-Instruction s_2b = {
+Instruction<SPC700> s_2b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3740,7 +3741,7 @@ Instruction s_2b = {
 };
 
 // LSR (4B)
-Instruction s_4b = {
+Instruction<SPC700> s_4b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3752,7 +3753,7 @@ Instruction s_4b = {
 };
 
 // ROR (6B)
-Instruction s_6b = {
+Instruction<SPC700> s_6b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3764,7 +3765,7 @@ Instruction s_6b = {
 };
 
 // ASL (1B)
-Instruction s_1b = {
+Instruction<SPC700> s_1b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3778,7 +3779,7 @@ Instruction s_1b = {
 };
 
 // ROL (3B)
-Instruction s_3b = {
+Instruction<SPC700> s_3b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3792,7 +3793,7 @@ Instruction s_3b = {
 };
 
 // LSR (5B)
-Instruction s_5b = {
+Instruction<SPC700> s_5b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3806,7 +3807,7 @@ Instruction s_5b = {
 };
 
 // ROR (7B)
-Instruction s_7b = {
+Instruction<SPC700> s_7b = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3820,7 +3821,7 @@ Instruction s_7b = {
 };
 
 // ASL (0C)
-Instruction s_0c = {
+Instruction<SPC700> s_0c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3834,7 +3835,7 @@ Instruction s_0c = {
 };
 
 // ROL (2C)
-Instruction s_2c = {
+Instruction<SPC700> s_2c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3848,7 +3849,7 @@ Instruction s_2c = {
 };
 
 // LSR (4C)
-Instruction s_4c = {
+Instruction<SPC700> s_4c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3862,7 +3863,7 @@ Instruction s_4c = {
 };
 
 // ROR (6C)
-Instruction s_6c = {
+Instruction<SPC700> s_6c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3876,7 +3877,7 @@ Instruction s_6c = {
 };
 
 // ASL (1C)
-Instruction s_1c = {
+Instruction<SPC700> s_1c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::ASL_A<SubFunc::SetNZFlagRegisterA>),
@@ -3884,7 +3885,7 @@ Instruction s_1c = {
 };
 
 // ROL (3C)
-Instruction s_3c = {
+Instruction<SPC700> s_3c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::ROL_A<SubFunc::SetNZFlagRegisterA>),
@@ -3892,7 +3893,7 @@ Instruction s_3c = {
 };
 
 // LSR (5C)
-Instruction s_5c = {
+Instruction<SPC700> s_5c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::LSR_A<SubFunc::SetNZFlagRegisterA>),
@@ -3900,7 +3901,7 @@ Instruction s_5c = {
 };
 
 // ROR (7C)
-Instruction s_7c = {
+Instruction<SPC700> s_7c = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::ROR_A<SubFunc::SetNZFlagRegisterA>),
@@ -3910,7 +3911,7 @@ Instruction s_7c = {
 // CALL/JMP
 
 // CALL (3F)
-Instruction s_3f = {
+Instruction<SPC700> s_3f = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3930,7 +3931,7 @@ Instruction s_3f = {
 };
 
 // PCALL (4F)
-Instruction s_4f = {
+Instruction<SPC700> s_4f = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3946,7 +3947,7 @@ Instruction s_4f = {
 };
 
 // JMP (1F)
-Instruction s_1f = {
+Instruction<SPC700> s_1f = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3962,7 +3963,7 @@ Instruction s_1f = {
 };
 
 // JMP (5F)
-Instruction s_5f = {
+Instruction<SPC700> s_5f = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -3974,7 +3975,7 @@ Instruction s_5f = {
 // CBNE/DBNZ
 
 // CBNE (2E)
-Instruction s_2e = {
+Instruction<SPC700> s_2e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -3992,7 +3993,7 @@ Instruction s_2e = {
 };
 
 // CBNE (DE)
-Instruction s_de = {
+Instruction<SPC700> s_de = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4012,7 +4013,7 @@ Instruction s_de = {
 };
 
 // DBNZ (6E)
-Instruction s_6e = {
+Instruction<SPC700> s_6e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4030,7 +4031,7 @@ Instruction s_6e = {
 };
 
 // DBNZ (FE)
-Instruction s_fe = {
+Instruction<SPC700> s_fe = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::DBNZ_FE<1>),
@@ -4048,7 +4049,7 @@ Instruction s_fe = {
 // 16-bit ops
 
 // DECW (1A)
-Instruction s_1a = {
+Instruction<SPC700> s_1a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4064,7 +4065,7 @@ Instruction s_1a = {
 };
 
 // INCW (3A)
-Instruction s_3a = {
+Instruction<SPC700> s_3a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4080,7 +4081,7 @@ Instruction s_3a = {
 };
 
 // CMPW (5A)
-Instruction s_5a = {
+Instruction<SPC700> s_5a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4092,7 +4093,7 @@ Instruction s_5a = {
 };
 
 // ADDW (7A)
-Instruction s_7a = {
+Instruction<SPC700> s_7a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4106,7 +4107,7 @@ Instruction s_7a = {
 };
 
 // SUBW (9A)
-Instruction s_9a = {
+Instruction<SPC700> s_9a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4120,7 +4121,7 @@ Instruction s_9a = {
 };
 
 // MOVW (BA)
-Instruction s_ba = {
+Instruction<SPC700> s_ba = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4134,7 +4135,7 @@ Instruction s_ba = {
 };
 
 // MOVW (DA)
-Instruction s_da = {
+Instruction<SPC700> s_da = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4149,7 +4150,7 @@ Instruction s_da = {
 
 // OR1 (0A)
 
-Instruction s_0a = {
+Instruction<SPC700> s_0a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4164,7 +4165,7 @@ Instruction s_0a = {
 
 // OR1 (2A)
 
-Instruction s_2a = {
+Instruction<SPC700> s_2a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4178,7 +4179,7 @@ Instruction s_2a = {
 };
 
 // AND1 (4A)
-Instruction s_4a = {
+Instruction<SPC700> s_4a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4190,7 +4191,7 @@ Instruction s_4a = {
 };
 
 // AND1 (6A)
-Instruction s_6a = {
+Instruction<SPC700> s_6a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4203,7 +4204,7 @@ Instruction s_6a = {
 
 // EOR1 (8A)
 
-Instruction s_8a = {
+Instruction<SPC700> s_8a = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4218,7 +4219,7 @@ Instruction s_8a = {
 
 // MOV1 (AA)
 
-Instruction s_aa = {
+Instruction<SPC700> s_aa = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4230,7 +4231,7 @@ Instruction s_aa = {
 };
 
 // (CA)
-Instruction s_ca = {
+Instruction<SPC700> s_ca = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4246,7 +4247,7 @@ Instruction s_ca = {
 };
 
 // NOT1 (EA)
-Instruction s_ea = {
+Instruction<SPC700> s_ea = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4262,7 +4263,7 @@ Instruction s_ea = {
 // TSET/TCLR
 
 // TSET1 (0E)
-Instruction s_0e = {
+Instruction<SPC700> s_0e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4278,7 +4279,7 @@ Instruction s_0e = {
 };
 
 // TCLR1 (4E)
-Instruction s_4e = {
+Instruction<SPC700> s_4e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4296,7 +4297,7 @@ Instruction s_4e = {
 // Miscellaneous (final 20, hooray)
 
 // OR (17)
-Instruction s_17 = {
+Instruction<SPC700> s_17 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4310,7 +4311,7 @@ Instruction s_17 = {
 };
 
 // AND (37)
-Instruction s_37 = {
+Instruction<SPC700> s_37 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4324,7 +4325,7 @@ Instruction s_37 = {
 };
 
 // EOR (57)
-Instruction s_57 = {
+Instruction<SPC700> s_57 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4338,7 +4339,7 @@ Instruction s_57 = {
 };
 
 // CMP (77)
-Instruction s_77 = {
+Instruction<SPC700> s_77 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4352,7 +4353,7 @@ Instruction s_77 = {
 };
 
 // ADC (97)
-Instruction s_97 = {
+Instruction<SPC700> s_97 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4366,7 +4367,7 @@ Instruction s_97 = {
 };
 
 // SBC (B7)
-Instruction s_b7 = {
+Instruction<SPC700> s_b7 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4380,7 +4381,7 @@ Instruction s_b7 = {
 };
 
 // MOV (F7)
-Instruction s_f7 = {
+Instruction<SPC700> s_f7 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4394,7 +4395,7 @@ Instruction s_f7 = {
 };
 
 // MOV (D7)
-Instruction s_d7 = {
+Instruction<SPC700> s_d7 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4410,7 +4411,7 @@ Instruction s_d7 = {
 };
 
 // CMP X (3E)
-Instruction s_3e = {
+Instruction<SPC700> s_3e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4420,7 +4421,7 @@ Instruction s_3e = {
 };
 
 // CMP Y (7E)
-Instruction s_7e = {
+Instruction<SPC700> s_7e = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4430,7 +4431,7 @@ Instruction s_7e = {
 };
 
 // MOV (BD)
-Instruction s_bd = {
+Instruction<SPC700> s_bd = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::MOV<0xBD, 0, SubFunc::None>),
@@ -4438,7 +4439,7 @@ Instruction s_bd = {
 };
 
 // MOV (BF)
-Instruction s_bf = {
+Instruction<SPC700> s_bf = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Discard>),
 	MakeHandler(SPC700Functions::SetFuncX),
@@ -4450,7 +4451,7 @@ Instruction s_bf = {
 };
 
 // MOV (C9)
-Instruction s_c9 = {
+Instruction<SPC700> s_c9 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4464,7 +4465,7 @@ Instruction s_c9 = {
 };
 
 // MOV (CD)
-Instruction s_cd = {
+Instruction<SPC700> s_cd = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::MOV<0xCD, 0, SubFunc::SetNZFlagRegisterX, true>),
@@ -4472,7 +4473,7 @@ Instruction s_cd = {
 };
 
 // MOV (DD)
-Instruction s_dd = {
+Instruction<SPC700> s_dd = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::MOV<0xDD, 0, SubFunc::SetNZFlagRegisterA>),
@@ -4480,7 +4481,7 @@ Instruction s_dd = {
 };
 
 // MOV (FD)
-Instruction s_fd = {
+Instruction<SPC700> s_fd = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::MOV<0xFD, 0, SubFunc::SetNZFlagRegisterY>),
@@ -4488,7 +4489,7 @@ Instruction s_fd = {
 };
 
 // MOV (E9)
-Instruction s_e9 = {
+Instruction<SPC700> s_e9 = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::AddressLow>),
 	MakeHandler(SPC700Functions::IncrementPC),
@@ -4500,7 +4501,7 @@ Instruction s_e9 = {
 };
 
 // MOV (FA)
-Instruction s_fa = {
+Instruction<SPC700> s_fa = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::Read<ReadFrom::PC, ReadTo::Operand>),
 	MakeHandler(SPC700Functions::IncrementPC<SubFunc::SetSubFunc>),
@@ -4513,7 +4514,7 @@ Instruction s_fa = {
 };
 
 // SLEEP (EF)
-Instruction s_ef = {
+Instruction<SPC700> s_ef = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700Functions::NOP),
@@ -4523,7 +4524,7 @@ Instruction s_ef = {
 };
 
 // STOP (FF)
-Instruction s_ff = {
+Instruction<SPC700> s_ff = {
 	MakeHandler(SPC700Functions::IncrementPC),
 	MakeHandler(SPC700Functions::NOP),
 	MakeHandler(SPC700SpecialFunctions::Stop),

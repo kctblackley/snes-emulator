@@ -21,7 +21,7 @@ struct SPCTimer {
 	uint16_t internal_counter = 0;
 };
 
-class SPC700 : public CPU {
+class SPC700 final : public CPU {
 public:
 	SPC700();
 
@@ -137,67 +137,67 @@ public:
 	void poll_interrupts() override;
 
 	// Not all correct, check later when I am implementing the APU!
-	bool get_flag_N() override { return (regs.P >> 7) & 0b1; }
-	bool get_flag_V() override { return (regs.P >> 6) & 0b1; }
-	bool get_flag_P() override { return (regs.P >> 5) & 0b1; }
- 	bool get_flag_X() override { return (regs.P >> 4) & 0b1; }
-	bool get_flag_H() override { return (regs.P >> 3) & 0b1; }
-	bool get_flag_I() override { return (regs.P >> 2) & 0b1; } 
-	bool get_flag_Z() override { return (regs.P >> 1) & 0b1;  }
-	bool get_flag_C() override { return  regs.P       & 0b1;  }
+	bool get_flag_N() { return (regs.P >> 7) & 0b1; }
+	bool get_flag_V() { return (regs.P >> 6) & 0b1; }
+	bool get_flag_P() { return (regs.P >> 5) & 0b1; }
+ 	bool get_flag_X() { return (regs.P >> 4) & 0b1; }
+	bool get_flag_H() { return (regs.P >> 3) & 0b1; }
+	bool get_flag_I() { return (regs.P >> 2) & 0b1; } 
+	bool get_flag_Z() { return (regs.P >> 1) & 0b1;  }
+	bool get_flag_C() { return  regs.P       & 0b1;  }
 
-	void set_flag_N(Byte value) override {
+	void set_flag_N(Byte value) {
 		condition = ( ( (value >> 7) & 0b1 ) == 1);
 		regs.P = condition ? set_bit(regs.P, 7) : clear_bit(regs.P, 7); 
 	}
 
-	void set_flag_V(Byte value) override { return; }
-	void set_flag_P(Byte value) override { return; }
-	void set_flag_X(Byte value) override { return; }
-	void set_flag_H(Byte value) override { return; }
-	void set_flag_I(Byte value) override { return; }
+	void set_flag_V(Byte value) { return; }
+	void set_flag_P(Byte value) { return; }
+	void set_flag_X(Byte value) { return; }
+	void set_flag_H(Byte value) { return; }
+	void set_flag_I(Byte value) { return; }
 
-	void set_flag_Z(Word value) override {
+	void set_flag_Z(Word value) {
 		condition = (value == 0);
 		regs.P = condition ? set_bit(regs.P, 1) : clear_bit(regs.P, 1); 
 	}
 
-	void set_flag_C(Byte value) override { return; }
+	void set_flag_C(Byte value) { return; }
 
-	void set_flag_N() override { regs.P = set_bit(regs.P, 7); }
-	void set_flag_V() override { regs.P = set_bit(regs.P, 6); }
-	void set_flag_P() override { regs.P = set_bit(regs.P, 5); }
-	void set_flag_X() override { regs.P = set_bit(regs.P, 4); }
-	void set_flag_H() override { regs.P = set_bit(regs.P, 3); }
-	void set_flag_I() override { regs.P = set_bit(regs.P, 2); }
-	void set_flag_Z() override { regs.P = set_bit(regs.P, 1); }
-	void set_flag_C() override { regs.P = set_bit(regs.P, 0); }
+	void set_flag_N() { regs.P = set_bit(regs.P, 7); }
+	void set_flag_V() { regs.P = set_bit(regs.P, 6); }
+	void set_flag_P() { regs.P = set_bit(regs.P, 5); }
+	void set_flag_X() { regs.P = set_bit(regs.P, 4); }
+	void set_flag_H() { regs.P = set_bit(regs.P, 3); }
+	void set_flag_I() { regs.P = set_bit(regs.P, 2); }
+	void set_flag_Z() { regs.P = set_bit(regs.P, 1); }
+	void set_flag_C() { regs.P = set_bit(regs.P, 0); }
 
-	void clear_flag_N() override { regs.P = clear_bit(regs.P, 7); }
- 	void clear_flag_V() override { regs.P = clear_bit(regs.P, 6); }
-	void clear_flag_P() override { regs.P = clear_bit(regs.P, 5); }
-	void clear_flag_X() override { regs.P = clear_bit(regs.P, 4); }
-	void clear_flag_H() override { regs.P = clear_bit(regs.P, 3); }
-	void clear_flag_I() override { regs.P = clear_bit(regs.P, 2); }
-	void clear_flag_Z() override { regs.P = clear_bit(regs.P, 1); }
-	void clear_flag_C() override { regs.P = clear_bit(regs.P, 0); }
+	void clear_flag_N() { regs.P = clear_bit(regs.P, 7); }
+ 	void clear_flag_V() { regs.P = clear_bit(regs.P, 6); }
+	void clear_flag_P() { regs.P = clear_bit(regs.P, 5); }
+	void clear_flag_X() { regs.P = clear_bit(regs.P, 4); }
+	void clear_flag_H() { regs.P = clear_bit(regs.P, 3); }
+	void clear_flag_I() { regs.P = clear_bit(regs.P, 2); }
+	void clear_flag_Z() { regs.P = clear_bit(regs.P, 1); }
+	void clear_flag_C() { regs.P = clear_bit(regs.P, 0); }
 
 	// Unused flags (SPC700 only)
-	bool get_flag_M() override { return false; }
-	bool get_flag_D() override { return false; }
-	bool get_flag_B() override { return false; }
+	bool get_flag_M() { return false; }
+	bool get_flag_D() { return false; }
+	bool get_flag_B() { return false; }
 
-	void set_flag_M(Byte value) override { return; }
-	void set_flag_D(Byte value) override { return; }
-	void set_flag_B(Byte value) override { return; }
+	void set_flag_M(Byte value) { return; }
+	void set_flag_D(Byte value) { return; }
+	void set_flag_B(Byte value) { return; }
 
-	void set_flag_M() override { return; }
-	void set_flag_D() override { return; }
-	void set_flag_B() override { return; }
+	void set_flag_M() { return; }
+	void set_flag_D() { return; }
+	void set_flag_B() { return; }
 
-	void clear_flag_M() override { return; }
-	void clear_flag_D() override { return; }
-	void clear_flag_B() override { return; }
+	void clear_flag_M() { return; }
+	void clear_flag_D() { return; }
+	void clear_flag_B() { return; }
 
 
 

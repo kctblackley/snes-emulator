@@ -1,7 +1,7 @@
 #pragma once
 #include "ricoh_5a22_operations.hpp"
 
-constexpr Optable native_optable = {
+constexpr Optable<Ricoh5A22> native_optable = {
 
     &n_00, // 0x00
 

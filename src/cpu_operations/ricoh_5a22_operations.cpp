@@ -1,7 +1,8 @@
 #include "ricoh_5a22_operations.hpp"
 #include "ricoh_5a22_addressing_modes.hpp"
+#include "ricoh_5a22.hpp"
 
-// Micro-instructions
+// Micro-Instruction<Ricoh5A22>s
 // Functions are all of the type
 
 Address get_pcpb(Word pc, Byte pb) {
@@ -201,30 +202,30 @@ namespace WriteTo {
 
 // Operations which will require additional features when added
 namespace Ricoh5A22SpecialFunctions {
-	void STOP(CPU& cpu, bool skipped) {
+	void STOP(Ricoh5A22& cpu, bool skipped) {
 		// STOP BEHAVIOUR TO OCCUR HERE
 		// Stops processor until hardware reset
 		return;
 	}
 
-	void WAIT(CPU& cpu, bool skipped) {
+	void WAIT(Ricoh5A22& cpu, bool skipped) {
 		cpu.poll_interrupts();
 		return;
 	}
 }
 
 namespace Ricoh5A22Functions {
-	void NOP(CPU& cpu, bool skipped) {
+	void NOP(Ricoh5A22& cpu, bool skipped) {
 		return;
 	}
 
-	void DecrementPC(CPU& cpu, bool skipped) {
+	void DecrementPC(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.PC -= 1;
 	}
 
 	template <typename Set = SetMode::None, bool IfSkipped = false, typename Branch = BranchMode::None, bool NoIncrement = false>
-	void IncrementPC(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void IncrementPC(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (IfSkipped) {
 			if (skipped && !NoIncrement) { cpu.regs.PC++; }
 		} else {
@@ -314,12 +315,12 @@ namespace Ricoh5A22Functions {
 			cpu.BufferOperand = 0;
 		}
 
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 	template <typename From, typename To, bool PlusOne = false, typename BranchingRoutine = Branching::None>
-	void Read(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void Read(Ricoh5A22& cpu, bool skipped) {
+		
 		Word register_offset = 0;
 		Byte register_bank = 0;
 
@@ -547,12 +548,12 @@ namespace Ricoh5A22Functions {
 		    }
 		}
 
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 	template <typename From, typename To, typename Mode = CopyMode::All, bool PCIncrement = false>
-	void Copy(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void Copy(Ricoh5A22& cpu, bool skipped) {
+		
 		Word* to = nullptr;
 		Word* from = nullptr;
 
@@ -606,13 +607,13 @@ namespace Ricoh5A22Functions {
 			*to = get_hi(*to);
 			*to = ( (*to) << 8) | get_lo(*from);
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void LDA(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void LDA(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -631,12 +632,12 @@ namespace Ricoh5A22Functions {
 			cpu.set_flag_N(get_lo(cpu.regs.A) & 0x80);
 			cpu.set_flag_Z(get_lo(cpu.regs.A));
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void LDX(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void LDX(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -655,42 +656,42 @@ namespace Ricoh5A22Functions {
 			cpu.set_flag_N(get_lo(cpu.regs.X) & 0x80);
 			cpu.set_flag_Z(get_lo(cpu.regs.X));
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
-	void BRL(CPU& cpu, bool skipped) {
+	void BRL(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.PC += cpu.BufferOperand;
 	}
 
-	void SEC(CPU& cpu, bool skipped) {
+	void SEC(Ricoh5A22& cpu, bool skipped) {
 		cpu.set_flag_C();
 	}
 
-	void SEI(CPU& cpu, bool skipped) {
+	void SEI(Ricoh5A22& cpu, bool skipped) {
 		cpu.set_flag_I();
 	}
 
-	void SED(CPU& cpu, bool skipped) {
+	void SED(Ricoh5A22& cpu, bool skipped) {
 		cpu.set_flag_D();
 	}
 
-	void CLC(CPU& cpu, bool skipped) {
+	void CLC(Ricoh5A22& cpu, bool skipped) {
 		cpu.clear_flag_C();
 	}
 
-	void CLD(CPU& cpu, bool skipped) {
+	void CLD(Ricoh5A22& cpu, bool skipped) {
 		cpu.clear_flag_D();
 	}
 
-	void CLI(CPU& cpu, bool skipped) {
+	void CLI(Ricoh5A22& cpu, bool skipped) {
 		cpu.clear_flag_I();
 	}
 
-	void CLV(CPU& cpu, bool skipped) {
+	void CLV(Ricoh5A22& cpu, bool skipped) {
 		cpu.clear_flag_V();
 	}
 
-	void XCE(CPU& cpu, bool skipped) {
+	void XCE(Ricoh5A22& cpu, bool skipped) {
 		bool carry = cpu.get_flag_C();
 		bool emulation = cpu.regs.emulation_mode;
 
@@ -712,8 +713,8 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void LDY(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void LDY(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -732,12 +733,12 @@ namespace Ricoh5A22Functions {
 			cpu.set_flag_N(get_lo(cpu.regs.Y) & 0x80);
 			cpu.set_flag_Z(get_lo(cpu.regs.Y));
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void ORA(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void ORA(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -755,12 +756,12 @@ namespace Ricoh5A22Functions {
 			cpu.set_flag_N(get_lo(cpu.regs.A) & 0x80);
 			cpu.set_flag_Z(get_lo(cpu.regs.A));
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void CMP(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void CMP(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -806,13 +807,13 @@ namespace Ricoh5A22Functions {
 				cpu.set_flag_N();
 			}	
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void AND(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void AND(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -831,12 +832,12 @@ namespace Ricoh5A22Functions {
 			cpu.set_flag_N(get_lo(cpu.regs.A) & 0x80);
 			cpu.set_flag_Z(get_lo(cpu.regs.A));
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void EOR(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void EOR(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -855,10 +856,10 @@ namespace Ricoh5A22Functions {
 			cpu.set_flag_Z(get_lo(cpu.regs.A));
 		}
 
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
-	void adc_m_flag(CPU& cpu) {
+	void adc_m_flag(Ricoh5A22& cpu) {
 		if (!cpu.get_flag_D()) {
 			uint16_t result = get_lo(cpu.regs.A) + cpu.BufferOperand + cpu.get_flag_C();
 			if ((~(get_lo(cpu.regs.A) ^ cpu.BufferOperand) & (get_lo(cpu.regs.A) ^ get_lo(result)) & 0x80) != 0) {
@@ -902,7 +903,7 @@ namespace Ricoh5A22Functions {
 		}
 	}
 
-	void adc_no_m_flag(CPU& cpu) {
+	void adc_no_m_flag(Ricoh5A22& cpu) {
 		if (!cpu.get_flag_D()) {
 			uint32_t result = cpu.regs.A + cpu.BufferOperand + cpu.get_flag_C();
 			if ((~(cpu.regs.A ^ cpu.BufferOperand) & (cpu.regs.A ^ (uint16_t)(result)) & 0x8000) != 0) {
@@ -957,8 +958,8 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void ADC(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void ADC(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -971,10 +972,10 @@ namespace Ricoh5A22Functions {
 		} else {
 			Ricoh5A22Functions::adc_m_flag(cpu);
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
-	void sbc_m_flag(CPU& cpu) {
+	void sbc_m_flag(Ricoh5A22& cpu) {
 		if (!cpu.get_flag_D()) {
 			uint16_t result = get_lo(cpu.regs.A) - cpu.BufferOperand - (1 - cpu.get_flag_C());
 
@@ -1028,7 +1029,7 @@ namespace Ricoh5A22Functions {
 		}
 	}
 
-	void sbc_no_m_flag(CPU& cpu) {
+	void sbc_no_m_flag(Ricoh5A22& cpu) {
 		if (!cpu.get_flag_D()) {
 			uint32_t result = (uint32_t)cpu.regs.A - (uint32_t)cpu.BufferOperand - (1 - cpu.get_flag_C());
 
@@ -1095,8 +1096,8 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, bool PCIncrement = false>
-	void SBC(CPU& cpu, bool skipped) {
-		INSTRUCTION_START_CHECK_ROUTINE
+	void SBC(Ricoh5A22& cpu, bool skipped) {
+		
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -1109,11 +1110,11 @@ namespace Ricoh5A22Functions {
 		} else {
 			Ricoh5A22Functions::sbc_m_flag(cpu);
 		}
-		INSTRUCTION_END_CHECK_ROUTINE
+		
 	}
 
 	template<bool PCIncrement = false>
-	void DirectIndirectYIndex(CPU& cpu, bool skipped) {
+	void DirectIndirectYIndex(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -1125,7 +1126,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<bool PCIncrement = false>
-	void AbsoluteYIndex(CPU& cpu, bool skipped) {
+	void AbsoluteYIndex(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -1137,7 +1138,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<bool PCIncrement = false>
-	void AbsoluteXIndex(CPU& cpu, bool skipped) {
+	void AbsoluteXIndex(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -1149,7 +1150,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<bool PCIncrement = false>
-	void AbsoluteXRMWIndex(CPU& cpu, bool skipped) {
+	void AbsoluteXRMWIndex(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -1160,7 +1161,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<bool PCIncrement = false>
-	void AbsoluteLongXIndex(CPU& cpu, bool skipped) {
+	void AbsoluteLongXIndex(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -1171,7 +1172,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <bool PCIncrement = false>
-	void DirectIndirectIndexedLongYIndex(CPU& cpu, bool skipped) {
+	void DirectIndirectIndexedLongYIndex(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -1182,7 +1183,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<bool PCIncrement = false>
-	void StackRelativeIndirectIndexed(CPU& cpu, bool skipped) {
+	void StackRelativeIndirectIndexed(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (PCIncrement) {
 			cpu.regs.PC++;
 		}
@@ -1192,12 +1193,12 @@ namespace Ricoh5A22Functions {
 		cpu.BufferBank = cpu.regs.DB + (tmp >> 16);
 	}
 
-	void PollInterrupts(CPU& cpu, bool skipped) {
+	void PollInterrupts(Ricoh5A22& cpu, bool skipped) {
 		cpu.poll_interrupts();
 	}
 
 	template<typename CPUMode>
-	void SetVector(CPU& cpu, bool skipped) {
+	void SetVector(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.Vector = 0xFFE4;
 		} else {
@@ -1206,7 +1207,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<typename CPUMode>
-	void SetVectorBRK(CPU& cpu, bool skipped) {
+	void SetVectorBRK(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.Vector = 0xFFE6;
 		} else {
@@ -1215,7 +1216,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<typename Value, typename To>
-	void Write(CPU& cpu, bool skipped) {
+	void Write(Ricoh5A22& cpu, bool skipped) {
 		Byte value;
 		if constexpr (std::is_same_v<Value, WriteValue::OperandLow>) {
 			value = (uint8_t)(get_lo(cpu.BufferOperand));
@@ -1368,7 +1369,7 @@ namespace Ricoh5A22Functions {
 		}
 	}
 
-	void MVP(CPU& cpu, bool skipped) {
+	void MVP(Ricoh5A22& cpu, bool skipped) {
 	    cpu.regs.A -= 1;
 	    
 	    if (cpu.get_flag_X()) {
@@ -1389,7 +1390,7 @@ namespace Ricoh5A22Functions {
 	    }
 	}
 
-	void MVN(CPU& cpu, bool skipped) {
+	void MVN(Ricoh5A22& cpu, bool skipped) {
 	    cpu.regs.A -= 1;
 	    
 	    if (cpu.get_flag_X()) {
@@ -1411,7 +1412,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, typename OpMode>
-	void TB(CPU& cpu, bool skipped) {
+	void TB(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_M()) {
 				if ( (get_lo(cpu.regs.A) & get_lo(cpu.BufferOperand)) == 0) {
@@ -1441,7 +1442,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, typename SetMode = Mode::Operand>
-	void ASL(CPU& cpu, bool skipped) {
+	void ASL(Ricoh5A22& cpu, bool skipped) {
 		uint16_t* shifting = nullptr;
 		if constexpr (std::is_same_v<SetMode, Mode::RegisterA>) {
 			shifting = &cpu.regs.A;
@@ -1509,7 +1510,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, typename SetMode = Mode::Operand>
-	void ROL(CPU& cpu, bool skipped) {
+	void ROL(Ricoh5A22& cpu, bool skipped) {
 		uint16_t* rotating = nullptr;
 		if constexpr (std::is_same_v<SetMode, Mode::RegisterA>) {
 			rotating = &cpu.regs.A;
@@ -1590,7 +1591,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, typename SetMode = Mode::Operand>
-	void LSR(CPU& cpu, bool skipped) {
+	void LSR(Ricoh5A22& cpu, bool skipped) {
 		uint16_t* shifting = nullptr;
 		if constexpr (std::is_same_v<SetMode, Mode::RegisterA>) {
 			shifting = &cpu.regs.A;
@@ -1658,7 +1659,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, typename SetMode = Mode::Operand>
-	void ROR(CPU& cpu, bool skipped) {
+	void ROR(Ricoh5A22& cpu, bool skipped) {
 		uint16_t* rotating = nullptr;
 		if constexpr (std::is_same_v<SetMode, Mode::RegisterA>) {
 			rotating = &cpu.regs.A;
@@ -1739,7 +1740,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TSX(CPU& cpu, bool skipped) {
+	void TSX(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_X()) {
 				cpu.regs.X = (get_hi(cpu.regs.X) << 8) | (uint8_t)(get_lo(cpu.regs.S));
@@ -1782,7 +1783,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TXY(CPU& cpu, bool skipped) {
+	void TXY(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_X()) {
 				cpu.regs.Y = (get_hi(cpu.regs.Y) << 8) | (uint8_t)(get_lo(cpu.regs.X));
@@ -1825,7 +1826,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TYX(CPU& cpu, bool skipped) {
+	void TYX(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_X()) {
 				cpu.regs.X = (get_hi(cpu.regs.X) << 8) | (uint8_t)(get_lo(cpu.regs.Y));
@@ -1868,7 +1869,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TAX(CPU& cpu, bool skipped) {
+	void TAX(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_X()) {
 				cpu.regs.X = (get_hi(cpu.regs.X) << 8) | (uint8_t)(get_lo(cpu.regs.A));
@@ -1911,7 +1912,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TAY(CPU& cpu, bool skipped) {
+	void TAY(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_X()) {
 				cpu.regs.Y = (get_hi(cpu.regs.Y) << 8) | (uint8_t)(get_lo(cpu.regs.A));
@@ -1954,7 +1955,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TXA(CPU& cpu, bool skipped) {
+	void TXA(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_M()) {
 				cpu.regs.A = (get_hi(cpu.regs.A) << 8) | (uint8_t)(get_lo(cpu.regs.X));
@@ -1997,7 +1998,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TYA(CPU& cpu, bool skipped) {
+	void TYA(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			if (cpu.get_flag_M()) {
 				cpu.regs.A = (get_hi(cpu.regs.A) << 8) | (uint8_t)(get_lo(cpu.regs.Y));
@@ -2040,7 +2041,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TCD(CPU& cpu, bool skipped) {
+	void TCD(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.D = cpu.regs.A;
 		if ((get_hi(cpu.regs.D) & 0x80) != 0) {
 			cpu.set_flag_N();
@@ -2055,7 +2056,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TCS(CPU& cpu, bool skipped) {
+	void TCS(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.S = cpu.regs.A;
 		} else {
@@ -2064,7 +2065,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TDC(CPU& cpu, bool skipped) {
+	void TDC(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.A = cpu.regs.D;
 		if ((get_hi(cpu.regs.A) & 0x80) != 0) {
 			cpu.set_flag_N();
@@ -2079,7 +2080,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TSC(CPU& cpu, bool skipped) {
+	void TSC(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.A = cpu.regs.S;
 			if ((get_hi(cpu.regs.A) & 0x80) != 0) {
@@ -2108,7 +2109,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void TXS(CPU& cpu, bool skipped) {
+	void TXS(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.S = cpu.regs.X;
 		} else {
@@ -2116,7 +2117,7 @@ namespace Ricoh5A22Functions {
 		}
 	}
 
-	void XBA(CPU& cpu, bool skipped) {
+	void XBA(Ricoh5A22& cpu, bool skipped) {
 		uint8_t lo = get_lo(cpu.regs.A);
 		uint8_t hi = get_hi(cpu.regs.A);
 		cpu.regs.A = (lo << 8) | (uint8_t)(hi);
@@ -2133,7 +2134,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, bool IsImmediate = false>
-	void BIT(CPU& cpu, bool skipped) {
+	void BIT(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (IsImmediate) {
 			cpu.regs.PC++;
 		}
@@ -2196,29 +2197,29 @@ namespace Ricoh5A22Functions {
 		}
 	}
 
-	void JMPOp(CPU& cpu, bool skipped) {
+	void JMPOp(Ricoh5A22& cpu, bool skipped) {
 	    cpu.BufferPointer = (cpu.BufferPointer + cpu.regs.X) & 0xFFFF;
 	    cpu.BufferBank = cpu.regs.PB;
 	}
 
-	void JMLDCRead(CPU& cpu, bool skipped) {
+	void JMLDCRead(Ricoh5A22& cpu, bool skipped) {
 		Word address = cpu.BufferPointer + 2; 
 	    Byte value_read = cpu.read(get_pcpb(address, 0));
 	    cpu.BufferBank = value_read;
 	}
 
-	void PCOperandPBBank(CPU& cpu, bool skipped) {
+	void PCOperandPBBank(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.PC = cpu.BufferOperand;
 		cpu.regs.PB = cpu.BufferBank;
 	}
 
-	void PCAddressPBBank(CPU& cpu, bool skipped) {
+	void PCAddressPBBank(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.PC = cpu.BufferAddress;
 		cpu.regs.PB = cpu.BufferBank;
 	}
 
 	template <typename CPUMode, typename Direction, typename Changing, typename Flag>
-	void INDE(CPU& cpu, bool skipped) {
+	void INDE(Ricoh5A22& cpu, bool skipped) {
 		int8_t adding = 1;
 		if constexpr (std::is_same_v<Direction, Mode::Decrease>) {
 			adding = -1;
@@ -2289,7 +2290,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void REP(CPU& cpu, bool skipped) {
+	void REP(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.P = cpu.regs.P & ~get_lo(cpu.BufferOperand);
 			if (cpu.get_flag_X()) {
@@ -2302,7 +2303,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void SEP(CPU& cpu, bool skipped) {
+	void SEP(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.P = cpu.regs.P | get_lo(cpu.BufferOperand);
 			if (cpu.get_flag_X()) {
@@ -2315,7 +2316,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, typename Register, bool PCIncrement = false>
-	void CopyRegister(CPU& cpu, bool skipped) {
+	void CopyRegister(Ricoh5A22& cpu, bool skipped) {
 		Word* reg = nullptr;
 		if constexpr (std::is_same_v<Register, Mode::RegisterX>) {
 			reg = &cpu.regs.X;
@@ -2378,98 +2379,98 @@ namespace Ricoh5A22Functions {
 		}
 	}
 
-	void DecrementS(CPU& cpu, bool skipped) {
+	void DecrementS(Ricoh5A22& cpu, bool skipped) {
 		if (!skipped) {
 			cpu.regs.S -= 1;
 		}
 	}
 
-	void DecrementSLow(CPU& cpu, bool skipped) {
+	void DecrementSLow(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.S = (0b1 << 8) | (uint8_t)(get_lo(cpu.regs.S) - 1);
 	}
 
-	void DecrementS2(CPU& cpu, bool skipped) {
+	void DecrementS2(Ricoh5A22& cpu, bool skipped) {
 		if (!skipped) {
 			cpu.regs.S -= 2;
 		}
 	}
 
-	void DecrementS2Low(CPU& cpu, bool skipped) {
+	void DecrementS2Low(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.S = (0b1 << 8) | (uint8_t)(get_lo(cpu.regs.S) - 2);
 	}
 
-	void DecrementS2PCAddress(CPU& cpu, bool skipped) {
+	void DecrementS2PCAddress(Ricoh5A22& cpu, bool skipped) {
 		if (!skipped) {
 			cpu.regs.S -= 2;
 			cpu.regs.PC = cpu.BufferAddress;
 		}
 	}
 
-	void DecrementS2LowPCAddress(CPU& cpu, bool skipped) {
+	void DecrementS2LowPCAddress(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.S = (0b1 << 8) | (uint8_t)(get_lo(cpu.regs.S) - 2);
 		cpu.regs.PC = cpu.BufferAddress;
 	}
 
-	void DecrementS3(CPU& cpu, bool skipped) {
+	void DecrementS3(Ricoh5A22& cpu, bool skipped) {
 		if (!skipped) {
 			cpu.regs.S -= 3;
 		}
 	}
 
-	void DecrementS3Low(CPU& cpu, bool skipped) {
+	void DecrementS3Low(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.S = (0b1 << 8) | (uint8_t)(get_lo(cpu.regs.S) - 3);
 	}
 
-	void DecrementS4(CPU& cpu, bool skipped) {
+	void DecrementS4(Ricoh5A22& cpu, bool skipped) {
 		if (!skipped) {
 			cpu.regs.S -= 4;
 		}
 	}
 
-	void DecrementS4Low(CPU& cpu, bool skipped) {
+	void DecrementS4Low(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.S = (0b1 << 8) | (uint8_t)(get_lo(cpu.regs.S) - 4);
 	}
 
-	void IncrementSNativeAndReadBank(CPU& cpu, bool skipped) {
+	void IncrementSNativeAndReadBank(Ricoh5A22& cpu, bool skipped) {
 		Word address = cpu.regs.S + 1;
 		cpu.BufferBank = cpu.read(get_pcpb(address, 0));
 		cpu.regs.S = address;
 	}
 
-	void IncrementS(CPU& cpu, bool skipped) {
+	void IncrementS(Ricoh5A22& cpu, bool skipped) {
 		if (!skipped) {
 			cpu.regs.S += 1;
 		}
 	}
 
-	void IncrementSLow(CPU& cpu, bool skipped) {
+	void IncrementSLow(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.S = (0b1 << 8) | (uint8_t)(get_lo(cpu.regs.S) + 1);
 	}
 
-	void IncrementS2(CPU& cpu, bool skipped) {
+	void IncrementS2(Ricoh5A22& cpu, bool skipped) {
 		if (!skipped) {
 			cpu.regs.S += 2;
 		}
 	}
 
-	void IncrementS2Low(CPU& cpu, bool skipped) {
+	void IncrementS2Low(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.S = (0b1 << 8) | (uint8_t)(get_lo(cpu.regs.S) + 2);
 	}
 
-	void IncrementS2PCAddress(CPU& cpu, bool skipped) {
+	void IncrementS2PCAddress(Ricoh5A22& cpu, bool skipped) {
 		if (!skipped) {
 			cpu.regs.S += 2;
 			cpu.regs.PC = cpu.BufferAddress;
 		}
 	}
 
-	void IncrementS2LowPCAddress(CPU& cpu, bool skipped) {
+	void IncrementS2LowPCAddress(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.S = (0b1 << 8) | (uint8_t)(get_lo(cpu.regs.S) + 2);
 		cpu.regs.PC = cpu.BufferAddress;
 	}
 
 	template <typename CPUMode>
-	void PHP(CPU& cpu, bool skipped) {
+	void PHP(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.BufferOperand = (get_hi(cpu.BufferOperand) << 8) | (uint8_t)(cpu.regs.P);
 		} else {
@@ -2479,7 +2480,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void STXIndex(CPU& cpu, bool skipped) {
+	void STXIndex(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>)  {
 			cpu.BufferAddress = cpu.BufferOperand + cpu.regs.Y + cpu.regs.D;
 		} else {
@@ -2493,7 +2494,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void STYIndex(CPU& cpu, bool skipped) {
+	void STYIndex(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>)  {
 			cpu.BufferAddress = cpu.BufferOperand + cpu.regs.X + cpu.regs.D;
 		} else {
@@ -2506,17 +2507,17 @@ namespace Ricoh5A22Functions {
 		}
 	}
 
-	void JSRIndex(CPU& cpu, bool skipped) {
+	void JSRIndex(Ricoh5A22& cpu, bool skipped) {
 		cpu.BufferPointer += cpu.regs.X;
 		cpu.BufferBank = cpu.regs.PB;
 	}
 
-	void PCAddress(CPU& cpu, bool skipped) {
+	void PCAddress(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.PC = cpu.BufferAddress;
 	}
 
 	template <typename CPUMode>
-	void JSL(CPU& cpu, bool skipped) {
+	void JSL(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.S -= 3;
 			cpu.regs.PC = cpu.BufferAddress;
@@ -2529,7 +2530,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode, typename Register, typename Flag>
-	void PL(CPU& cpu, bool skipped) {
+	void PL(Ricoh5A22& cpu, bool skipped) {
 		Word* reg = nullptr;
 		if constexpr (std::is_same_v<Register, Mode::RegisterA>) {
 			reg = &cpu.regs.A;
@@ -2587,7 +2588,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void PLP(CPU& cpu, bool skipped) {
+	void PLP(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.P = get_lo(cpu.BufferOperand);
 			if (cpu.get_flag_X()) {
@@ -2604,7 +2605,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void PLB(CPU& cpu, bool skipped) {
+	void PLB(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.DB = cpu.BufferBank;
 		if ((cpu.regs.DB & 0x80) != 0) {
 			cpu.set_flag_N();
@@ -2619,7 +2620,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void PLD(CPU& cpu, bool skipped) {
+	void PLD(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.S += 2;
 		} else {
@@ -2639,7 +2640,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void RTS(CPU& cpu, bool skipped) {
+	void RTS(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.S += 1;
 		} else {
@@ -2649,7 +2650,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void POperand(CPU& cpu, bool skipped) {
+	void POperand(Ricoh5A22& cpu, bool skipped) {
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			cpu.regs.P = cpu.BufferOperand;
 		} else {
@@ -2658,7 +2659,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void RTI(CPU& cpu, bool skipped) {
+	void RTI(Ricoh5A22& cpu, bool skipped) {
 		// Note: cpu.regs.PB is already restored directly by the preceding
 		// Read<ReadFrom::Stack3, ReadTo::PB> micro-op in the native-mode
 		// opcode table (see the Read<> template's ReadTo::PB branch, which
@@ -2677,7 +2678,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template <typename CPUMode>
-	void RTL(CPU& cpu, bool skipped) {
+	void RTL(Ricoh5A22& cpu, bool skipped) {
 		// Note: cpu.regs.PB is already restored directly by the preceding
 		// Read<ReadFrom::Stack3, ReadTo::PB> micro-op (see RTI's note above).
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
@@ -2688,17 +2689,17 @@ namespace Ricoh5A22Functions {
 		cpu.regs.PC = (cpu.BufferOperand + 1);
 	}
 
-	void SetIUnsetD(CPU& cpu, bool skipped) {
+	void SetIUnsetD(Ricoh5A22& cpu, bool skipped) {
 		cpu.set_flag_I();
 		cpu.clear_flag_D();
 	}
 
-	void COP(CPU& cpu, bool skipped) {
+	void COP(Ricoh5A22& cpu, bool skipped) {
 		cpu.regs.PC = cpu.BufferAddress;
 		cpu.regs.PB = 0;
 	}
 
-	void PushStatusWithBreakFlag(CPU& cpu, bool skipped) {
+	void PushStatusWithBreakFlag(Ricoh5A22& cpu, bool skipped) {
 		Byte value = cpu.regs.P | 0x10;
 		Address address = 0x0100 | (uint8_t)(get_lo(cpu.regs.S) - 2);
 
@@ -2710,7 +2711,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<typename CPUMode>
-	void SetVectorNMI(CPU& cpu, bool skipped) {
+	void SetVectorNMI(Ricoh5A22& cpu, bool skipped) {
 	    if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 	        cpu.Vector = 0xFFEA;
 	    } else {
@@ -2719,7 +2720,7 @@ namespace Ricoh5A22Functions {
 	}
 
 	template<typename CPUMode>
-	void SetVectorIRQ(CPU& cpu, bool skipped) {
+	void SetVectorIRQ(Ricoh5A22& cpu, bool skipped) {
 	    if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 	        cpu.Vector = 0xFFEE;
 	    } else {
@@ -2727,7 +2728,7 @@ namespace Ricoh5A22Functions {
 	    }
 	}
 
-	void PushStatusClearBreakFlag(CPU& cpu, bool skipped) {
+	void PushStatusClearBreakFlag(Ricoh5A22& cpu, bool skipped) {
 	    Byte value = cpu.regs.P & ~0x10;
 	    Address address = 0x0100 | (uint8_t)(get_lo(cpu.regs.S) - 2);
 	    if constexpr (SST_TEST) {
@@ -2739,38 +2740,38 @@ namespace Ricoh5A22Functions {
 }
 
 namespace Ricoh5A22Predicates {
-	bool Never(CPU& cpu) {
+	bool Never(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return false;
 	}
 
-	bool Even(CPU& cpu) {
+	bool Even(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return ( (cpu.regs.PC & 0b1) == 0);
 	}
 
-	bool Odd(CPU& cpu) {
+	bool Odd(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return ( (cpu.regs.PC & 0b1) == 1);
 	}
 
-	bool DLZero(CPU& cpu) {
+	bool DLZero(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return get_lo(cpu.regs.D) == 0;
 	}
 
-	bool MFlagSet(CPU& cpu) {
+	bool MFlagSet(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return cpu.get_flag_M();
 	}
 
-	bool XFlagSet(CPU& cpu) {
+	bool XFlagSet(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return cpu.get_flag_X();
 	}
 
 	template <typename CPUMode = Mode::Native>
-	bool ReadingCondition(CPU& cpu) {
+	bool ReadingCondition(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		if constexpr (std::is_same_v<CPUMode, Mode::Native>) {
 			return (get_hi(cpu.BufferOrig) == get_hi(cpu.BufferPointer) && cpu.get_flag_X() == true);
@@ -2779,17 +2780,17 @@ namespace Ricoh5A22Predicates {
 		}
 	}
 
-	bool NoBranching(CPU& cpu) {
+	bool NoBranching(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return !cpu.Branching;
 	}
 
-	bool NoBoundaryCrossed(CPU& cpu) {
+	bool NoBoundaryCrossed(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return !cpu.BoundaryCrossed;
 	}
 
-	bool NoBranchingOrNoBoundaryCrossed(CPU& cpu) {
+	bool NoBranchingOrNoBoundaryCrossed(Ricoh5A22& cpu) {
 		PREDICATE_CHECK_ROUTINE
 		return !cpu.Branching || !cpu.BoundaryCrossed;
 	}
@@ -2797,7 +2798,7 @@ namespace Ricoh5A22Predicates {
 
 // Interrupt routines
 // NMI
-Instruction n_nmi = {
+Instruction<Ricoh5A22> n_nmi = {
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),
@@ -2816,7 +2817,7 @@ Instruction n_nmi = {
     NEXT_OPCODE
 };
 
-Instruction e_nmi = {
+Instruction<Ricoh5A22> e_nmi = {
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),
@@ -2834,7 +2835,7 @@ Instruction e_nmi = {
 };
 
 // IRQ
-Instruction n_irq = {
+Instruction<Ricoh5A22> n_irq = {
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),
@@ -2852,7 +2853,7 @@ Instruction n_irq = {
     MakeHandler(Ricoh5A22Functions::COP),
     NEXT_OPCODE
 };
-Instruction e_irq = {
+Instruction<Ricoh5A22> e_irq = {
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),
     MakeHandler(Ricoh5A22Functions::NOP),
@@ -2869,10 +2870,10 @@ Instruction e_irq = {
     NEXT_OPCODE
 };
 
-// Main instructions
+// Main Instruction<Ricoh5A22>s
 
 // BRK (00)
-Instruction n_00 = {
+Instruction<Ricoh5A22> n_00 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -2890,7 +2891,7 @@ Instruction n_00 = {
 	MakeHandler(Ricoh5A22Functions::COP),
 	NEXT_OPCODE
 };
-Instruction e_00 = {
+Instruction<Ricoh5A22> e_00 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -2908,19 +2909,19 @@ Instruction e_00 = {
 };
 
 // ORA (01)
-Instruction n_01 = {
+Instruction<Ricoh5A22> n_01 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_01 = {
+Instruction<Ricoh5A22> e_01 = {
 	EMULATION_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // COP (02)
-Instruction n_02 = {
+Instruction<Ricoh5A22> n_02 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -2938,7 +2939,7 @@ Instruction n_02 = {
 	MakeHandler(Ricoh5A22Functions::COP),
 	NEXT_OPCODE
 };
-Instruction e_02 = {
+Instruction<Ricoh5A22> e_02 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -2956,19 +2957,19 @@ Instruction e_02 = {
 };
 
 // ORA (03)
-Instruction n_03 = {
+Instruction<Ricoh5A22> n_03 = {
 	NATIVE_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_03 = {
+Instruction<Ricoh5A22> e_03 = {
 	EMULATION_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // TSB (04)
-Instruction n_04 = {
+Instruction<Ricoh5A22> n_04 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -2986,7 +2987,7 @@ Instruction n_04 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_04 = {
+Instruction<Ricoh5A22> e_04 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -3002,25 +3003,25 @@ Instruction e_04 = {
 };
 
 // ORA (05)
-Instruction n_05 = {
+Instruction<Ricoh5A22> n_05 = {
 	NATIVE_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_05 = {
+Instruction<Ricoh5A22> e_05 = {
 	EMULATION_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ASL (06)
-Instruction n_06 = {
+Instruction<Ricoh5A22> n_06 = {
 	NATIVE_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Native>),
 	NATIVE_DIRECT_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_06 = {
+Instruction<Ricoh5A22> e_06 = {
 	EMULATION_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Emulation>),
 	EMULATION_DIRECT_READ_MODIFY_WRITE_END
@@ -3028,19 +3029,19 @@ Instruction e_06 = {
 };
 
 // ORA (07)
-Instruction n_07 = {
+Instruction<Ricoh5A22> n_07 = {
 	NATIVE_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_07 = {
+Instruction<Ricoh5A22> e_07 = {
 	EMULATION_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PHP (08)
-Instruction n_08 = {
+Instruction<Ricoh5A22> n_08 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::PHP<Mode::Native>),
@@ -3048,7 +3049,7 @@ Instruction n_08 = {
 	MakeHandler(Ricoh5A22Functions::DecrementS),
 	NEXT_OPCODE
 };
-Instruction e_08 = {
+Instruction<Ricoh5A22> e_08 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::PHP<Mode::Emulation>),
@@ -3058,31 +3059,31 @@ Instruction e_08 = {
 };
 
 // ORA (09)
-Instruction n_09 = {
+Instruction<Ricoh5A22> n_09 = {
 	NATIVE_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_09 = {
+Instruction<Ricoh5A22> e_09 = {
 	EMULATION_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // ASL (0A)
-Instruction n_0a = {
+Instruction<Ricoh5A22> n_0a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Native, Mode::RegisterA>),
 	NEXT_OPCODE
 };
-Instruction e_0a = {
+Instruction<Ricoh5A22> e_0a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Emulation, Mode::RegisterA>),
 	NEXT_OPCODE
 };
 
 // PHD (0B)
-Instruction n_0b = {
+Instruction<Ricoh5A22> n_0b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -3092,7 +3093,7 @@ Instruction n_0b = {
 	MakeHandler(Ricoh5A22Functions::DecrementS2),
 	NEXT_OPCODE
 };
-Instruction e_0b = {
+Instruction<Ricoh5A22> e_0b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -3104,7 +3105,7 @@ Instruction e_0b = {
 };
 
 // TSB (0C)
-Instruction n_0c = {
+Instruction<Ricoh5A22> n_0c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -3122,7 +3123,7 @@ Instruction n_0c = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_0c = {
+Instruction<Ricoh5A22> e_0c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -3138,25 +3139,25 @@ Instruction e_0c = {
 };
 
 // ORA (0D)
-Instruction n_0d = {
+Instruction<Ricoh5A22> n_0d = {
 	NATIVE_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_0d = {
+Instruction<Ricoh5A22> e_0d = {
 	EMULATION_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ASL (0E)
-Instruction n_0e = {
+Instruction<Ricoh5A22> n_0e = {
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Native>),
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_0e = {
+Instruction<Ricoh5A22> e_0e = {
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Emulation>),
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_END
@@ -3164,67 +3165,67 @@ Instruction e_0e = {
 };
 
 // ORA (0F)
-Instruction n_0f = {
+Instruction<Ricoh5A22> n_0f = {
 	NATIVE_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_0f = {
+Instruction<Ricoh5A22> e_0f = {
 	EMULATION_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BPL (10)
-Instruction n_10 = {
+Instruction<Ricoh5A22> n_10 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::N_Zero>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_10 = {
+Instruction<Ricoh5A22> e_10 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::N_Zero>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // ORA (11)
-Instruction n_11 = {
+Instruction<Ricoh5A22> n_11 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_11 = {
+Instruction<Ricoh5A22> e_11 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ORA (12)
-Instruction n_12 = {
+Instruction<Ricoh5A22> n_12 = {
 	NATIVE_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_12 = {
+Instruction<Ricoh5A22> e_12 = {
 	EMULATION_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ORA (13)
-Instruction n_13 = {
+Instruction<Ricoh5A22> n_13 = {
 	NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_13 = {
+Instruction<Ricoh5A22> e_13 = {
 	EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // TRB (14)
-Instruction n_14 = {
+Instruction<Ricoh5A22> n_14 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -3242,7 +3243,7 @@ Instruction n_14 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_14 = {
+Instruction<Ricoh5A22> e_14 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -3258,25 +3259,25 @@ Instruction e_14 = {
 };
 
 // ORA (15)
-Instruction n_15 = {
+Instruction<Ricoh5A22> n_15 = {
 	NATIVE_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_15 = {
+Instruction<Ricoh5A22> e_15 = {
 	EMULATION_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ASL (16)
-Instruction n_16 = {
+Instruction<Ricoh5A22> n_16 = {
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Native>),
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_16 = {
+Instruction<Ricoh5A22> e_16 = {
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Emulation>),
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_END
@@ -3284,57 +3285,57 @@ Instruction e_16 = {
 };
 
 // ORA (17)
-Instruction n_17 = {
+Instruction<Ricoh5A22> n_17 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_17 = {
+Instruction<Ricoh5A22> e_17 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CLC (18)
-Instruction n_18 = {
+Instruction<Ricoh5A22> n_18 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::CLC),
 	NEXT_OPCODE
 };
-Instruction e_18 = n_18;
+Instruction<Ricoh5A22> e_18 = n_18;
 
 // ORA (19)
-Instruction n_19 = {
+Instruction<Ricoh5A22> n_19 = {
 	NATIVE_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_19 = {
+Instruction<Ricoh5A22> e_19 = {
 	EMULATION_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // INC (1A)
-Instruction n_1a = {
+Instruction<Ricoh5A22> n_1a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Increase, Mode::RegisterA, Mode::MFlag>),
 	NEXT_OPCODE
 };
-Instruction e_1a = {
+Instruction<Ricoh5A22> e_1a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Increase, Mode::RegisterA, Mode::MFlag>),
 	NEXT_OPCODE
 };
 
 // TCS (1B)
-Instruction n_1b = {
+Instruction<Ricoh5A22> n_1b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TCS<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_1b = {
+Instruction<Ricoh5A22> e_1b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TCS<Mode::Emulation>),
 	NEXT_OPCODE
@@ -3342,7 +3343,7 @@ Instruction e_1b = {
 
 
 // TRB (1C)
-Instruction n_1c = {
+Instruction<Ricoh5A22> n_1c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -3360,7 +3361,7 @@ Instruction n_1c = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_1c = {
+Instruction<Ricoh5A22> e_1c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -3376,25 +3377,25 @@ Instruction e_1c = {
 };
 
 // ORA (1D)
-Instruction n_1d = {
+Instruction<Ricoh5A22> n_1d = {
 	NATIVE_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_1d = {
+Instruction<Ricoh5A22> e_1d = {
 	EMULATION_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ASL (1E)
-Instruction n_1e = {
+Instruction<Ricoh5A22> n_1e = {
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Native>),
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_1e = {
+Instruction<Ricoh5A22> e_1e = {
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ASL<Mode::Emulation>),
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_END
@@ -3402,19 +3403,19 @@ Instruction e_1e = {
 };
 
 // ORA (1F)
-Instruction n_1f = {
+Instruction<Ricoh5A22> n_1f = {
 	NATIVE_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_1f = {
+Instruction<Ricoh5A22> e_1f = {
 	EMULATION_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::ORA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // JSR (20)
-Instruction n_20 = {
+Instruction<Ricoh5A22> n_20 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -3428,7 +3429,7 @@ Instruction n_20 = {
 	MakeHandler(Ricoh5A22Functions::DecrementS2PCAddress),
 	NEXT_OPCODE
 };
-Instruction e_20 = {
+Instruction<Ricoh5A22> e_20 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -3444,19 +3445,19 @@ Instruction e_20 = {
 };
 
 // AND (21)
-Instruction n_21 = {
+Instruction<Ricoh5A22> n_21 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_21 = {
+Instruction<Ricoh5A22> e_21 = {
 	EMULATION_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // JSL (22)
-Instruction n_22 = {
+Instruction<Ricoh5A22> n_22 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -3474,7 +3475,7 @@ Instruction n_22 = {
 	MakeHandler(Ricoh5A22Functions::JSL<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_22 = {
+Instruction<Ricoh5A22> e_22 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -3494,49 +3495,49 @@ Instruction e_22 = {
 };
 
 // AND (23)
-Instruction n_23 = {
+Instruction<Ricoh5A22> n_23 = {
 	NATIVE_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_23 = {
+Instruction<Ricoh5A22> e_23 = {
 	EMULATION_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BIT (24)
-Instruction n_24 = {
+Instruction<Ricoh5A22> n_24 = {
 	NATIVE_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_24 = {
+Instruction<Ricoh5A22> e_24 = {
 	EMULATION_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // AND (25)
-Instruction n_25 = {
+Instruction<Ricoh5A22> n_25 = {
 	NATIVE_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_25 = {
+Instruction<Ricoh5A22> e_25 = {
 	EMULATION_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ROL (26)
-Instruction n_26 = {
+Instruction<Ricoh5A22> n_26 = {
 	NATIVE_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Native>),
 	NATIVE_DIRECT_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_26 = {
+Instruction<Ricoh5A22> e_26 = {
 	EMULATION_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Emulation>),
 	EMULATION_DIRECT_READ_MODIFY_WRITE_END
@@ -3544,19 +3545,19 @@ Instruction e_26 = {
 };
 
 // AND (27)
-Instruction n_27 = {
+Instruction<Ricoh5A22> n_27 = {
 	NATIVE_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_27 = {
+Instruction<Ricoh5A22> e_27 = {
 	EMULATION_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PLP (28)
-Instruction n_28 = {
+Instruction<Ricoh5A22> n_28 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -3566,7 +3567,7 @@ Instruction n_28 = {
 	MakeHandler(Ricoh5A22Functions::PLP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_28 = {
+Instruction<Ricoh5A22> e_28 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -3578,31 +3579,31 @@ Instruction e_28 = {
 };
 
 // AND (29)
-Instruction n_29 = {
+Instruction<Ricoh5A22> n_29 = {
 	NATIVE_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_29 = {
+Instruction<Ricoh5A22> e_29 = {
 	EMULATION_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // ROL (2A)
-Instruction n_2a = {
+Instruction<Ricoh5A22> n_2a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Native, Mode::RegisterA>),
 	NEXT_OPCODE
 };
-Instruction e_2a = {
+Instruction<Ricoh5A22> e_2a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Emulation, Mode::RegisterA>),
 	NEXT_OPCODE
 };
 
 // PLD (2B)
-Instruction n_2b = {
+Instruction<Ricoh5A22> n_2b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -3614,7 +3615,7 @@ Instruction n_2b = {
 	MakeHandler(Ricoh5A22Functions::PLD<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_2b = {
+Instruction<Ricoh5A22> e_2b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -3628,37 +3629,37 @@ Instruction e_2b = {
 };
 
 // BIT (2C)
-Instruction n_2c = {
+Instruction<Ricoh5A22> n_2c = {
 	NATIVE_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_2c = {
+Instruction<Ricoh5A22> e_2c = {
 	EMULATION_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // AND (2D)
-Instruction n_2d = {
+Instruction<Ricoh5A22> n_2d = {
 	NATIVE_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_2d = {
+Instruction<Ricoh5A22> e_2d = {
 	EMULATION_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ROL (2E)
-Instruction n_2e = {
+Instruction<Ricoh5A22> n_2e = {
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Native>),
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_2e = {
+Instruction<Ricoh5A22> e_2e = {
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Emulation>),
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_END
@@ -3666,97 +3667,97 @@ Instruction e_2e = {
 };
 
 // AND (2F)
-Instruction n_2f = {
+Instruction<Ricoh5A22> n_2f = {
 	NATIVE_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_2f = {
+Instruction<Ricoh5A22> e_2f = {
 	EMULATION_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BMI (30)
-Instruction n_30 = {
+Instruction<Ricoh5A22> n_30 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::N_One>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_30 = {
+Instruction<Ricoh5A22> e_30 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::N_One>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // AND (31)
-Instruction n_31 = {
+Instruction<Ricoh5A22> n_31 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_31 = {
+Instruction<Ricoh5A22> e_31 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // AND (32)
-Instruction n_32 = {
+Instruction<Ricoh5A22> n_32 = {
 	NATIVE_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_32 = {
+Instruction<Ricoh5A22> e_32 = {
 	EMULATION_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // AND (33)
-Instruction n_33 = {
+Instruction<Ricoh5A22> n_33 = {
 	NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_33 = {
+Instruction<Ricoh5A22> e_33 = {
 	EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BIT (34)
-Instruction n_34 = {
+Instruction<Ricoh5A22> n_34 = {
 	NATIVE_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_34 = {
+Instruction<Ricoh5A22> e_34 = {
 	EMULATION_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // AND (35)
-Instruction n_35 = {
+Instruction<Ricoh5A22> n_35 = {
 	NATIVE_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_35 = {
+Instruction<Ricoh5A22> e_35 = {
 	EMULATION_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ROL (36)
-Instruction n_36 = {
+Instruction<Ricoh5A22> n_36 = {
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Native>),
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_36 = {
+Instruction<Ricoh5A22> e_36 = {
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Emulation>),
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_END
@@ -3764,94 +3765,94 @@ Instruction e_36 = {
 };
 
 // AND (37)
-Instruction n_37 = {
+Instruction<Ricoh5A22> n_37 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_37 = {
+Instruction<Ricoh5A22> e_37 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // SEC (38)
-Instruction n_38 = {
+Instruction<Ricoh5A22> n_38 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::SEC),
 	NEXT_OPCODE
 };
-Instruction e_38 = n_38;
+Instruction<Ricoh5A22> e_38 = n_38;
 
 // AND (39)
-Instruction n_39 = {
+Instruction<Ricoh5A22> n_39 = {
 	NATIVE_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_39 = {
+Instruction<Ricoh5A22> e_39 = {
 	EMULATION_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // DEC (3A)
-Instruction n_3a = {
+Instruction<Ricoh5A22> n_3a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Decrease, Mode::RegisterA, Mode::MFlag>),
 	NEXT_OPCODE
 };
-Instruction e_3a = {
+Instruction<Ricoh5A22> e_3a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Decrease, Mode::RegisterA, Mode::MFlag>),
 	NEXT_OPCODE
 };
 
 // TSC (3B)
-Instruction n_3b = {
+Instruction<Ricoh5A22> n_3b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TSC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_3b = {
+Instruction<Ricoh5A22> e_3b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TSC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BIT (3C)
-Instruction n_3c = {
+Instruction<Ricoh5A22> n_3c = {
 	NATIVE_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_3c = {
+Instruction<Ricoh5A22> e_3c = {
 	EMULATION_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // AND (3D)
-Instruction n_3d = {
+Instruction<Ricoh5A22> n_3d = {
 	NATIVE_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_3d = {
+Instruction<Ricoh5A22> e_3d = {
 	EMULATION_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ROL (3E)
-Instruction n_3e = {
+Instruction<Ricoh5A22> n_3e = {
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Native>),
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_3e = {
+Instruction<Ricoh5A22> e_3e = {
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROL<Mode::Emulation>),
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_END
@@ -3859,19 +3860,19 @@ Instruction e_3e = {
 };
 
 // AND (3F)
-Instruction n_3f = {
+Instruction<Ricoh5A22> n_3f = {
 	NATIVE_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_3f = {
+Instruction<Ricoh5A22> e_3f = {
 	EMULATION_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::AND<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // RTI (40)
-Instruction n_40 = {
+Instruction<Ricoh5A22> n_40 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -3887,7 +3888,7 @@ Instruction n_40 = {
 	MakeHandler(Ricoh5A22Functions::RTI<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_40 = {
+Instruction<Ricoh5A22> e_40 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -3903,40 +3904,40 @@ Instruction e_40 = {
 };
 
 // EOR (41)
-Instruction n_41 = {
+Instruction<Ricoh5A22> n_41 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_41 = {
+Instruction<Ricoh5A22> e_41 = {
 	EMULATION_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // WDM (42)
-Instruction n_42 = {
+Instruction<Ricoh5A22> n_42 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	NEXT_OPCODE
 };
-Instruction e_42 = n_42;
+Instruction<Ricoh5A22> e_42 = n_42;
 
 // EOR (43)
-Instruction n_43 = {
+Instruction<Ricoh5A22> n_43 = {
 	NATIVE_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_43 = {
+Instruction<Ricoh5A22> e_43 = {
 	EMULATION_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // MVP (44)
-Instruction n_44 = {
+Instruction<Ricoh5A22> n_44 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::DBOL>),
@@ -3952,29 +3953,29 @@ Instruction n_44 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_44 = n_44;
+Instruction<Ricoh5A22> e_44 = n_44;
 
 
 // EOR (45)
-Instruction n_45 = {
+Instruction<Ricoh5A22> n_45 = {
 	NATIVE_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_45 = {
+Instruction<Ricoh5A22> e_45 = {
 	EMULATION_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LSR (46)
-Instruction n_46 = {
+Instruction<Ricoh5A22> n_46 = {
 	NATIVE_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Native>),
 	NATIVE_DIRECT_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_46 = {
+Instruction<Ricoh5A22> e_46 = {
 	EMULATION_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Emulation>),
 	EMULATION_DIRECT_READ_MODIFY_WRITE_END
@@ -3982,19 +3983,19 @@ Instruction e_46 = {
 };
 
 // EOR (47)
-Instruction n_47 = {
+Instruction<Ricoh5A22> n_47 = {
 	NATIVE_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_47 = {
+Instruction<Ricoh5A22> e_47 = {
 	EMULATION_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PHA (48)
-Instruction n_48 = {
+Instruction<Ricoh5A22> n_48 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::MFlagSet),
@@ -4004,7 +4005,7 @@ Instruction n_48 = {
 	MakeHandler(Ricoh5A22Functions::DecrementS),
 	NEXT_OPCODE
 };
-Instruction e_48 = {
+Instruction<Ricoh5A22> e_48 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4014,31 +4015,31 @@ Instruction e_48 = {
 };
 
 // EOR (49)
-Instruction n_49 = {
+Instruction<Ricoh5A22> n_49 = {
 	NATIVE_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_49 = {
+Instruction<Ricoh5A22> e_49 = {
 	EMULATION_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // LSR (4A)
-Instruction n_4a = {
+Instruction<Ricoh5A22> n_4a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Native, Mode::RegisterA>),
 	NEXT_OPCODE
 };
-Instruction e_4a = {
+Instruction<Ricoh5A22> e_4a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Emulation, Mode::RegisterA>),
 	NEXT_OPCODE
 };
 
 // PHK (4B)
-Instruction n_4b = {
+Instruction<Ricoh5A22> n_4b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4046,7 +4047,7 @@ Instruction n_4b = {
 	MakeHandler(Ricoh5A22Functions::DecrementS),
 	NEXT_OPCODE
 };
-Instruction e_4b = {
+Instruction<Ricoh5A22> e_4b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4056,7 +4057,7 @@ Instruction e_4b = {
 };
 
 // JMP (4C)
-Instruction n_4c = {
+Instruction<Ricoh5A22> n_4c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4064,28 +4065,28 @@ Instruction n_4c = {
 	MakeHandler(Ricoh5A22Functions::Copy<ReadFrom::Address, ReadTo::PC>),
 	NEXT_OPCODE
 };
-Instruction e_4c = n_4c;
+Instruction<Ricoh5A22> e_4c = n_4c;
 
 // EOR (4D)
-Instruction n_4d = {
+Instruction<Ricoh5A22> n_4d = {
 	NATIVE_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_4d = {
+Instruction<Ricoh5A22> e_4d = {
 	EMULATION_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LSR (4E)
-Instruction n_4e = {
+Instruction<Ricoh5A22> n_4e = {
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Native>),
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_4e = {
+Instruction<Ricoh5A22> e_4e = {
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Emulation>),
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_END
@@ -4093,67 +4094,67 @@ Instruction e_4e = {
 };
 
 // EOR (4F)
-Instruction n_4f = {
+Instruction<Ricoh5A22> n_4f = {
 	NATIVE_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_4f = {
+Instruction<Ricoh5A22> e_4f = {
 	EMULATION_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BVC (50)
-Instruction n_50 = {
+Instruction<Ricoh5A22> n_50 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::V_Zero>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_50 = {
+Instruction<Ricoh5A22> e_50 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::V_Zero>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // EOR (51)
-Instruction n_51 = {
+Instruction<Ricoh5A22> n_51 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_51 = {
+Instruction<Ricoh5A22> e_51 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // EOR (52)
-Instruction n_52 = {
+Instruction<Ricoh5A22> n_52 = {
 	NATIVE_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_52 = {
+Instruction<Ricoh5A22> e_52 = {
 	EMULATION_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // EOR (53)
-Instruction n_53 = {
+Instruction<Ricoh5A22> n_53 = {
 	NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_53 = {
+Instruction<Ricoh5A22> e_53 = {
 	EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // MVN (54)
-Instruction n_54 = {
+Instruction<Ricoh5A22> n_54 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::DBOL>),
@@ -4169,28 +4170,28 @@ Instruction n_54 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_54 = n_54;
+Instruction<Ricoh5A22> e_54 = n_54;
 
 // EOR (55)
-Instruction n_55 = {
+Instruction<Ricoh5A22> n_55 = {
 	NATIVE_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_55 = {
+Instruction<Ricoh5A22> e_55 = {
 	EMULATION_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LSR (56)
-Instruction n_56 = {
+Instruction<Ricoh5A22> n_56 = {
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Native>),
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_56 = {
+Instruction<Ricoh5A22> e_56 = {
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Emulation>),
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_END
@@ -4198,40 +4199,40 @@ Instruction e_56 = {
 };
 
 // EOR (57)
-Instruction n_57 = {
+Instruction<Ricoh5A22> n_57 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_57 = {
+Instruction<Ricoh5A22> e_57 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CLI (58)
-Instruction n_58 = {
+Instruction<Ricoh5A22> n_58 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::CLI),
 	NEXT_OPCODE
 };
-Instruction e_58 = n_58;
+Instruction<Ricoh5A22> e_58 = n_58;
 
 // EOR (59)
-Instruction n_59 = {
+Instruction<Ricoh5A22> n_59 = {
 	NATIVE_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_59 = {
+Instruction<Ricoh5A22> e_59 = {
 	EMULATION_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PHY (5A)
-Instruction n_5a = {
+Instruction<Ricoh5A22> n_5a = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::XFlagSet),
@@ -4241,7 +4242,7 @@ Instruction n_5a = {
 	MakeHandler(Ricoh5A22Functions::DecrementS),
 	NEXT_OPCODE
 };
-Instruction e_5a = {
+Instruction<Ricoh5A22> e_5a = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4251,19 +4252,19 @@ Instruction e_5a = {
 };
 
 // TCD (5B)
-Instruction n_5b = {
+Instruction<Ricoh5A22> n_5b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TCD<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_5b = {
+Instruction<Ricoh5A22> e_5b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TCD<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // JML (5C)
-Instruction n_5c = {
+Instruction<Ricoh5A22> n_5c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4273,28 +4274,28 @@ Instruction n_5c = {
 	MakeHandler(Ricoh5A22Functions::PCAddressPBBank),
 	NEXT_OPCODE
 };
-Instruction e_5c = n_5c;
+Instruction<Ricoh5A22> e_5c = n_5c;
 
 // EOR (5D)
-Instruction n_5d = {
+Instruction<Ricoh5A22> n_5d = {
 	NATIVE_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_5d = {
+Instruction<Ricoh5A22> e_5d = {
 	EMULATION_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LSR (5E)
-Instruction n_5e = {
+Instruction<Ricoh5A22> n_5e = {
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Native>),
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_5e = {
+Instruction<Ricoh5A22> e_5e = {
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::LSR<Mode::Emulation>),
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_END
@@ -4302,19 +4303,19 @@ Instruction e_5e = {
 };
 
 // EOR (5F)
-Instruction n_5f = {
+Instruction<Ricoh5A22> n_5f = {
 	NATIVE_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_5f = {
+Instruction<Ricoh5A22> e_5f = {
 	EMULATION_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::EOR<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // RTS (60)
-Instruction n_60 = {
+Instruction<Ricoh5A22> n_60 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4328,7 +4329,7 @@ Instruction n_60 = {
 	MakeHandler(Ricoh5A22Functions::RTS<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_60 = {
+Instruction<Ricoh5A22> e_60 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4344,19 +4345,19 @@ Instruction e_60 = {
 };
 
 // ADC (61)
-Instruction n_61 = {
+Instruction<Ricoh5A22> n_61 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_61 = {
+Instruction<Ricoh5A22> e_61 = {
 	EMULATION_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PER (62)
-Instruction n_62 = {
+Instruction<Ricoh5A22> n_62 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4370,7 +4371,7 @@ Instruction n_62 = {
 	MakeHandler(Ricoh5A22Functions::DecrementS2),
 	NEXT_OPCODE
 };
-Instruction e_62 = {
+Instruction<Ricoh5A22> e_62 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4386,19 +4387,19 @@ Instruction e_62 = {
 };
 
 // ADC (63)
-Instruction n_63 = {
+Instruction<Ricoh5A22> n_63 = {
 	NATIVE_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_63 = {
+Instruction<Ricoh5A22> e_63 = {
 	EMULATION_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // STZ (64)
-Instruction n_64 = {
+Instruction<Ricoh5A22> n_64 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -4410,7 +4411,7 @@ Instruction n_64 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_64 = {
+Instruction<Ricoh5A22> e_64 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -4422,25 +4423,25 @@ Instruction e_64 = {
 };
 
 // ADC (65)
-Instruction n_65 = {
+Instruction<Ricoh5A22> n_65 = {
 	NATIVE_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_65 = {
+Instruction<Ricoh5A22> e_65 = {
 	EMULATION_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ROR (66)
-Instruction n_66 = {
+Instruction<Ricoh5A22> n_66 = {
 	NATIVE_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Native>),
 	NATIVE_DIRECT_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_66 = {
+Instruction<Ricoh5A22> e_66 = {
 	EMULATION_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Emulation>),
 	EMULATION_DIRECT_READ_MODIFY_WRITE_END
@@ -4448,19 +4449,19 @@ Instruction e_66 = {
 };
 
 // ADC (67)
-Instruction n_67 = {
+Instruction<Ricoh5A22> n_67 = {
 	NATIVE_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_67 = {
+Instruction<Ricoh5A22> e_67 = {
 	EMULATION_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PLA (68)
-Instruction n_68 = {
+Instruction<Ricoh5A22> n_68 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4472,7 +4473,7 @@ Instruction n_68 = {
 	MakeHandler(Ricoh5A22Functions::PL<Mode::Native, Mode::RegisterA, Mode::MFlag>),
 	NEXT_OPCODE
 };
-Instruction e_68 = {
+Instruction<Ricoh5A22> e_68 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4484,31 +4485,31 @@ Instruction e_68 = {
 };
 
 // ADC (69)
-Instruction n_69 = {
+Instruction<Ricoh5A22> n_69 = {
 	NATIVE_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_69 = {
+Instruction<Ricoh5A22> e_69 = {
 	EMULATION_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // ROR (6A)
-Instruction n_6a = {
+Instruction<Ricoh5A22> n_6a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Native, Mode::RegisterA>),
 	NEXT_OPCODE
 };
-Instruction e_6a = {
+Instruction<Ricoh5A22> e_6a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Emulation, Mode::RegisterA>),
 	NEXT_OPCODE
 };
 
 // RTL (6B)
-Instruction n_6b = {
+Instruction<Ricoh5A22> n_6b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4522,7 +4523,7 @@ Instruction n_6b = {
 	MakeHandler(Ricoh5A22Functions::RTL<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_6b = {
+Instruction<Ricoh5A22> e_6b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4538,7 +4539,7 @@ Instruction e_6b = {
 };
 
 // JMP (6C)
-Instruction n_6c = {
+Instruction<Ricoh5A22> n_6c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4550,28 +4551,28 @@ Instruction n_6c = {
 	MakeHandler(Ricoh5A22Functions::Copy<ReadFrom::Address, ReadTo::PC>),
 	NEXT_OPCODE
 };
-Instruction e_6c = n_6c;
+Instruction<Ricoh5A22> e_6c = n_6c;
 
 // ADC (6D)
-Instruction n_6d = {
+Instruction<Ricoh5A22> n_6d = {
 	NATIVE_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_6d = {
+Instruction<Ricoh5A22> e_6d = {
 	EMULATION_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ROR (6E)
-Instruction n_6e = {
+Instruction<Ricoh5A22> n_6e = {
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Native>),
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_6e = {
+Instruction<Ricoh5A22> e_6e = {
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Emulation>),
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_END
@@ -4579,67 +4580,67 @@ Instruction e_6e = {
 };
 
 // ADC (6F)
-Instruction n_6f = {
+Instruction<Ricoh5A22> n_6f = {
 	NATIVE_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_6f = {
+Instruction<Ricoh5A22> e_6f = {
 	EMULATION_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BVS (70)
-Instruction n_70 = {
+Instruction<Ricoh5A22> n_70 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::V_One>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_70 = {
+Instruction<Ricoh5A22> e_70 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::V_One>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // ADC (71)
-Instruction n_71 = {
+Instruction<Ricoh5A22> n_71 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_71 = {
+Instruction<Ricoh5A22> e_71 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ADC (72)
-Instruction n_72 = {
+Instruction<Ricoh5A22> n_72 = {
 	NATIVE_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_72 = {
+Instruction<Ricoh5A22> e_72 = {
 	EMULATION_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ADC (73)
-Instruction n_73 = {
+Instruction<Ricoh5A22> n_73 = {
 	NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_73 = {
+Instruction<Ricoh5A22> e_73 = {
 	EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // STZ (74)
-Instruction n_74 = {
+Instruction<Ricoh5A22> n_74 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4653,7 +4654,7 @@ Instruction n_74 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_74 = {
+Instruction<Ricoh5A22> e_74 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4667,25 +4668,25 @@ Instruction e_74 = {
 };
 
 // ADC (75)
-Instruction n_75 = {
+Instruction<Ricoh5A22> n_75 = {
 	NATIVE_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_75 = {
+Instruction<Ricoh5A22> e_75 = {
 	EMULATION_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ROR (76)
-Instruction n_76 = {
+Instruction<Ricoh5A22> n_76 = {
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Native>),
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_76 = {
+Instruction<Ricoh5A22> e_76 = {
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Emulation>),
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_END
@@ -4693,41 +4694,41 @@ Instruction e_76 = {
 };
 
 // ADC (77)
-Instruction n_77 = {
+Instruction<Ricoh5A22> n_77 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_77 = {
+Instruction<Ricoh5A22> e_77 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // SEI (78)
-Instruction n_78 = {
+Instruction<Ricoh5A22> n_78 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::SEI),
 	NEXT_OPCODE
 };
-Instruction e_78 = n_78;
+Instruction<Ricoh5A22> e_78 = n_78;
 
 
 // ADC (79)
-Instruction n_79 = {
+Instruction<Ricoh5A22> n_79 = {
 	NATIVE_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_79 = {
+Instruction<Ricoh5A22> e_79 = {
 	EMULATION_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PLY (7A)
-Instruction n_7a = {
+Instruction<Ricoh5A22> n_7a = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4739,7 +4740,7 @@ Instruction n_7a = {
 	MakeHandler(Ricoh5A22Functions::PL<Mode::Native, Mode::RegisterY, Mode::XFlag>),
 	NEXT_OPCODE
 };
-Instruction e_7a = {
+Instruction<Ricoh5A22> e_7a = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4751,19 +4752,19 @@ Instruction e_7a = {
 };
 
 // TDC (7B)
-Instruction n_7b = {
+Instruction<Ricoh5A22> n_7b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TDC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_7b = {
+Instruction<Ricoh5A22> e_7b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TDC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // JMP (7C)
-Instruction n_7c = {
+Instruction<Ricoh5A22> n_7c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4777,28 +4778,28 @@ Instruction n_7c = {
 	MakeHandler(Ricoh5A22Functions::Copy<ReadFrom::Address, ReadTo::PC>),
 	NEXT_OPCODE
 };
-Instruction e_7c = n_7c;
+Instruction<Ricoh5A22> e_7c = n_7c;
 
 // ADC (7D)
-Instruction n_7d = {
+Instruction<Ricoh5A22> n_7d = {
 	NATIVE_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_7d = {
+Instruction<Ricoh5A22> e_7d = {
 	EMULATION_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // ROR (7E)
-Instruction n_7e = {
+Instruction<Ricoh5A22> n_7e = {
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Native>),
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_7e = {
+Instruction<Ricoh5A22> e_7e = {
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::ROR<Mode::Emulation>),
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_END
@@ -4806,12 +4807,12 @@ Instruction e_7e = {
 };
 
 // ADC (7F)
-Instruction n_7f = {
+Instruction<Ricoh5A22> n_7f = {
 	NATIVE_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_7f = {
+Instruction<Ricoh5A22> e_7f = {
 	EMULATION_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::ADC<Mode::Emulation>),
 	NEXT_OPCODE
@@ -4819,31 +4820,31 @@ Instruction e_7f = {
 
 
 // BRA (80)
-Instruction n_80 = {
+Instruction<Ricoh5A22> n_80 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::Always>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_80 = {
+Instruction<Ricoh5A22> e_80 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::Always>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // STA (81)
-Instruction n_81 = {
+Instruction<Ricoh5A22> n_81 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_81 = {
+Instruction<Ricoh5A22> e_81 = {
 	EMULATION_DIRECT_INDEXED_INDIRECT_D_X_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // BRL (82)
-Instruction n_82 = {
+Instruction<Ricoh5A22> n_82 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4853,22 +4854,22 @@ Instruction n_82 = {
 	MakeHandler(Ricoh5A22Functions::BRL),
 	NEXT_OPCODE
 };
-Instruction e_82 = n_82;
+Instruction<Ricoh5A22> e_82 = n_82;
 
 // STA (83)
-Instruction n_83 = {
+Instruction<Ricoh5A22> n_83 = {
 	NATIVE_STACK_RELATIVE_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_83 = {
+Instruction<Ricoh5A22> e_83 = {
 	EMULATION_STACK_RELATIVE_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // STY (84)
-Instruction n_84 = {
+Instruction<Ricoh5A22> n_84 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -4880,7 +4881,7 @@ Instruction n_84 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_84 = {
+Instruction<Ricoh5A22> e_84 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -4892,19 +4893,19 @@ Instruction e_84 = {
 };
 
 // STA (85)
-Instruction n_85 = {
+Instruction<Ricoh5A22> n_85 = {
 	NATIVE_DIRECT_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_85 = {
+Instruction<Ricoh5A22> e_85 = {
 	EMULATION_DIRECT_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // STX (86)
-Instruction n_86 = {
+Instruction<Ricoh5A22> n_86 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -4916,7 +4917,7 @@ Instruction n_86 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_86 = {
+Instruction<Ricoh5A22> e_86 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -4928,43 +4929,43 @@ Instruction e_86 = {
 };
 
 // STA (87)
-Instruction n_87 = {
+Instruction<Ricoh5A22> n_87 = {
 	NATIVE_DIRECT_INDIRECT_LONG_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_87 = {
+Instruction<Ricoh5A22> e_87 = {
 	EMULATION_DIRECT_INDIRECT_LONG_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // DEY (88)
-Instruction n_88 = {
+Instruction<Ricoh5A22> n_88 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Decrease, Mode::RegisterY, Mode::XFlag>),
 	NEXT_OPCODE
 };
-Instruction e_88 = {
+Instruction<Ricoh5A22> e_88 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Decrease, Mode::RegisterY, Mode::XFlag>),
 	NEXT_OPCODE
 };
 
 // TXA (8A)
-Instruction n_8a = {
+Instruction<Ricoh5A22> n_8a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TXA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_8a = {
+Instruction<Ricoh5A22> e_8a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TXA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PHB (8B)
-Instruction n_8b = {
+Instruction<Ricoh5A22> n_8b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4972,7 +4973,7 @@ Instruction n_8b = {
 	MakeHandler(Ricoh5A22Functions::DecrementS),
 	NEXT_OPCODE
 };
-Instruction e_8b = {
+Instruction<Ricoh5A22> e_8b = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -4982,7 +4983,7 @@ Instruction e_8b = {
 };
 
 // STY (8C)
-Instruction n_8c = {
+Instruction<Ricoh5A22> n_8c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -4994,7 +4995,7 @@ Instruction n_8c = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_8c = {
+Instruction<Ricoh5A22> e_8c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5006,19 +5007,19 @@ Instruction e_8c = {
 };
 
 // STA (8D)
-Instruction n_8d = {
+Instruction<Ricoh5A22> n_8d = {
 	NATIVE_ABSOLUTE_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_8d = {
+Instruction<Ricoh5A22> e_8d = {
 	EMULATION_ABSOLUTE_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // STX (8E)
-Instruction n_8e = {
+Instruction<Ricoh5A22> n_8e = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5030,7 +5031,7 @@ Instruction n_8e = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_8e = {
+Instruction<Ricoh5A22> e_8e = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5042,79 +5043,79 @@ Instruction e_8e = {
 };
 
 // STA (8F)
-Instruction n_8f = {
+Instruction<Ricoh5A22> n_8f = {
 	NATIVE_ABSOLUTE_LONG_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_8f = {
+Instruction<Ricoh5A22> e_8f = {
 	EMULATION_ABSOLUTE_LONG_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // BIT (89)
-Instruction n_89 = {
+Instruction<Ricoh5A22> n_89 = {
 	NATIVE_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Native, Mode::IsImmediate>),
 	NEXT_OPCODE
 };
-Instruction e_89 = {
+Instruction<Ricoh5A22> e_89 = {
 	EMULATION_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::BIT<Mode::Emulation, Mode::IsImmediate>),
 	NEXT_OPCODE
 };
 
 // BCC (90)
-Instruction n_90 = {
+Instruction<Ricoh5A22> n_90 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::C_Zero>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_90 = {
+Instruction<Ricoh5A22> e_90 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::C_Zero>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // STA (91)
-Instruction n_91 = {
+Instruction<Ricoh5A22> n_91 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_D_Y_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_91 = {
+Instruction<Ricoh5A22> e_91 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_D_Y_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // STA (92)
-Instruction n_92 = {
+Instruction<Ricoh5A22> n_92 = {
 	NATIVE_DIRECT_INDIRECT_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_92 = {
+Instruction<Ricoh5A22> e_92 = {
 	EMULATION_DIRECT_INDIRECT_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // STA (93)
-Instruction n_93 = {
+Instruction<Ricoh5A22> n_93 = {
 	NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_93 = {
+Instruction<Ricoh5A22> e_93 = {
 	EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // STY (94)
-Instruction n_94 = {
+Instruction<Ricoh5A22> n_94 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5128,7 +5129,7 @@ Instruction n_94 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_94 = {
+Instruction<Ricoh5A22> e_94 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5142,19 +5143,19 @@ Instruction e_94 = {
 };
 
 // STA (95)
-Instruction n_95 = {
+Instruction<Ricoh5A22> n_95 = {
 	NATIVE_DIRECT_X_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_95 = {
+Instruction<Ricoh5A22> e_95 = {
 	EMULATION_DIRECT_X_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // STX (96)
-Instruction n_96 = {
+Instruction<Ricoh5A22> n_96 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5168,7 +5169,7 @@ Instruction n_96 = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_96 = {
+Instruction<Ricoh5A22> e_96 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5182,24 +5183,24 @@ Instruction e_96 = {
 };
 
 // STA (97)
-Instruction n_97 = {
+Instruction<Ricoh5A22> n_97 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_97 = {
+Instruction<Ricoh5A22> e_97 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // TYA (98)
-Instruction n_98 = {
+Instruction<Ricoh5A22> n_98 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TYA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_98 = {
+Instruction<Ricoh5A22> e_98 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TYA<Mode::Emulation>),
 	NEXT_OPCODE
@@ -5207,43 +5208,43 @@ Instruction e_98 = {
 
 
 // STA (99)
-Instruction n_99 = {
+Instruction<Ricoh5A22> n_99 = {
 	NATIVE_ABSOLUTE_Y_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_99 = {
+Instruction<Ricoh5A22> e_99 = {
 	EMULATION_ABSOLUTE_Y_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // TXS (9A)
-Instruction n_9a = {
+Instruction<Ricoh5A22> n_9a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TXS<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_9a = {
+Instruction<Ricoh5A22> e_9a = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TXS<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // TXY (9B)
-Instruction n_9b = {
+Instruction<Ricoh5A22> n_9b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TXY<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_9b = {
+Instruction<Ricoh5A22> e_9b = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TXY<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // STZ (9C)
-Instruction n_9c = {
+Instruction<Ricoh5A22> n_9c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5255,7 +5256,7 @@ Instruction n_9c = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_9c = {
+Instruction<Ricoh5A22> e_9c = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Address>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5267,19 +5268,19 @@ Instruction e_9c = {
 };
 
 // STA (9D)
-Instruction n_9d = {
+Instruction<Ricoh5A22> n_9d = {
 	NATIVE_ABSOLUTE_X_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_9d = {
+Instruction<Ricoh5A22> e_9d = {
 	EMULATION_ABSOLUTE_X_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // STZ (9E)
-Instruction n_9e = {
+Instruction<Ricoh5A22> n_9e = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5293,7 +5294,7 @@ Instruction n_9e = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_9e = {
+Instruction<Ricoh5A22> e_9e = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5307,72 +5308,72 @@ Instruction e_9e = {
 };
 
 // STA (9F)
-Instruction n_9f = {
+Instruction<Ricoh5A22> n_9f = {
 	NATIVE_ABSOLUTE_LONG_X_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_9f = {
+Instruction<Ricoh5A22> e_9f = {
 	EMULATION_ABSOLUTE_LONG_X_WRITE
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
 
 // LDY (A0)
-Instruction n_a0 = {
+Instruction<Ricoh5A22> n_a0 = {
 	NATIVE_IMMEDIATE_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_a0 = {
+Instruction<Ricoh5A22> e_a0 = {
 	EMULATION_IMMEDIATE_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // LDA (A1)
-Instruction n_a1 = {
+Instruction<Ricoh5A22> n_a1 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_a1 = {
+Instruction<Ricoh5A22> e_a1 = {
 	EMULATION_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDX (A2)
-Instruction n_a2 = {
+Instruction<Ricoh5A22> n_a2 = {
 	NATIVE_IMMEDIATE_X
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_a2 = {
+Instruction<Ricoh5A22> e_a2 = {
 	EMULATION_IMMEDIATE_X
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // LDA (A3)
-Instruction n_a3 = {
+Instruction<Ricoh5A22> n_a3 = {
 	NATIVE_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_a3 = {
+Instruction<Ricoh5A22> e_a3 = {
 	EMULATION_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDY (A4)
-Instruction n_a4 = {
+Instruction<Ricoh5A22> n_a4 = {
 	NATIVE_DIRECT_READ_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_a4 = {
+Instruction<Ricoh5A22> e_a4 = {
 	EMULATION_DIRECT_READ_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Emulation>),
 	NEXT_OPCODE
@@ -5380,79 +5381,79 @@ Instruction e_a4 = {
 
 
 // LDA (A5)
-Instruction n_a5 = {
+Instruction<Ricoh5A22> n_a5 = {
 	NATIVE_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_a5 = {
+Instruction<Ricoh5A22> e_a5 = {
 	EMULATION_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDX (A6)
-Instruction n_a6 = {
+Instruction<Ricoh5A22> n_a6 = {
 	NATIVE_DIRECT_READ_X
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_a6 = {
+Instruction<Ricoh5A22> e_a6 = {
 	EMULATION_DIRECT_READ_X
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (A7)
-Instruction n_a7 = {
+Instruction<Ricoh5A22> n_a7 = {
 	NATIVE_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_a7 = {
+Instruction<Ricoh5A22> e_a7 = {
 	EMULATION_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
 
 // TAY (A8)
-Instruction n_a8 = {
+Instruction<Ricoh5A22> n_a8 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TAY<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_a8 = {
+Instruction<Ricoh5A22> e_a8 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TAY<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (A9)
-Instruction n_a9 = {
+Instruction<Ricoh5A22> n_a9 = {
 	NATIVE_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_a9 = {
+Instruction<Ricoh5A22> e_a9 = {
 	EMULATION_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // TAX (AA)
-Instruction n_aa = {
+Instruction<Ricoh5A22> n_aa = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TAX<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_aa = {
+Instruction<Ricoh5A22> e_aa = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TAX<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PLB (AB)
-Instruction n_ab = {
+Instruction<Ricoh5A22> n_ab = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -5462,7 +5463,7 @@ Instruction n_ab = {
 	MakeHandler(Ricoh5A22Functions::PLB<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_ab = {
+Instruction<Ricoh5A22> e_ab = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -5474,269 +5475,269 @@ Instruction e_ab = {
 };
 
 // LDY (AC)
-Instruction n_ac = {
+Instruction<Ricoh5A22> n_ac = {
 	NATIVE_ABSOLUTE_READ_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_ac = {
+Instruction<Ricoh5A22> e_ac = {
 	EMULATION_ABSOLUTE_READ_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (AD)
-Instruction n_ad = {
+Instruction<Ricoh5A22> n_ad = {
 	NATIVE_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_ad = {
+Instruction<Ricoh5A22> e_ad = {
 	EMULATION_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDX (AE)
-Instruction n_ae = {
+Instruction<Ricoh5A22> n_ae = {
 	NATIVE_ABSOLUTE_READ_X
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_ae = {
+Instruction<Ricoh5A22> e_ae = {
 	EMULATION_ABSOLUTE_READ_X
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (AF)
-Instruction n_af = {
+Instruction<Ricoh5A22> n_af = {
 	NATIVE_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_af = {
+Instruction<Ricoh5A22> e_af = {
 	EMULATION_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BCS (B0)
-Instruction n_b0 = {
+Instruction<Ricoh5A22> n_b0 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::C_One>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_b0 = {
+Instruction<Ricoh5A22> e_b0 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::C_One>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // LDA (B1)
-Instruction n_b1 = {
+Instruction<Ricoh5A22> n_b1 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_b1 = {
+Instruction<Ricoh5A22> e_b1 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
 
 // LDA (B2)
-Instruction n_b2 = {
+Instruction<Ricoh5A22> n_b2 = {
 	NATIVE_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_b2 = {
+Instruction<Ricoh5A22> e_b2 = {
 	EMULATION_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (B3)
-Instruction n_b3 = {
+Instruction<Ricoh5A22> n_b3 = {
 	NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_b3 = {
+Instruction<Ricoh5A22> e_b3 = {
 	EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDY (B4)
-Instruction n_b4 = {
+Instruction<Ricoh5A22> n_b4 = {
 	NATIVE_DIRECT_X_READ_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_b4 = {
+Instruction<Ricoh5A22> e_b4 = {
 	EMULATION_DIRECT_X_READ_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (B5)
-Instruction n_b5 = {
+Instruction<Ricoh5A22> n_b5 = {
 	NATIVE_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_b5 = {
+Instruction<Ricoh5A22> e_b5 = {
 	EMULATION_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDX (B6)
-Instruction n_b6 = {
+Instruction<Ricoh5A22> n_b6 = {
 	NATIVE_DIRECT_Y_READ
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_b6 = {
+Instruction<Ricoh5A22> e_b6 = {
 	EMULATION_DIRECT_Y_READ
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (B7)
-Instruction n_b7 = {
+Instruction<Ricoh5A22> n_b7 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_b7 = {
+Instruction<Ricoh5A22> e_b7 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CLV (B8)
-Instruction n_b8 = {
+Instruction<Ricoh5A22> n_b8 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::CLV),
 	NEXT_OPCODE
 };
-Instruction e_b8 = n_b8;
+Instruction<Ricoh5A22> e_b8 = n_b8;
 
 
 // LDA (B9)
-Instruction n_b9 = {
+Instruction<Ricoh5A22> n_b9 = {
 	NATIVE_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_b9 = {
+Instruction<Ricoh5A22> e_b9 = {
 	EMULATION_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // TSX (BA)
-Instruction n_ba = {
+Instruction<Ricoh5A22> n_ba = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TSX<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_ba = {
+Instruction<Ricoh5A22> e_ba = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TSX<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // TYX (BB)
-Instruction n_bb = {
+Instruction<Ricoh5A22> n_bb = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TYX<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_bb = {
+Instruction<Ricoh5A22> e_bb = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::TYX<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDY (BC)
-Instruction n_bc = {
+Instruction<Ricoh5A22> n_bc = {
 	NATIVE_ABSOLUTE_X_READ_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_bc = {
+Instruction<Ricoh5A22> e_bc = {
 	EMULATION_ABSOLUTE_X_READ_X
 	MakeHandler(Ricoh5A22Functions::LDY<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (BD)
-Instruction n_bd = {
+Instruction<Ricoh5A22> n_bd = {
 	NATIVE_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_bd = {
+Instruction<Ricoh5A22> e_bd = {
 	EMULATION_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDX (BE)
-Instruction n_be = {
+Instruction<Ricoh5A22> n_be = {
 	NATIVE_ABSOLUTE_Y_READ_X
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_be = {
+Instruction<Ricoh5A22> e_be = {
 	EMULATION_ABSOLUTE_Y_READ_X
 	MakeHandler(Ricoh5A22Functions::LDX<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // LDA (BF)
-Instruction n_bf = {
+Instruction<Ricoh5A22> n_bf = {
 	NATIVE_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_bf = {
+Instruction<Ricoh5A22> e_bf = {
 	EMULATION_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::LDA<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CPY (C0)
-Instruction n_c0 = {
+Instruction<Ricoh5A22> n_c0 = {
 	NATIVE_IMMEDIATE_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Native, Mode::RegisterY, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_c0 = {
+Instruction<Ricoh5A22> e_c0 = {
 	EMULATION_IMMEDIATE_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Emulation, Mode::RegisterY, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // CMP (C1)
-Instruction n_c1 = {
+Instruction<Ricoh5A22> n_c1 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_c1 = {
+Instruction<Ricoh5A22> e_c1 = {
 	EMULATION_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // REP (C2)
-Instruction n_c2 = {
+Instruction<Ricoh5A22> n_c2 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5744,7 +5745,7 @@ Instruction n_c2 = {
 	MakeHandler(Ricoh5A22Functions::REP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_c2 = {
+Instruction<Ricoh5A22> e_c2 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -5754,49 +5755,49 @@ Instruction e_c2 = {
 };
 
 // CMP (C3)
-Instruction n_c3 = {
+Instruction<Ricoh5A22> n_c3 = {
 	NATIVE_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_c3 = {
+Instruction<Ricoh5A22> e_c3 = {
 	EMULATION_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CPY (C4)
-Instruction n_c4 = {
+Instruction<Ricoh5A22> n_c4 = {
 	NATIVE_DIRECT_READ_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Native, Mode::RegisterY>),
 	NEXT_OPCODE
 };
-Instruction e_c4 = {
+Instruction<Ricoh5A22> e_c4 = {
 	EMULATION_DIRECT_READ_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Emulation, Mode::RegisterY>),
 	NEXT_OPCODE
 };
 
 // CMP (C5)
-Instruction n_c5 = {
+Instruction<Ricoh5A22> n_c5 = {
 	NATIVE_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_c5 = {
+Instruction<Ricoh5A22> e_c5 = {
 	EMULATION_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // DEC (C6)
-Instruction n_c6 = {
+Instruction<Ricoh5A22> n_c6 = {
 	NATIVE_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Decrease, Mode::Operand, Mode::MFlag>),
 	NATIVE_DIRECT_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_c6 = {
+Instruction<Ricoh5A22> e_c6 = {
 	EMULATION_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Decrease, Mode::Operand, Mode::MFlag>),
 	EMULATION_DIRECT_READ_MODIFY_WRITE_END
@@ -5804,55 +5805,55 @@ Instruction e_c6 = {
 };
 
 // CMP (C7)
-Instruction n_c7 = {
+Instruction<Ricoh5A22> n_c7 = {
 	NATIVE_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_c7 = {
+Instruction<Ricoh5A22> e_c7 = {
 	EMULATION_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // INY (C8)
-Instruction n_c8 = {
+Instruction<Ricoh5A22> n_c8 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Increase, Mode::RegisterY, Mode::XFlag>),
 	NEXT_OPCODE
 };
-Instruction e_c8 = {
+Instruction<Ricoh5A22> e_c8 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Increase, Mode::RegisterY, Mode::XFlag>),
 	NEXT_OPCODE
 };
 
 // CMP (C9)
-Instruction n_c9 = {
+Instruction<Ricoh5A22> n_c9 = {
 	NATIVE_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_c9 = {
+Instruction<Ricoh5A22> e_c9 = {
 	EMULATION_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // DEX (CA)
-Instruction n_ca = {
+Instruction<Ricoh5A22> n_ca = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Decrease, Mode::RegisterX, Mode::XFlag>),
 	NEXT_OPCODE
 };
-Instruction e_ca = {
+Instruction<Ricoh5A22> e_ca = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Decrease, Mode::RegisterX, Mode::XFlag>),
 	NEXT_OPCODE
 };
 
 // WAI (CB)
-Instruction n_cb = {
+Instruction<Ricoh5A22> n_cb = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -5860,40 +5861,40 @@ Instruction n_cb = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22SpecialFunctions::WAIT),
 };
-Instruction e_cb = n_cb;
+Instruction<Ricoh5A22> e_cb = n_cb;
 
 // CPY (CC)
-Instruction n_cc = {
+Instruction<Ricoh5A22> n_cc = {
 	NATIVE_ABSOLUTE_READ_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Native, Mode::RegisterY>),
 	NEXT_OPCODE
 };
-Instruction e_cc = {
+Instruction<Ricoh5A22> e_cc = {
 	EMULATION_ABSOLUTE_READ_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Emulation, Mode::RegisterY>),
 	NEXT_OPCODE
 };
 
 // CMP (CD)
-Instruction n_cd = {
+Instruction<Ricoh5A22> n_cd = {
 	NATIVE_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_cd = {
+Instruction<Ricoh5A22> e_cd = {
 	EMULATION_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // DEC (CE)
-Instruction n_ce = {
+Instruction<Ricoh5A22> n_ce = {
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Decrease, Mode::Operand, Mode::MFlag>),
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_ce = {
+Instruction<Ricoh5A22> e_ce = {
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Decrease, Mode::Operand, Mode::MFlag>),
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_END
@@ -5901,67 +5902,67 @@ Instruction e_ce = {
 };
 
 // CMP (CF)
-Instruction n_cf = {
+Instruction<Ricoh5A22> n_cf = {
 	NATIVE_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_cf = {
+Instruction<Ricoh5A22> e_cf = {
 	EMULATION_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BNE (D0)
-Instruction n_d0 = {
+Instruction<Ricoh5A22> n_d0 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::Z_Zero>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_d0 = {
+Instruction<Ricoh5A22> e_d0 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::Z_Zero>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // CMP (D1)
-Instruction n_d1 = {
+Instruction<Ricoh5A22> n_d1 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_d1 = {
+Instruction<Ricoh5A22> e_d1 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CMP (D2)
-Instruction n_d2 = {
+Instruction<Ricoh5A22> n_d2 = {
 	NATIVE_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_d2 = {
+Instruction<Ricoh5A22> e_d2 = {
 	EMULATION_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CMP (D3)
-Instruction n_d3 = {
+Instruction<Ricoh5A22> n_d3 = {
 	NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_d3 = {
+Instruction<Ricoh5A22> e_d3 = {
 	EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PEI (D4)
-Instruction n_d4 = {
+Instruction<Ricoh5A22> n_d4 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -5977,7 +5978,7 @@ Instruction n_d4 = {
 	MakeHandler(Ricoh5A22Functions::DecrementS2),
 	NEXT_OPCODE
 };
-Instruction e_d4 = {
+Instruction<Ricoh5A22> e_d4 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC, Ricoh5A22Predicates::DLZero),
@@ -5995,25 +5996,25 @@ Instruction e_d4 = {
 };
 
 // CMP (D5)
-Instruction n_d5 = {
+Instruction<Ricoh5A22> n_d5 = {
 	NATIVE_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_d5 = {
+Instruction<Ricoh5A22> e_d5 = {
 	EMULATION_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // DEC (D6)
-Instruction n_d6 = {
+Instruction<Ricoh5A22> n_d6 = {
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Decrease, Mode::Operand, Mode::MFlag>),
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_d6 = {
+Instruction<Ricoh5A22> e_d6 = {
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Decrease, Mode::Operand, Mode::MFlag>),
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_END
@@ -6021,41 +6022,41 @@ Instruction e_d6 = {
 };
 
 // CMP (D7)
-Instruction n_d7 = {
+Instruction<Ricoh5A22> n_d7 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_d7 = {
+Instruction<Ricoh5A22> e_d7 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CLD (D8)
-Instruction n_d8 = {
+Instruction<Ricoh5A22> n_d8 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::CLD),
 	NEXT_OPCODE
 };
-Instruction e_d8 = n_d8;
+Instruction<Ricoh5A22> e_d8 = n_d8;
 
 
 // CMP (D9)
-Instruction n_d9 = {
+Instruction<Ricoh5A22> n_d9 = {
 	NATIVE_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_d9 = {
+Instruction<Ricoh5A22> e_d9 = {
 	EMULATION_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PHX (DA)
-Instruction n_da = {
+Instruction<Ricoh5A22> n_da = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP, Ricoh5A22Predicates::XFlagSet),
@@ -6065,7 +6066,7 @@ Instruction n_da = {
 	MakeHandler(Ricoh5A22Functions::DecrementS),
 	NEXT_OPCODE
 };
-Instruction e_da = {
+Instruction<Ricoh5A22> e_da = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -6075,7 +6076,7 @@ Instruction e_da = {
 };
 
 // STP (DB)
-Instruction n_db = {
+Instruction<Ricoh5A22> n_db = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -6084,10 +6085,10 @@ Instruction n_db = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22SpecialFunctions::STOP),
 };
-Instruction e_db = n_db;
+Instruction<Ricoh5A22> e_db = n_db;
 
 // JML (DC)
-Instruction n_dc = {
+Instruction<Ricoh5A22> n_dc = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -6101,28 +6102,28 @@ Instruction n_dc = {
 	MakeHandler(Ricoh5A22Functions::PCOperandPBBank),
 	NEXT_OPCODE
 };
-Instruction e_dc = n_dc;
+Instruction<Ricoh5A22> e_dc = n_dc;
 
 // CMP (DD)
-Instruction n_dd = {
+Instruction<Ricoh5A22> n_dd = {
 	NATIVE_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_dd = {
+Instruction<Ricoh5A22> e_dd = {
 	EMULATION_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // DEC (DE)
-Instruction n_de = {
+Instruction<Ricoh5A22> n_de = {
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Decrease, Mode::Operand, Mode::MFlag>),
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_de = {
+Instruction<Ricoh5A22> e_de = {
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Decrease, Mode::Operand, Mode::MFlag>),
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_END
@@ -6130,43 +6131,43 @@ Instruction e_de = {
 };
 
 // CMP (DF)
-Instruction n_df = {
+Instruction<Ricoh5A22> n_df = {
 	NATIVE_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_df = {
+Instruction<Ricoh5A22> e_df = {
 	EMULATION_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::CMP<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CPX (E0)
-Instruction n_e0 = {
+Instruction<Ricoh5A22> n_e0 = {
 	NATIVE_IMMEDIATE_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Native, Mode::RegisterX, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_e0 = {
+Instruction<Ricoh5A22> e_e0 = {
 	EMULATION_IMMEDIATE_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Emulation, Mode::RegisterX, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // SBC (E1)
-Instruction n_e1 = {
+Instruction<Ricoh5A22> n_e1 = {
 	NATIVE_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_e1 = {
+Instruction<Ricoh5A22> e_e1 = {
 	EMULATION_DIRECT_INDEXED_INDIRECT_D_X_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // SEP (E2)
-Instruction n_e2 = {
+Instruction<Ricoh5A22> n_e2 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -6174,7 +6175,7 @@ Instruction n_e2 = {
 	MakeHandler(Ricoh5A22Functions::SEP<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_e2 = {
+Instruction<Ricoh5A22> e_e2 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -6184,49 +6185,49 @@ Instruction e_e2 = {
 };
 
 // SBC (E3)
-Instruction n_e3 = {
+Instruction<Ricoh5A22> n_e3 = {
 	NATIVE_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_e3 = {
+Instruction<Ricoh5A22> e_e3 = {
 	EMULATION_STACK_RELATIVE_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // CPX (E4)
-Instruction n_e4 = {
+Instruction<Ricoh5A22> n_e4 = {
 	NATIVE_DIRECT_READ_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Native, Mode::RegisterX>),
 	NEXT_OPCODE
 };
-Instruction e_e4 = {
+Instruction<Ricoh5A22> e_e4 = {
 	EMULATION_DIRECT_READ_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Emulation, Mode::RegisterX>),
 	NEXT_OPCODE
 };
 
 // SBC (E5)
-Instruction n_e5 = {
+Instruction<Ricoh5A22> n_e5 = {
 	NATIVE_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_e5 = {
+Instruction<Ricoh5A22> e_e5 = {
 	EMULATION_DIRECT_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // INC (E6)
-Instruction n_e6 = {
+Instruction<Ricoh5A22> n_e6 = {
 	NATIVE_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Increase, Mode::Operand, Mode::MFlag>),
 	NATIVE_DIRECT_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_e6 = {
+Instruction<Ricoh5A22> e_e6 = {
 	EMULATION_DIRECT_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Increase, Mode::Operand, Mode::MFlag>),
 	EMULATION_DIRECT_READ_MODIFY_WRITE_END
@@ -6234,51 +6235,51 @@ Instruction e_e6 = {
 };
 
 // SBC (E7)
-Instruction n_e7 = {
+Instruction<Ricoh5A22> n_e7 = {
 	NATIVE_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_e7 = {
+Instruction<Ricoh5A22> e_e7 = {
 	EMULATION_DIRECT_INDIRECT_LONG_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // INX (E8)
-Instruction n_e8 = {
+Instruction<Ricoh5A22> n_e8 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Increase, Mode::RegisterX, Mode::XFlag>),
 	NEXT_OPCODE
 };
-Instruction e_e8 = {
+Instruction<Ricoh5A22> e_e8 = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Increase, Mode::RegisterX, Mode::XFlag>),
 	NEXT_OPCODE
 };
 
 // SBC (E9)
-Instruction n_e9 = {
+Instruction<Ricoh5A22> n_e9 = {
 	NATIVE_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
-Instruction e_e9 = {
+Instruction<Ricoh5A22> e_e9 = {
 	EMULATION_IMMEDIATE_M
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation, Mode::PCIncrement>),
 	NEXT_OPCODE
 };
 
 // NOP (EA)
-Instruction n_ea = {
+Instruction<Ricoh5A22> n_ea = {
 	IMPLIED
 	MakeHandler(Ricoh5A22Functions::NOP),
 	NEXT_OPCODE
 };
-Instruction e_ea = n_ea;
+Instruction<Ricoh5A22> e_ea = n_ea;
 
 // XBA (EB)
-Instruction n_eb = {
+Instruction<Ricoh5A22> n_eb = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -6286,40 +6287,40 @@ Instruction n_eb = {
 	MakeHandler(Ricoh5A22Functions::XBA),
 	NEXT_OPCODE
 };
-Instruction e_eb = n_eb;
+Instruction<Ricoh5A22> e_eb = n_eb;
 
 // CPX (EC)
-Instruction n_ec = {
+Instruction<Ricoh5A22> n_ec = {
 	NATIVE_ABSOLUTE_READ_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Native, Mode::RegisterX>),
 	NEXT_OPCODE
 };
-Instruction e_ec = {
+Instruction<Ricoh5A22> e_ec = {
 	EMULATION_ABSOLUTE_READ_X
 	MakeHandler(Ricoh5A22Functions::CopyRegister<Mode::Emulation, Mode::RegisterX>),
 	NEXT_OPCODE
 };
 
 // SBC (ED)
-Instruction n_ed = {
+Instruction<Ricoh5A22> n_ed = {
 	NATIVE_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_ed = {
+Instruction<Ricoh5A22> e_ed = {
 	EMULATION_ABSOLUTE_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // INC (EE)
-Instruction n_ee = {
+Instruction<Ricoh5A22> n_ee = {
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Increase, Mode::Operand, Mode::MFlag>),
 	NATIVE_ABSOLUTE_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_ee = {
+Instruction<Ricoh5A22> e_ee = {
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Increase, Mode::Operand, Mode::MFlag>),
 	EMULATION_ABSOLUTE_READ_MODIFY_WRITE_END
@@ -6327,67 +6328,67 @@ Instruction e_ee = {
 };
 
 // SBC (EF)
-Instruction n_ef = {
+Instruction<Ricoh5A22> n_ef = {
 	NATIVE_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_ef = {
+Instruction<Ricoh5A22> e_ef = {
 	EMULATION_ABSOLUTE_LONG_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // BEQ (F0)
-Instruction n_f0 = {
+Instruction<Ricoh5A22> n_f0 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::Z_One>),
 	NATIVE_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
-Instruction e_f0 = {
+Instruction<Ricoh5A22> e_f0 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC<SetMode::None, false, BranchMode::Z_One>),
 	EMULATION_FLAG_BRANCH_LOGIC
 	NEXT_OPCODE
 };
 
 // SBC (F1)
-Instruction n_f1 = {
+Instruction<Ricoh5A22> n_f1 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_f1 = {
+Instruction<Ricoh5A22> e_f1 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // SBC (F2)
-Instruction n_f2 = {
+Instruction<Ricoh5A22> n_f2 = {
 	NATIVE_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_f2 = {
+Instruction<Ricoh5A22> e_f2 = {
 	EMULATION_DIRECT_INDIRECT_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // SBC (F3)
-Instruction n_f3 = {
+Instruction<Ricoh5A22> n_f3 = {
 	NATIVE_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_f3 = {
+Instruction<Ricoh5A22> e_f3 = {
 	EMULATION_STACK_RELATIVE_INDIRECT_INDEXED_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PEA (F4)
-Instruction n_f4 = {
+Instruction<Ricoh5A22> n_f4 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -6399,7 +6400,7 @@ Instruction n_f4 = {
 	MakeHandler(Ricoh5A22Functions::DecrementS2),
 	NEXT_OPCODE
 };
-Instruction e_f4 = {
+Instruction<Ricoh5A22> e_f4 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Operand>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -6413,25 +6414,25 @@ Instruction e_f4 = {
 };
 
 // SBC (F5)
-Instruction n_f5 = {
+Instruction<Ricoh5A22> n_f5 = {
 	NATIVE_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_f5 = {
+Instruction<Ricoh5A22> e_f5 = {
 	EMULATION_DIRECT_X_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // INC (F6)
-Instruction n_f6 = {
+Instruction<Ricoh5A22> n_f6 = {
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Increase, Mode::Operand, Mode::MFlag>),
 	NATIVE_DIRECT_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_f6 = {
+Instruction<Ricoh5A22> e_f6 = {
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Increase, Mode::Operand, Mode::MFlag>),
 	EMULATION_DIRECT_X_READ_MODIFY_WRITE_END
@@ -6439,41 +6440,41 @@ Instruction e_f6 = {
 };
 
 // SBC (F7)
-Instruction n_f7 = {
+Instruction<Ricoh5A22> n_f7 = {
 	NATIVE_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_f7 = {
+Instruction<Ricoh5A22> e_f7 = {
 	EMULATION_DIRECT_INDIRECT_INDEXED_LONG_D_Y_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // SED (F8)
-Instruction n_f8 = {
+Instruction<Ricoh5A22> n_f8 = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::SED),
 	NEXT_OPCODE
 };
-Instruction e_f8 = n_f8;
+Instruction<Ricoh5A22> e_f8 = n_f8;
 
 
 // SBC (F9)
-Instruction n_f9 = {
+Instruction<Ricoh5A22> n_f9 = {
 	NATIVE_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_f9 = {
+Instruction<Ricoh5A22> e_f9 = {
 	EMULATION_ABSOLUTE_Y_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // PLX (FA)
-Instruction n_fa = {
+Instruction<Ricoh5A22> n_fa = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -6485,7 +6486,7 @@ Instruction n_fa = {
 	MakeHandler(Ricoh5A22Functions::PL<Mode::Native, Mode::RegisterX, Mode::XFlag>),
 	NEXT_OPCODE
 };
-Instruction e_fa = {
+Instruction<Ricoh5A22> e_fa = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
@@ -6497,16 +6498,16 @@ Instruction e_fa = {
 };
 
 // XCE (FB)
-Instruction n_fb = {
+Instruction<Ricoh5A22> n_fb = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Discard>),
 	MakeHandler(Ricoh5A22Functions::XCE),
 	NEXT_OPCODE
 };
-Instruction e_fb = n_fb;
+Instruction<Ricoh5A22> e_fb = n_fb;
 
 // JSR (FC)
-Instruction n_fc = {
+Instruction<Ricoh5A22> n_fc = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -6524,7 +6525,7 @@ Instruction n_fc = {
 	MakeHandler(Ricoh5A22Functions::PCAddress),
 	NEXT_OPCODE
 };
-Instruction e_fc = {
+Instruction<Ricoh5A22> e_fc = {
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
 	MakeHandler(Ricoh5A22Functions::Read<ReadFrom::PCPB, ReadTo::Pointer>),
 	MakeHandler(Ricoh5A22Functions::IncrementPC),
@@ -6544,25 +6545,25 @@ Instruction e_fc = {
 };
 
 // SBC (FD)
-Instruction n_fd = {
+Instruction<Ricoh5A22> n_fd = {
 	NATIVE_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_fd = {
+Instruction<Ricoh5A22> e_fd = {
 	EMULATION_ABSOLUTE_X_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
 // INC (FE)
-Instruction n_fe = {
+Instruction<Ricoh5A22> n_fe = {
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Native, Mode::Increase, Mode::Operand, Mode::MFlag>),
 	NATIVE_ABSOLUTE_X_READ_MODIFY_WRITE_END
 	NEXT_OPCODE
 };
-Instruction e_fe = {
+Instruction<Ricoh5A22> e_fe = {
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_START
 	MakeHandler(Ricoh5A22Functions::INDE<Mode::Emulation, Mode::Increase, Mode::Operand, Mode::MFlag>),
 	EMULATION_ABSOLUTE_X_READ_MODIFY_WRITE_END
@@ -6570,18 +6571,18 @@ Instruction e_fe = {
 };
 
 // SBC (FF)
-Instruction n_ff = {
+Instruction<Ricoh5A22> n_ff = {
 	NATIVE_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Native>),
 	NEXT_OPCODE
 };
-Instruction e_ff = {
+Instruction<Ricoh5A22> e_ff = {
 	EMULATION_ABSOLUTE_LONG_X_READ
 	MakeHandler(Ricoh5A22Functions::SBC<Mode::Emulation>),
 	NEXT_OPCODE
 };
 
-Instruction nop = {
+Instruction<Ricoh5A22> nop = {
 	MakeHandler(Ricoh5A22Functions::NOP),
 	MakeHandler(Ricoh5A22Functions::NOP),
 };

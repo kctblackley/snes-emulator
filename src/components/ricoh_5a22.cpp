@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include "ricoh_5a22.hpp"
 #include "ricoh_5a22_opcode_info.hpp"
+#include "bus.hpp"
 
 namespace {
 	std::string byte_hex(Byte b) {
@@ -63,16 +64,18 @@ void Ricoh5A22::apply_invariants() {
 }
 
 void Ricoh5A22::tick_multiply_divisor() {
-	if (multiplier.half_cycles_since_init > 0) {
-		multiplier.half_cycles_since_init--;
-	}
-	if (divisor.half_cycles_since_init > 0) {
-		divisor.half_cycles_since_init--;
+	if (multiplier.half_cycles_since_init || divisor.half_cycles_since_init) {
+		if (multiplier.half_cycles_since_init > 0) {
+			multiplier.half_cycles_since_init--;
+		}
+		if (divisor.half_cycles_since_init > 0) {
+			divisor.half_cycles_since_init--;
+		}
 	}
 }
 
 void Ricoh5A22::run_half_cycle() {
-	apply_invariants();
+	if (regs.emulation_mode) { apply_invariants(); }
 	//log();
 	tick_multiply_divisor();
 	if constexpr (DEBUG_WINDOW && SHOW_LOGS) {
@@ -183,4 +186,32 @@ void Ricoh5A22::log() {
 	          << "OP: "    << std::hex << std::setw(2) << std::setfill('0') << (int)BufferOpCode << " "
 	          << "CYC: "   << std::dec << (int)instruction_cycle
 	          << "\n";
+}
+
+Byte Ricoh5A22::read(Address addr) {
+	return bus->read(addr);
+}
+
+void Ricoh5A22::write(Address addr, Byte value) {
+	bus->write(addr, value);
+}
+
+void Ricoh5A22::enable_test_mode() {
+	bus->enable_test_mode();
+}
+
+void Ricoh5A22::disable_test_mode() {
+	bus->disable_test_mode();
+}
+
+void Ricoh5A22::reset_test_memory() {
+	bus->reset_test_memory();
+}
+
+Byte Ricoh5A22::test_peek(Address addr) {
+	return bus->test_peek(addr);
+}
+
+void Ricoh5A22::test_poke(Address addr, Byte value) {
+	bus->test_poke(addr, value);
 }

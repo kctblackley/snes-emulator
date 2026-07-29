@@ -1,7 +1,7 @@
 #pragma once
 #include "spc_700_operations.hpp"
 
-constexpr Optable optable = {
+constexpr Optable<SPC700> optable = {
 
     &s_00, // 0x00
     &s_01, // 0x01

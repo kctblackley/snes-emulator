@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <variant>
 #include "store.hpp"
 #include "mapper.hpp"
 #include "lorom_mapper.hpp"
@@ -46,12 +47,24 @@ public:
 
 	Byte read(SNESAddress address) override {
 		address_bus = address;
-		return mapper->read(address);
+		return std::visit(
+		    [&](auto& m)
+		    {
+		        return m.read(address);
+		    },
+		    mapper
+		);
 	}
 
 	void write(SNESAddress address, Byte value) override {
 		address_bus = address;
-		mapper->write(address, value);
+		std::visit(
+	        [&](auto& m)
+	        {
+	            m.write(address, value);
+	        },
+	        mapper
+	    );
 	}
 
 	SNESAddress get_address_bus() override {
@@ -95,33 +108,40 @@ public:
 
 		switch (best->mapper) {
 		case MapperType::LoROM:
-			mapper = std::make_unique<LoROM>();
+			mapper = LoROM{};
 			break;
 		case MapperType::HiROM:
-			mapper = std::make_unique<HiROM>();
+			mapper = HiROM{};
 			break;
 		case MapperType::ExHiROM:
-			mapper = std::make_unique<ExHiROM>();
+			mapper = ExHiROM{};
 			break;
 		}
 
 		header = best->h;
-		mapper->load_rom(rom);
-		mapper->load_sram(header.ram_size);
-		mapper->connect_cpu(cpu);
-		mapper->to_string();
+		std::visit(
+		    [&](auto& m)
+		    {
+		        m.load_rom(rom);
+		        m.load_sram(header.ram_size);
+		        m.connect_cpu(cpu);
+		        m.to_string();
+		    },
+		    mapper
+		);
 		std::cout << header.title << "\n";
 	}
 
 	void connect_cpu(Ricoh5A22* cpu) {
-		mapper->connect_cpu(cpu);
+	    std::visit([&](auto& m) { m.connect_cpu(cpu); }, mapper);
 	}
 
 private:
 	Byte mapping; // Stores cartridge's mapping
 
 	CartridgeHeader header;
-	std::unique_ptr<Mapper> mapper;
+	
+	std::variant<LoROM, HiROM, ExHiROM> mapper;
 
 	SNESAddress address_bus;
 };

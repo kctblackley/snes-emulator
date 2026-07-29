@@ -4,6 +4,7 @@
 
 #include "component.hpp"
 
+
 class CPU : public Component {
 public:
 	
@@ -74,53 +75,53 @@ public:
 	virtual void apply_invariants() = 0;
 	virtual void poll_interrupts() = 0;
 
-	virtual bool get_flag_N() { return false; }
-	virtual bool get_flag_V() { return false; }
-	virtual bool get_flag_M() { return false; }
-	virtual bool get_flag_X() { return false; }
-	virtual bool get_flag_D() { return false; }
-	virtual bool get_flag_I() { return false; }
-	virtual bool get_flag_Z() { return false; }
-	virtual bool get_flag_C() { return false; }
-	virtual bool get_flag_P() { return false; }
-	virtual bool get_flag_H() { return false; }
-	virtual bool get_flag_B() { return false; }
+	bool get_flag_N() = delete;
+	bool get_flag_V() = delete;
+	bool get_flag_M() = delete;
+	bool get_flag_X() = delete;
+	bool get_flag_D() = delete;
+	bool get_flag_I() = delete;
+	bool get_flag_Z() = delete;
+	bool get_flag_C() = delete;
+	bool get_flag_P() = delete;
+	bool get_flag_H() = delete;
+	bool get_flag_B() = delete;
 	
-	virtual void set_flag_N(Byte value) = 0;
-	virtual void set_flag_V(Byte value) = 0;
-	virtual void set_flag_M(Byte value) = 0;
-	virtual void set_flag_X(Byte value) = 0;
-	virtual void set_flag_D(Byte value) = 0;
-	virtual void set_flag_I(Byte value) = 0;
-	virtual void set_flag_Z(Word value) = 0;
-	virtual void set_flag_C(Byte value) = 0;
-	virtual void set_flag_P(Byte value) = 0;
-	virtual void set_flag_H(Byte value) = 0;
-	virtual void set_flag_B(Byte value) = 0;
+	void set_flag_N(Byte value) = delete;
+	void set_flag_V(Byte value) = delete;
+	void set_flag_M(Byte value) = delete;
+	void set_flag_X(Byte value) = delete;
+	void set_flag_D(Byte value) = delete;
+	void set_flag_I(Byte value) = delete;
+	void set_flag_Z(Word value) = delete;
+	void set_flag_C(Byte value) = delete;
+	void set_flag_P(Byte value) = delete;
+	void set_flag_H(Byte value) = delete;
+	void set_flag_B(Byte value) = delete;
 
-	virtual void set_flag_N() = 0;
-	virtual void set_flag_V() = 0;
-	virtual void set_flag_M() = 0;
-	virtual void set_flag_X() = 0;
-	virtual void set_flag_D() = 0;
-	virtual void set_flag_I() = 0;
-	virtual void set_flag_Z() = 0;
-	virtual void set_flag_C() = 0;
-	virtual void set_flag_P() = 0;
-	virtual void set_flag_H() = 0;
-	virtual void set_flag_B() = 0;
+	void set_flag_N() = delete;
+	void set_flag_V() = delete;
+	void set_flag_M() = delete;
+	void set_flag_X() = delete;
+	void set_flag_D() = delete;
+	void set_flag_I() = delete;
+	void set_flag_Z() = delete;
+	void set_flag_C() = delete;
+	void set_flag_P() = delete;
+	void set_flag_H() = delete;
+	void set_flag_B() = delete;
 
-	virtual void clear_flag_N() = 0;
-	virtual void clear_flag_V() = 0;
-	virtual void clear_flag_M() = 0;
-	virtual void clear_flag_X() = 0;
-	virtual void clear_flag_D() = 0;
-	virtual void clear_flag_I() = 0;
-	virtual void clear_flag_Z() = 0;
-	virtual void clear_flag_C() = 0;
-	virtual void clear_flag_P() = 0;
-	virtual void clear_flag_H() = 0;
-	virtual void clear_flag_B() = 0;
+	void clear_flag_N() = delete;
+	void clear_flag_V() = delete;
+	void clear_flag_M() = delete;
+	void clear_flag_X() = delete;
+	void clear_flag_D() = delete;
+	void clear_flag_I() = delete;
+	void clear_flag_Z() = delete;
+	void clear_flag_C() = delete;
+	void clear_flag_P() = delete;
+	void clear_flag_H() = delete;
+	void clear_flag_B() = delete;
 	
 	virtual void enable_test_mode() = 0;
 	virtual void disable_test_mode() = 0;

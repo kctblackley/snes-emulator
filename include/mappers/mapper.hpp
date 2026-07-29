@@ -1,18 +1,15 @@
 #pragma once
 #include "common.hpp"
 #include <vector>
+#include <fstream>
 #include <optional>
+#include "ricoh_5a22.hpp"
 
-class Ricoh5A22;
-
+template <class MapperT>
 class Mapper {
 public:
-	virtual ~Mapper() = default;
-
 	Byte read(SNESAddress address);
 	void write(SNESAddress address, Byte value);
-
-	virtual void to_string() = 0;
 
 	void load_rom(std::vector<Byte> rom) {
 		this->rom = rom;
@@ -24,6 +21,16 @@ public:
 			sram_size = (1024u << ram_size);
 		}
 		sram.assign(sram_size, 0);
+
+		if constexpr (PLAYING_EARTHBOUND) {
+			std::ifstream file("saves/earthbound/earthbound.srm", std::ios::binary);
+
+			file.seekg(0, std::ios::end);
+			std::size_t size = file.tellg();
+			file.seekg(0, std::ios::beg);
+
+			file.read(reinterpret_cast<char*>(sram.data()), size);
+		}
 	}
 
 	void connect_cpu(Ricoh5A22* cpu) {
@@ -35,8 +42,6 @@ public:
 	}
 
 protected:
-	virtual std::optional<Address> rom_idx(SNESAddress address) const = 0;
-	virtual std::optional<Address> sram_idx(SNESAddress address) const = 0;
 
 	void log_info() {
 		std::cout << "ROM size: " << rom.size() << "\n";
@@ -47,4 +52,16 @@ protected:
 	std::vector<Byte> sram;
 
 	Ricoh5A22* cpu = nullptr;
+
+private:
+
+	MapperT& derived() {
+		return static_cast<MapperT&>(*this);
+	}
+
+	const MapperT& derived() const {
+		return static_cast<const MapperT&>(*this);
+	}
 };
+
+#include "mapper.inl"

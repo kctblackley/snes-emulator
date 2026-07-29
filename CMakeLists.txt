@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(snes_emulator LANGUAGES CXX)
 
-set(CMAKE_CXX_FLAGS_RELEASE
-    "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto"
-)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,25 +12,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB COMPONENT_SOURCES CONFIGURE_DEPENDS
     src/components/*.cpp
 )
-
 file(GLOB MISC_SOURCES CONFIGURE_DEPENDS
     src/misc/*.cpp
 )
-
 file(GLOB CPU_OPERATIONS_SOURCES CONFIGURE_DEPENDS
     src/cpu_operations/*.cpp
-)
-
-file(GLOB MAPPER_SOURCES
-CONFIGURE_DEPENDS
-    src/mappers/*.cpp
 )
 
 file(GLOB TESTING_SOURCES CONFIGURE_DEPENDS
     src/testing/*.cpp
 )
-
-
 set(SNES_SOURCES
     ${COMPONENT_SOURCES}
     ${MISC_SOURCES}
@@ -40,7 +32,6 @@ set(SNES_SOURCES
 )
 
 find_package(SDL3 REQUIRED CONFIG)
-
 add_executable(snes_emulator ${SNES_SOURCES})
 
 target_include_directories(snes_emulator PRIVATE
@@ -54,11 +45,23 @@ target_include_directories(snes_emulator PRIVATE
 
 target_link_libraries(snes_emulator PRIVATE SDL3::SDL3)
 
-target_compile_options(snes_emulator PRIVATE
-    $<$<CONFIG:Release>:-O3;-march=native;-mtune=native;-flto>
-    $<$<CONFIG:RelWithDebInfo>:-O3;-march=native;-mtune=native;-flto;-g>
+set(SNES_OPT_FLAGS
+    -O3
+    -march=native
+    -mtune=native
+    -flto=auto          
+    -funroll-loops
+    -fomit-frame-pointer
+    -fstrict-aliasing
+    -fno-semantic-interposition
 )
 
+target_compile_options(snes_emulator PRIVATE
+    $<$<CONFIG:Release>:${SNES_OPT_FLAGS};-DNDEBUG>
+    $<$<CONFIG:RelWithDebInfo>:${SNES_OPT_FLAGS};-g>
+)
 
-
-
+target_link_options(snes_emulator PRIVATE
+    $<$<CONFIG:Release>:-O3;-flto=auto>
+    $<$<CONFIG:RelWithDebInfo>:-O3;-flto=auto>
+)

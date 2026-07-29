@@ -2,7 +2,6 @@
 #include "spc_700_optable.hpp"
 #include "ricoh_5a22_native_optable.hpp"
 #include "ricoh_5a22_emulation_optable.hpp"
-#include "test_harness.hpp"
 #include <string>
 #include <iomanip>
 #include <sstream>

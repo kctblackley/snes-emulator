@@ -88,20 +88,6 @@ void SNES::run() {
 
 			fps_frames++;
 			frame_count++;
-
-			auto now = std::chrono::steady_clock::now();
-	        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-	            now - fps_timer
-	        );
-
-	        if (elapsed.count() >= 1000) {
-	            double fps = fps_frames * 1000.0 / elapsed.count();
-	       
-	            std::cout << "\rFPS: " << fps << std::flush;
-
-	            fps_frames = 0;
-	            fps_timer = now;
-	        }
 		}
 
 		total_ticks += 1;
@@ -118,6 +104,7 @@ void SNES::run() {
     std::cout << "Time taken: " << elapsed.count() << " seconds\n";
 	std::cout << std::dec << (int)(ricoh_5a22->get_tick()) << std::endl;
 	std::cout << "Frames: " << (int)(frame_count) << std::endl;
+	std::cout << "FPS: " << (float)(frame_count) / (float)(elapsed.count()) << std::endl;
 }
 
 void SNES::reset() {

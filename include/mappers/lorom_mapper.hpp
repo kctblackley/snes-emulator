@@ -1,21 +1,22 @@
 #include "mapper.hpp"
 
-class LoROM : public Mapper {
+class LoROM : public Mapper<LoROM> {
+	friend class Mapper<LoROM>;
 public:
-	void to_string() override {
+	void to_string() {
 		std::cout << "LoROM\n";
 		log_info();
 	}
 
 protected:
-	std::optional<Address> rom_idx(SNESAddress address) const override {
+	std::optional<Address> rom_idx(SNESAddress address) const {
 		if (address.offset < 0x8000) {
 			return std::nullopt;
 		}
 		return ((address.bank & 0x7F) << 15) | (address.offset & 0x7FFF);
 	}
 
-	std::optional<Address> sram_idx(SNESAddress address) const override {
+	std::optional<Address> sram_idx(SNESAddress address) const {
 		bool sram_bank =
 		    (address.bank >= 0x70 && address.bank <= 0x7D) ||
 		    (address.bank >= 0xF0 && address.bank <= 0xFF);

@@ -34,6 +34,16 @@ void SPC700::run_half_cycle() {
 void SPC700::accumulate(CycleCount delta) {
 	accumulated_cycles += (double)delta;
 	while (accumulated_cycles > SPC_700_CYCLE_CONSTANT) {
+		if constexpr (SHOW_LOGS) {
+			if (instruction_cycle == 0) {
+				std::cout << "INSTRUCTION SPC700 PC=" << std::hex << (int)(regs.PC) << 
+				             "OPCODE=" << std::hex << (int)(BufferOpCode) << std::endl;
+				std::cout << "PC=" << std::hex << regs.PC
+				    << " Y=" << std::hex << (int)regs.Y
+				    << " P=" << std::hex << (int)regs.P
+				    << "\n";
+			}
+		}
 		tick_component();
 		accumulated_cycles -= SPC_700_CYCLE_CONSTANT;
 	}
@@ -59,6 +69,7 @@ void SPC700::reset() { // RUN IPL ROM HERE! MEMORY MAP THE IPL ROM!
 	regs.PC = 0xFFC0;
 	accumulated_cycles = 0;
 	BufferOpCode = read(regs.PC);
+	write(0xF0, 0x0A);
 }
 
 void SPC700::initialise() {

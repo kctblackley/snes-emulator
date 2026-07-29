@@ -1,5 +1,5 @@
 #pragma once
-#include "bus.hpp"
+#include "common.hpp"
 
 class Component {
 public:

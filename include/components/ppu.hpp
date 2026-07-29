@@ -13,8 +13,13 @@
 
 #define MAX_OBJECTS 32
 
+// For tile caching...
+#define NUM_BPP 3
+#define MAX_TILES 4096
+
 class DMAController;
 class Ricoh5A22;
+class Bus;
 
 constexpr Byte PPU1_VERSION = 1;
 constexpr Byte PPU2_VERSION = 2;
@@ -121,6 +126,7 @@ public:
 	Pixel fetch_bg_pixel(BG& bg, uint16_t screen_x);
 	Pixel fetch_mode7_pixel(BG& bg, uint16_t screen_x);
 	void fetch_objects();
+	void push_pixel(BG& bg, Pixel px, int& dot);
 	void render_bg_scanline(BG& bg);
 	void render_obj_scanline(ObjectLayer& obj);
 	void render_scanline();
@@ -171,15 +177,15 @@ public:
 	}
 
 	bool oam_accessible() {
-		return vblank || forced_blank;
+		return true || vblank || forced_blank;
 	}
 
 	bool cgram_accessible() {
-		return vblank || hblank || forced_blank;
+		return true || vblank || hblank || forced_blank;
 	}
 
 	bool vram_accessible() {
-		return vblank || forced_blank;
+		return true || vblank || forced_blank;
 	}
 
 	Word remap_vmadd(Word vmadd) {
@@ -298,97 +304,108 @@ public:
 		}
 	}
 
-	// PPU registers go here
-	Byte communication_read(SNESAddress addr) override {
-		Byte fetched = bus->get_open_bus();
-		// OAM
-		if (addr.offset == OAMDATAREAD_ADDRESS) {
-			if (oam.oamadd < 0x200) {
-				fetched = oam.data[oam.oamadd];
-			} else {
-				fetched = oam.data[0x200 + ((oam.oamadd - 0x200) & 0x1F)];
-			}
-			oam.oamadd = (oam.oamadd + 1) & 0x3FF;
-		}
+	// PPU tile caching
 
-		// CGRAM
-		if (addr.offset == CGDATAREAD_ADDRESS) {
-			if (cgram.cgram_byte == 0) {
-				fetched = get_lo(cgram.data[cgram.cgram_address]);
-			} else {
-				fetched = get_hi(cgram.data[cgram.cgram_address]);
-				cgram.cgram_address++;
-			}
-			cgram.cgram_byte = !cgram.cgram_byte;
-		}
-
-		// VRAM
-		if (addr.offset == VMDATALREAD_ADDRESS) {
-			fetched = get_lo(vram.vram_latch);
-			if (vram.address_increment_mode == 0) {
-				vram.vram_latch = vram.data[remap_vmadd(vram.vmadd)];
-				vram.vmadd = (vram.vmadd + vram.address_increment) & 0x7FFF;
+	void invalidate_tile(Word tile_address) {
+		for (int i = 3; i <= 5; i++) { // shifts for each of the bpp
+			int index = tile_address >> i;
+			int bpp = i - 3;
+			DecodedTile& tile = tile_cache[bpp][index];
+			if (tile.valid) {
+				for (auto& r : tile.rows) {
+					r.valid = false;
+				}
+				tile.valid = false;
 			}
 		}
-		if (addr.offset == VMDATAHREAD_ADDRESS) {
-			fetched = get_hi(vram.vram_latch);
-			if (vram.address_increment_mode == 1) {
-				vram.vram_latch = vram.data[remap_vmadd(vram.vmadd)];
-				vram.vmadd = (vram.vmadd + vram.address_increment) & 0x7FFF;
-			}
-		}
-
-		// Multiplication result
-		if (addr.offset == MPYH_ADDRESS || addr.offset == MPYM_ADDRESS || addr.offset == MPYL_ADDRESS) {
-			mode7.mpy = mode7.m7a * mode7.last_m7b;
-			if (addr.offset == MPYL_ADDRESS) {
-				fetched = (mode7.mpy >> 0) & 0xFF;
-			}
-			if (addr.offset == MPYM_ADDRESS) {
-				fetched = (mode7.mpy >> 8) & 0xFF;
-			}
-			if (addr.offset == MPYH_ADDRESS) {
-				fetched = (mode7.mpy >> 16) & 0xFF;
-			}
-		}
-
-		// H/V Counters
-
-		if (addr.offset == SLHV_ADDRESS) {
-			counter_latch = true;
-			ophct = hcounter / 4;
-			opvct = vcounter;
-		}
-		if (addr.offset == OPHCT_ADDRESS) {
-			if (ophct_byte == 0) {
-				fetched = get_lo(ophct);
-			} else {
-				fetched = get_hi (ophct);
-			}
-			ophct_byte = !ophct_byte;
-		}
-		if (addr.offset == OPVCT_ADDRESS) {
-			if (opvct_byte == 0) {
-				fetched = get_lo(opvct);
-			} else {
-				fetched = get_hi (opvct);
-			}
-			opvct_byte = !opvct_byte;
-		}
-
-		// Status
-		if (addr.offset == STAT77_ADDRESS) {
-		    fetched = (time_over << 7) | (range_over << 6) | (master_slave_mode << 5) | (ppu1_version & 0xFF);
-		}
-		if (addr.offset == STAT78_ADDRESS) {
-		    fetched = (field << 7) | (counter_latch << 5) | (region << 4) | (ppu2_version & 0xFF);
-		    counter_latch = false;
-		    ophct_byte = false;
-		    opvct_byte = false;
-		}
-
-		return fetched;
 	}
+
+	// bpp is provided as 2, 4, 8, but changed to 0, 1, 2
+	DecodedRow* get_tile_row(Word tile_address, int row, int bpp_num) {
+		int bpp = (bpp_num >> 2);
+		int index = (tile_address >> (bpp + 3));
+		DecodedTile& tile = tile_cache[bpp][index];
+		if (!tile.rows[row].valid) {
+			decode_tile_row(tile_address, row, bpp);
+			tile.valid = true;
+		}
+		return &tile.rows[row];
+	}
+
+	// bpp is provided as 0, 1, 2 -> just gets the row and avoids decoding
+	DecodedRow* fetch_tile_row(Word tile_address, int row, int bpp) {
+		int index = (tile_address >> (bpp + 3));
+		DecodedTile& tile = tile_cache[bpp][index];
+		return &tile.rows[row];
+	}
+
+	// bpp is provided as 0, 1, 2
+	void decode_2bpp(Word tile_address, int row) {
+		DecodedRow* row_data = fetch_tile_row(tile_address, row, 0);
+		Word plane01 = vram.data[(tile_address +      row) & 0x7FFF];
+		Byte p0 = get_lo(plane01);
+		Byte p1 = get_hi(plane01);
+		for (int px = 0; px < 8; px++) {
+			int bit = 7 - px;
+			Byte colour = ((p0 >> bit) & 1) | (((p1 >> bit) & 1) << 1);
+			row_data->data[px] = colour;
+		}
+		row_data->valid = true;
+	}
+
+	void decode_4bpp(Word tile_address, int row) {
+		DecodedRow* row_data = fetch_tile_row(tile_address, row, 1);
+		Word plane01 = vram.data[(tile_address +      row) & 0x7FFF];
+		Word plane23 = vram.data[(tile_address + 8  + row) & 0x7FFF];
+		Byte p0 = get_lo(plane01);
+		Byte p1 = get_hi(plane01);
+		Byte p2 = get_lo(plane23);
+		Byte p3 = get_hi(plane23);
+		for (int px = 0; px < 8; px++) {
+			int bit = 7 - px;
+			Byte colour = ((p0 >> bit) & 1)       | (((p1 >> bit) & 1) << 1) |
+				         (((p2 >> bit) & 1) << 2) | (((p3 >> bit) & 1) << 3);
+			row_data->data[px] = colour;
+		}
+		row_data->valid = true;
+	}
+
+	void decode_8bpp(Word tile_address, int row) {
+		DecodedRow* row_data = fetch_tile_row(tile_address, row, 2);
+		Word plane01 = vram.data[(tile_address +      row) & 0x7FFF];
+		Word plane23 = vram.data[(tile_address + 8  + row) & 0x7FFF];
+		Word plane45 = vram.data[(tile_address + 16 + row) & 0x7FFF];
+		Word plane67 = vram.data[(tile_address + 24 + row) & 0x7FFF];
+		Byte p0 = get_lo(plane01);
+		Byte p1 = get_hi(plane01);
+		Byte p2 = get_lo(plane23);
+		Byte p3 = get_hi(plane23);
+		Byte p4 = get_lo(plane45);
+		Byte p5 = get_hi(plane45);
+		Byte p6 = get_lo(plane67);
+		Byte p7 = get_hi(plane67);
+		for (int px = 0; px < 8; px++) {
+			int bit = 7 - px;
+			Byte colour = ((p0 >> bit) & 1)       | (((p1 >> bit) & 1) << 1) |
+						 (((p2 >> bit) & 1) << 2) | (((p3 >> bit) & 1) << 3) |
+						 (((p4 >> bit) & 1) << 4) | (((p5 >> bit) & 1) << 5) |
+						 (((p6 >> bit) & 1) << 6) | (((p7 >> bit) & 1) << 7);	
+			row_data->data[px] = colour;
+		}
+		row_data->valid = true;
+	}
+
+	// bpp is provided as 0, 1, 2
+	void decode_tile_row(Word tile_address, int row, int bpp) {
+		switch (bpp) {
+		case 0: decode_2bpp(tile_address, row); break;
+		case 1: decode_4bpp(tile_address, row); break;
+		case 2: decode_8bpp(tile_address, row); break;
+		}
+	}
+
+	// PPU registers go here
+	Byte communication_read(SNESAddress addr) override;
 
 	void set_bgsc(BG& bg, Byte value) {
 		bg.horizontal_tilemap_count = value & 1;
@@ -641,6 +658,14 @@ public:
 		if (addr.offset == OAMADDL_ADDRESS || addr.offset == OAMADDH_ADDRESS) {
 			oam.oamadd = oam.reload << 1;
 		}
+		/*if (addr.offset == OAMDATA_ADDRESS) {
+			if (oam_accessible()) {
+				accepted++;
+			} else {
+				rejected++;
+			}
+			std::cout << "OAMDATA WRITE " << std::dec << (int)(accepted) << " ACCEPTED " << (int)(rejected) << " REJECTED\n";
+		}*/
 		if (oam_accessible()) {
 			if (addr.offset == OAMDATA_ADDRESS) {
 				if ( (oam.oamadd & 1) == 0) {
@@ -653,9 +678,9 @@ public:
 					update_object(oam.oamadd - 1, oam.latch);
 					update_object(oam.oamadd, value);
 				}
-				if (oam.oamadd >= 0x200) {
-					oam.data[0x200 + ((oam.oamadd - 0x200) & 0x1F)] = value;
-					update_object(0x200 + ((oam.oamadd - 0x200) & 0x1F), value);
+				if (oam.oamadd >= 0x200 && oam.oamadd < 0x220) {
+					oam.data[0x200 + (oam.oamadd - 0x200)] = value;
+					update_object(0x200 + (oam.oamadd - 0x200), value);
 				}
 				oam.oamadd = (oam.oamadd + 1) & 0x3FF;
 			}
@@ -717,6 +742,7 @@ public:
 				if (vram.address_increment_mode == 0) {
 					vram.vmadd = (vram.vmadd + vram.address_increment) & 0x7FFF;
 				}
+				invalidate_tile(mapped_addr);
 			}
 			if (addr.offset == VMDATAH_ADDRESS) {
 				Word mapped_addr = remap_vmadd(vram.vmadd);
@@ -724,6 +750,7 @@ public:
 				if (vram.address_increment_mode == 1) {
 					vram.vmadd = (vram.vmadd + vram.address_increment) & 0x7FFF;
 				}
+				invalidate_tile(mapped_addr);
 			}
 		}
 
@@ -833,4 +860,11 @@ private:
 	std::array<Priority, 8> priorities = initialise_priorities();
 	std::array<Object, 128> all_objects;
 	Priority priority_order;
+
+	// DEBUGGING OAMDATA
+	int accepted = 0;
+	int rejected = 0;
+
+	// Tile cache
+	DecodedTile tile_cache[NUM_BPP][MAX_TILES] {};
 };

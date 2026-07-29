@@ -43,16 +43,12 @@ public:
 	Byte test_peek(Address addr);
 	void test_poke(Address addr, Byte value);
 
-	void connect_cpu_to_cartridge(Ricoh5A22* cpu) {
-		cartridge->connect_cpu(cpu);
-	}
+	void connect_cpu_to_cartridge(Ricoh5A22* cpu);
 
 	Byte get_open_bus();
 	void set_open_bus(Byte value);
 
-	bool is_cartridge_mapped(Address addr) {
-		return route(split_address(addr)) == cartridge.get();
-	}
+	bool is_cartridge_mapped(Address addr);
 
 private:
 	WaitCallback callback;

@@ -1,7 +1,7 @@
 #pragma once
 #include "ricoh_5a22_operations.hpp"
 
-constexpr Optable emulation_optable = {
+constexpr Optable<Ricoh5A22> emulation_optable = {
 
     &e_00, // 0x00
 

@@ -42,6 +42,8 @@
 #define RDNMI_ADDRESS 0x4210
 #define TIMEUP_ADDRESS 0x4211
 
+class Bus;
+
 // The Multiplier's RDMPYH and RDMPYL also store the remainder of division by the divisor
 // Multiplication takes 16 half-cycles of the CPU (not master clock)
 struct Multiplier {
@@ -69,7 +71,7 @@ struct CPURegisters {
 	Byte RDNMI, TIMEUP;
 };
 
-class Ricoh5A22 : public CPU {
+class Ricoh5A22 final : public CPU {
 public:
 	explicit Ricoh5A22(Bus* bus);
 
@@ -83,13 +85,9 @@ public:
 	void reset() override;
 	void initialise() override;
 
-	Byte read(Address addr) override {
-		return bus->read(addr);
-	}
+	Byte read(Address addr) override;
 
-	void write(Address addr, Byte value) override {
-		bus->write(addr, value);
-	}
+	void write(Address addr, Byte value) override;
 
 	// Handles CPU ports!
 	Byte communication_read(SNESAddress addr) override {
@@ -161,6 +159,11 @@ public:
 		
 		if (addr.offset == JOY1L_ADDRESS || addr.offset == JOY1H_ADDRESS) {
 			return renderer->get_joypad(addr.offset);
+		}
+
+		// Miscellaneous
+		if (addr.offset == 0x4016) {
+			return 0x01;
 		}
 
 
@@ -251,87 +254,74 @@ public:
 
 	void poll_interrupts() override;
 
-	bool get_flag_N() override { return (regs.P >> 7) & 0b1; }
-	bool get_flag_V() override { return (regs.P >> 6) & 0b1; }
-	bool get_flag_M() override { return regs.emulation_mode ? 0b1 : (regs.P >> 5) & 0b1; }
- 	bool get_flag_X() override { return regs.emulation_mode ? 0b1 : (regs.P >> 4) & 0b1; }
-	bool get_flag_D() override { return (regs.P >> 3) & 0b1; }
-	bool get_flag_I() override { return (regs.P >> 2) & 0b1; } 
-	bool get_flag_Z() override { return (regs.P >> 1) & 0b1;  }
-	bool get_flag_C() override { return  regs.P       & 0b1;  }
+	bool get_flag_N() { return (regs.P >> 7) & 0b1; }
+	bool get_flag_V() { return (regs.P >> 6) & 0b1; }
+	bool get_flag_M() { return regs.emulation_mode ? 0b1 : (regs.P >> 5) & 0b1; }
+ 	bool get_flag_X() { return regs.emulation_mode ? 0b1 : (regs.P >> 4) & 0b1; }
+	bool get_flag_D() { return (regs.P >> 3) & 0b1; }
+	bool get_flag_I() { return (regs.P >> 2) & 0b1; } 
+	bool get_flag_Z() { return (regs.P >> 1) & 0b1;  }
+	bool get_flag_C() { return  regs.P       & 0b1;  }
 
-	void set_flag_N(Byte value) override {
+	void set_flag_N(Byte value) {
 		condition = ( ( (value >> 7) & 0b1 ) == 1);
 		regs.P = condition ? set_bit(regs.P, 7) : clear_bit(regs.P, 7); 
 	}
 
-	void set_flag_V(Byte value) override { return; }
-	void set_flag_M(Byte value) override { return; }
-	void set_flag_X(Byte value) override { return; }
-	void set_flag_D(Byte value) override { return; }
-	void set_flag_I(Byte value) override { return; }
+	void set_flag_V(Byte value) { return; }
+	void set_flag_M(Byte value) { return; }
+	void set_flag_X(Byte value) { return; }
+	void set_flag_D(Byte value) { return; }
+	void set_flag_I(Byte value) { return; }
 
-	void set_flag_Z(Word value) override {
+	void set_flag_Z(Word value) {
 		condition = (value == 0);
 		regs.P = condition ? set_bit(regs.P, 1) : clear_bit(regs.P, 1); 
 	}
 
-	void set_flag_C(Byte value) override { return; }
+	void set_flag_C(Byte value) { return; }
 
-	void set_flag_N() override { regs.P = set_bit(regs.P, 7); }
-	void set_flag_V() override { regs.P = set_bit(regs.P, 6); }
-	void set_flag_M() override { regs.P = set_bit(regs.P, 5); }
-	void set_flag_X() override { regs.P = set_bit(regs.P, 4); }
-	void set_flag_D() override { regs.P = set_bit(regs.P, 3); }
-	void set_flag_I() override { regs.P = set_bit(regs.P, 2); }
-	void set_flag_Z() override { regs.P = set_bit(regs.P, 1); }
-	void set_flag_C() override { regs.P = set_bit(regs.P, 0); }
+	void set_flag_N() { regs.P = set_bit(regs.P, 7); }
+	void set_flag_V() { regs.P = set_bit(regs.P, 6); }
+	void set_flag_M() { regs.P = set_bit(regs.P, 5); }
+	void set_flag_X() { regs.P = set_bit(regs.P, 4); }
+	void set_flag_D() { regs.P = set_bit(regs.P, 3); }
+	void set_flag_I() { regs.P = set_bit(regs.P, 2); }
+	void set_flag_Z() { regs.P = set_bit(regs.P, 1); }
+	void set_flag_C() { regs.P = set_bit(regs.P, 0); }
 
-	void clear_flag_N() override { regs.P = clear_bit(regs.P, 7); }
- 	void clear_flag_V() override { regs.P = clear_bit(regs.P, 6); }
-	void clear_flag_M() override { regs.P = clear_bit(regs.P, 5); }
-	void clear_flag_X() override { regs.P = clear_bit(regs.P, 4); }
-	void clear_flag_D() override { regs.P = clear_bit(regs.P, 3); }
-	void clear_flag_I() override { regs.P = clear_bit(regs.P, 2); }
-	void clear_flag_Z() override { regs.P = clear_bit(regs.P, 1); }
-	void clear_flag_C() override { regs.P = clear_bit(regs.P, 0); }
+	void clear_flag_N() { regs.P = clear_bit(regs.P, 7); }
+ 	void clear_flag_V() { regs.P = clear_bit(regs.P, 6); }
+	void clear_flag_M() { regs.P = clear_bit(regs.P, 5); }
+	void clear_flag_X() { regs.P = clear_bit(regs.P, 4); }
+	void clear_flag_D() { regs.P = clear_bit(regs.P, 3); }
+	void clear_flag_I() { regs.P = clear_bit(regs.P, 2); }
+	void clear_flag_Z() { regs.P = clear_bit(regs.P, 1); }
+	void clear_flag_C() { regs.P = clear_bit(regs.P, 0); }
 
 	// Unused flags (SPC700 only)
-	bool get_flag_P() override { return false; }
-	bool get_flag_H() override { return false; }
-	bool get_flag_B() override { return false; }
+	bool get_flag_P() { return false; }
+	bool get_flag_H() { return false; }
+	bool get_flag_B() { return false; }
 
-	void set_flag_P(Byte value) override { return; }
-	void set_flag_H(Byte value) override { return; }
-	void set_flag_B(Byte value) override { return; }
+	void set_flag_P(Byte value) { return; }
+	void set_flag_H(Byte value) { return; }
+	void set_flag_B(Byte value) { return; }
 
-	void set_flag_P() override { return; }
-	void set_flag_H() override { return; }
-	void set_flag_B() override { return; }
+	void set_flag_P() { return; }
+	void set_flag_H() { return; }
+	void set_flag_B() { return; }
 
-	void clear_flag_P() override { return; }
-	void clear_flag_H() override { return; }
-	void clear_flag_B() override { return; }
+	void clear_flag_P() { return; }
+	void clear_flag_H() { return; }
+	void clear_flag_B() { return; }
 
-	void enable_test_mode() override {
-		bus->enable_test_mode();
-	}
+	void enable_test_mode();
+	void disable_test_mode();
+	void reset_test_memory();
+	Byte test_peek(Address addr);
+	void test_poke(Address addr, Byte value);
 
-	void disable_test_mode() override {
-		bus->disable_test_mode();
-	}
-
-	void reset_test_memory() override {
-		bus->reset_test_memory();
-	}
-
-	Byte test_peek(Address addr) override {
-		return bus->test_peek(addr);
-	}
-
-	void test_poke(Address addr, Byte value) override {
-		bus->test_poke(addr, value);
-	}
 	void connect_renderer(Renderer* renderer) {
 		this->renderer = renderer;
 	}
