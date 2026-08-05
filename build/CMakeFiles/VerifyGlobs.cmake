@@ -5,13 +5,17 @@ cmake_policy(SET CMP0009 NEW)
 # COMPONENT_SOURCES at CMakeLists.txt:12 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/*.cpp")
 set(OLD_GLOB
+  "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/apubus.cpp"
+  "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/audio_buffer.cpp"
   "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/bus.cpp"
   "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/cartridge.cpp"
   "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/dma_controller.cpp"
   "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/ppu.cpp"
   "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/ricoh_5a22.cpp"
+  "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/sdsp.cpp"
   "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/snes.cpp"
   "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/spc_700.cpp"
+  "/home/kctb/Projects/GithubBackups/snes-emulator/src/components/voice.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

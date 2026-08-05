@@ -2,9 +2,12 @@ rom/*
 tests/*
 !rom/.gitkeep
 build/*
+CMakeFiles/*
 tests/*
 ipl/*
 !ipl/.gitkeep
 logs/*
 README.md
 *.zip
+saves/*
+

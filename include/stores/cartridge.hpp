@@ -72,7 +72,41 @@ public:
 	}
 
 	CycleCount penalty() override {
-		return 0;
+		return penalty_value;
+	}
+
+	MapperCandidate make_candidate(const std::vector<Byte>& rom, MapperType mapper, size_t offset) {
+	    MapperCandidate c{
+	        mapper,
+	        parse_header(rom, offset),
+	        0
+	    };
+
+	    c.score = score(c, rom.size());
+
+	    return c;
+	}
+
+	bool is_exhirom_half_swapped(const std::vector<Byte>& rom) {
+		if (rom.size() != 0x600000) {
+			return false;
+		}
+
+		if (rom.size() < 0x410000) {
+			return false;
+		}
+
+		auto normal = make_candidate(rom, MapperType::ExHiROM, 0x40ffc0);
+		std::vector<Byte> test = rom;
+
+		std::rotate(test.begin(), test.begin() + 0x400000, test.end());
+		auto swapped = make_candidate(test, MapperType::ExHiROM, 0x40ffc0);
+
+		return swapped.score > normal.score;
+	}
+
+	void fix_exhirom_half_swap(std::vector<Byte>& rom) {
+		std::rotate(rom.begin(), rom.begin() + 0x400000, rom.end());
 	}
 
 	void load_cartridge(const std::string& directory, Ricoh5A22* cpu) {
@@ -106,6 +140,29 @@ public:
 			}
 		);
 
+		if (best->mapper == MapperType::ExHiROM && is_exhirom_half_swapped(rom)) {
+			std::cout << "Detected ExHiROM half-swapped dump; correcting\n";
+			fix_exhirom_half_swap(rom);
+		
+			candidates.clear();
+
+		    try_add(MapperType::LoROM,   0x7fc0);
+		    try_add(MapperType::HiROM,   0xffc0);
+		    try_add(MapperType::ExHiROM, 0x40ffc0);
+
+		    for (auto& c : candidates) {
+		        c.score = score(c, rom.size());
+		    }
+
+		    best = std::max_element(
+		        candidates.begin(),
+		        candidates.end(),
+		        [](const auto& a, const auto& b) {
+		            return a.score < b.score;
+		        }
+		    );
+		}
+
 		switch (best->mapper) {
 		case MapperType::LoROM:
 			mapper = LoROM{};
@@ -129,6 +186,10 @@ public:
 		    },
 		    mapper
 		);
+
+		fast_rom = (header.map_mode & 0x10) != 0;
+		penalty_value = fast_rom ? 0 : 2;
+
 		std::cout << header.title << "\n";
 	}
 
@@ -138,7 +199,8 @@ public:
 
 private:
 	Byte mapping; // Stores cartridge's mapping
-
+	bool fast_rom = false;
+	CycleCount penalty_value = 0;
 	CartridgeHeader header;
 	
 	std::variant<LoROM, HiROM, ExHiROM> mapper;

@@ -4,10 +4,7 @@
 
 
 class Ricoh5A22;
-// Micro-Instruction<Ricoh5A22>s
-// Functions are all of the type
 
-// Instruction<Ricoh5A22>s
 extern Instruction<Ricoh5A22> n_00;
 extern Instruction<Ricoh5A22> e_00;
 

@@ -93,6 +93,7 @@ public:
 	Word h_time_target = 0;
 	Word v_time_target = 0;
 	Byte irq_mode = 0;
+	bool irq_condition_met = false;
 
 	bool frame_finished = false;
 
@@ -177,15 +178,15 @@ public:
 	}
 
 	bool oam_accessible() {
-		return true || vblank || forced_blank;
+		return vblank || forced_blank;
 	}
 
 	bool cgram_accessible() {
-		return true || vblank || hblank || forced_blank;
+		return vblank || hblank || forced_blank;
 	}
 
 	bool vram_accessible() {
-		return true || vblank || forced_blank;
+		return vblank || forced_blank;
 	}
 
 	Word remap_vmadd(Word vmadd) {
@@ -418,20 +419,23 @@ public:
 	}
 
 	void set_bghofs(BG& bg, Byte value) {
-		bg.bghofs = (value << 8) | (bg.bgofs_latch & ~7) | (bg.bghofs_latch & 7);
-		bg.bgofs_latch = value;
-		bg.bghofs_latch = value;
+		bg.bghofs = (value << 8) | (bg_ofs_latch & ~7) | (bg_hofs_latch & 7);
+		bg_ofs_latch = value;
+		bg_hofs_latch = value;
 	}
 
 	void set_bgvofs(BG& bg, Byte value) {
-		bg.bgvofs = (value << 8) | bg.bgofs_latch;
-		bg.bgofs_latch = value;
+		bg.bgvofs = (value << 8) | bg_ofs_latch;
+		bg_ofs_latch = value;
 	}
 
 	void communication_write(SNESAddress addr, Byte value) override {
 		// Display configuration
 		if (addr.offset == INIDISP_ADDRESS) {
 			bool new_forced_blank = ((value >> 7) & 0b1) == 1;
+			if (forced_blank && !new_forced_blank && vblank && vcounter == vblank_start) {
+				oam.oamadd = oam.reload << 1;
+			}
 			forced_blank = new_forced_blank;
 			brightness = value & 0x0F;
 		}
@@ -836,6 +840,9 @@ private:
 	int mosaic_size = 0;
 
 	BG bg1, bg2, bg3, bg4; // stores attributes relevant to bg layers
+
+	Byte bg_ofs_latch = 0x00;
+	Byte bg_hofs_latch = 0x00;
 	ObjectLayer obj; // stores attributes relevant to obj layer
 	ColorMathLayer col;
 	Window window1;

@@ -78,14 +78,24 @@ void Ricoh5A22::run_half_cycle() {
 	if (regs.emulation_mode) { apply_invariants(); }
 	//log();
 	tick_multiply_divisor();
-	if constexpr (DEBUG_WINDOW && SHOW_LOGS) {
+	if constexpr (SHOW_LOGS) {
 		if (instruction_cycle == 0) {
+			executed++;
+		}
+		if (instruction_cycle == 0 && BufferOpCode < 256) {
+			if (executed >= 12) {
+				executed = 0;
+			}
 			const OpCodeInfo& info = ricoh_5a22_opcode_info[BufferOpCode];
 			std::cout <<
 			 std::hex << std::uppercase << std::setw(2) << std::setfill('0') << static_cast<int>(regs.PB) << ":" <<
 			 std::hex << std::uppercase << std::setw(4) << std::setfill('0') << static_cast<int>(regs.PC) << " ";
 			std::cout << info.mnemonic;
 			SizeType size_type = info.size_type;
+
+			if (regs.PB == 0x00 && regs.PC == 0x000B) {
+				std::abort();
+			}
 
 			bool flag = false;
 			switch(size_type) {

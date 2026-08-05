@@ -47,6 +47,13 @@ enum Registers {
 	NLTR = 10
 };
 
+enum DMAState {
+	Inactive = 0,
+	SetUp = 1,
+	NextChannel = 2,
+	Transferring = 3
+};
+
 class DMAChannel {
 
 public:
@@ -90,8 +97,15 @@ public:
 		registers[A2AH] = get_hi(word);
 	}
 
-	std::array<Byte, 16> registers {};
+	std::array<Byte, 16> registers = make_filled_registers();
 	HDMAState hdma;
+
+private:
+	static std::array<Byte, 16> make_filled_registers() {
+		std::array<Byte, 16> regs;
+		regs.fill(0xFF);
+		return regs;
+	}
 };
 
 class DMAController : public Component {
@@ -115,6 +129,7 @@ public:
 
 	void execute_gpdma();
 	void execute_hdma();
+	void gpdma_init();
 	void hdma_init();
 	CycleCount perform_hdma_transfer(DMAChannel& ch);
 	CycleCount load_hdma_descriptor(DMAChannel& ch);

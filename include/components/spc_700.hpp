@@ -5,6 +5,7 @@
 #include "apubus.hpp"
 
 #define SPC_700_CYCLE_CONSTANT 20.9738991477
+#define SDSP_CYCLE_CONSTANT (SPC_700_CYCLE_CONSTANT * /*128.0*/ 32.0)
 
 enum class APUStubState {
 	WaitForCC,
@@ -29,6 +30,7 @@ public:
 
 	void run_half_cycle();
 	void accumulate(CycleCount delta);
+	void accumulate_dsp(CycleCount delta);
 	void tick_component() override;
 	CycleCount get_cycle() override;
 	TickCount get_tick() override;
@@ -42,6 +44,10 @@ public:
 
 	void communication_write(SNESAddress addr, Byte value) override {
 		cpu_to_spc_ports[(addr.offset - 0x2140) & 3] = value;
+	}
+
+	void close_audio() {
+		bus->close_audio();
 	}
 
 	Byte read(Address addr) override {
@@ -76,23 +82,30 @@ public:
 
 		    if (!old0 && timers[0].enabled) {
 			    timers[0].output = 0;
-			    timers[0].divider_counter = 0;
 			    timers[0].internal_counter = 0;
 			}
 
 		    if (!old1 && timers[1].enabled) {
 			    timers[1].output = 0;
-			    timers[1].divider_counter = 0;
 			    timers[1].internal_counter = 0;
 			}
 
 		    if (!old2 && timers[2].enabled) {
 			    timers[2].output = 0;
-			    timers[2].divider_counter = 0;
 			    timers[2].internal_counter = 0;
 			}
 
 		    ipl_rom_enabled = value & 0x80;
+		    
+		    if (value & 0x10) {
+		    	cpu_to_spc_ports[0] = 0;
+		    	cpu_to_spc_ports[1] = 0;
+		    }
+		    if (value & 0x20) {
+		    	cpu_to_spc_ports[2] = 0;
+		    	cpu_to_spc_ports[3] = 0;
+		    }
+
 		    return;
 		}
 		if (addr >= 0xF4 && addr <= 0xF7) {
@@ -103,33 +116,26 @@ public:
 	}
 
 	void tick_timer(int index, int divider) {
-		SPCTimer& timer = timers[index];
+	    SPCTimer& timer = timers[index];
 
-		if (!timer.enabled) {
-			return;
-		}
+	    timer.divider_counter++;
+	    if (timer.divider_counter < divider) {
+	        return;
+	    }
+	    timer.divider_counter -= divider;   // see note below on -= vs = 0
 
-		timer.divider_counter++;
+	    if (!timer.enabled) {
+	        return;   // only the counter/output stage freezes when disabled
+	    }
 
-		if (timer.divider_counter < divider) {
-			return;
-		}
+	    timer.internal_counter++;
 
-		timer.divider_counter = 0;
-		timer.internal_counter++;
+	    uint16_t target = (timer.target == 0) ? 256 : timer.target;
 
-		uint16_t target;
-		if (timer.target == 0) {
-			target = 256;
-		} else {
-			target = timer.target;
-		}
-
-		if (timer.internal_counter >= target) {
-			timer.internal_counter = 0;
-
-			timer.output = (timer.output + 1) & 0x0F;
-		}
+	    if (timer.internal_counter >= target) {
+	        timer.internal_counter = 0;
+	        timer.output = (timer.output + 1) & 0x0F;
+	    }
 	}
 
 	void apply_invariants() override;
@@ -221,6 +227,12 @@ public:
 		bus->write(addr, value);
 	}
 
+	bool audio_buffer_above_half() {
+		return bus->sdsp_above_half();
+	}
+
+	int sdsp_ticks_this_frame = 0;
+
 private:
 	std::unique_ptr<APUBus> bus;
 
@@ -237,4 +249,6 @@ private:
 
 	std::array<Byte, 64> ipl_rom {};
 	SPCTimer timers[3];
+
+	double dsp_accumulated_cycles = 0;
 };

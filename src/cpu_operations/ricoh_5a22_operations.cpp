@@ -2,9 +2,6 @@
 #include "ricoh_5a22_addressing_modes.hpp"
 #include "ricoh_5a22.hpp"
 
-// Micro-Instruction<Ricoh5A22>s
-// Functions are all of the type
-
 Address get_pcpb(Word pc, Byte pb) {
 	return (pb << 16) | pc;
 }
@@ -534,16 +531,20 @@ namespace Ricoh5A22Functions {
 		        (cpu.BufferAddress & 0xFF00);
 
 		    if (!cpu.Branching || !cpu.BoundaryCrossed) {
-		        cpu.poll_interrupts();
-		    }
+			    if (cpu.interrupt_pending()) {
+			        cpu.regs.PC += 1;
+			    }
+			    cpu.poll_interrupts();
+			}
 		}
 		if constexpr (std::is_same_v<BranchingRoutine, Branching::FlagNative>) {
-			int16_t offset = static_cast<int8_t>(cpu.BufferOperand & 0xFF);
-
-		    cpu.BufferAddress =
-		        static_cast<uint16_t>(cpu.regs.PC + 1 + offset);
+		    int16_t offset = static_cast<int8_t>(cpu.BufferOperand & 0xFF);
+		    cpu.BufferAddress = static_cast<uint16_t>(cpu.regs.PC + 1 + offset);
 
 		    if (!cpu.Branching) {
+		        if (cpu.interrupt_pending()) {
+		            cpu.regs.PC += 1;      // only advance to the true instruction boundary
+		        }                          // when we're actually about to latch it
 		        cpu.poll_interrupts();
 		    }
 		}

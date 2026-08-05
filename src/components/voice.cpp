@@ -1,0 +1,133 @@
+#include "sdsp.hpp"
+#include "apubus.hpp"
+
+void Voice::mem_write(Word address, Byte value) {
+	if (bus) {
+		bus->write(address, value);
+	}
+}
+
+Byte Voice::mem_read(Word address) {
+	if (bus) {
+		return bus->read(address);
+	} else {
+		return 0x00;
+	}
+}
+
+void Voice::decode_brr_block() {
+	header = mem_read(current_brr_address);
+	
+	shift     = header >> 4;
+	filter    = (header >> 2) & 3;
+	loop_flag = (header & 0x02) != 0;
+	end_flag  = (header & 0x01) != 0;
+
+	for (int i = 0; i < 16; i++) {
+		Byte data = mem_read(current_brr_address + 1 + i / 2);
+		Byte nibble;
+		if ((i & 1) == 0) {
+			nibble = data >> 4;
+		} else {
+			nibble = data & 0x0F;
+		}
+
+		Sample sample = nibble;
+
+		if (sample >= 8) {
+			sample -= 16;
+		}
+
+		if (shift <= 12) {
+			sample = sample << shift;
+			sample = sample >> 1;
+		} else {
+			sample = (sample < 0) ? -2048 : 2048;
+		}
+
+		switch(filter) {
+		case 1:
+			sample += prev1;
+			sample -= prev1 >> 4;
+			break;
+		case 2: 
+			sample += (prev1 << 1);
+			sample -= (prev1 * 3) >> 5;
+
+			sample -= prev2;
+			sample += prev2 >> 4;
+			break;
+		case 3:
+			sample += (prev1 << 1);
+			sample -= (prev1 * 13) >> 6;
+
+			sample -= prev2;
+			sample += (prev2 * 3) >> 4;
+			break;
+		}
+
+		sample = std::clamp(sample, -32768, 32767);
+		sample = sample & ~1;
+
+		decoded_samples[i] = sample;
+		prev2 = prev1;
+		prev1 = sample;
+	}
+
+	next_brr_address = current_brr_address + 9;
+}
+
+StereoSample Voice::output() {
+	if (!active) {
+		return {0, 0};
+	}
+
+	return {
+		static_cast<int16_t>(current_sample * voll / 128),
+		static_cast<int16_t>(current_sample * volr / 128)
+	};
+}
+
+void Voice::advance_brr_address() {
+	if (end_flag) {
+		if (loop_flag) {
+			current_brr_address = loop_brr_address;
+		} else {
+			active = false;
+			endx_flag = true;
+		}
+	} else {
+		current_brr_address = next_brr_address;
+	}
+}
+
+void Voice::tick() {
+	if (!active) {
+		current_sample = 0;
+		return;
+	}
+	
+	uint16_t pitch = ((pitchr & 0x3F) << 8) | pitchl;
+	pitch_counter += pitch;
+
+	while (pitch_counter >= 0x1000) {
+		pitch_counter -= 0x1000;
+		sample_index += 1;
+
+		if (sample_index == 16) {
+			advance_brr_address();
+
+			if (!active) {
+				current_sample = 0;
+				return;
+			}
+
+			decode_brr_block();
+			sample_index = 0;
+		}
+	}
+
+	current_sample = decoded_samples[sample_index];
+
+	return;
+}

@@ -22,7 +22,7 @@ public:
 		}
 		sram.assign(sram_size, 0);
 
-		if constexpr (PLAYING_EARTHBOUND) {
+		if constexpr (PLAYING_EARTHBOUND) { // Just a temporary thing for testing Earthbound, which is experiencing some issues at the moment
 			std::ifstream file("saves/earthbound/earthbound.srm", std::ios::binary);
 
 			file.seekg(0, std::ios::end);

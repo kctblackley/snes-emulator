@@ -1,5 +1,8 @@
+
 #include "snes.hpp"
 #include <chrono>
+#include <thread>
+#include <iostream>
 
 SNES::SNES() : master_cycle(0) {
 	// Create component and link to Bus
@@ -76,18 +79,37 @@ void SNES::run() {
 	int fps_frames = 0;	
 	int frame_count = 0;
 
+	constexpr double TARGET_FRAME_SECONDS = 1.0 / 60.0988; // NTSC SNES refresh rate
+	auto frame_start = std::chrono::steady_clock::now();
+
 	while (running) {
-		CycleCount prev_master_cycle = master_cycle;
+		CycleCount prev_master = master_cycle;
+
 		tick_snes();
-		spc_700->accumulate(master_cycle - prev_master_cycle);
 		
+		CycleCount delta = master_cycle - prev_master;
+		spc_700->accumulate(delta);
+		spc_700->accumulate_dsp(delta);
+
 		if (ppu->frame_finished) {
 			ppu->push_framebuffer();
 			renderer->loop();
 			ppu->frame_finished = false;
 
+			if constexpr (SHOW_SDSP_LOGS) {
+				static int diag_frame = 0;
+				if (++diag_frame % 60 == 0) {
+					std::cout << "[sdsp] ticks last frame: " << std::dec << (int)spc_700->sdsp_ticks_this_frame
+					          << " (expect ~533)\n";
+				}
+			}
+			spc_700->sdsp_ticks_this_frame = 0;
 			fps_frames++;
 			frame_count++;
+
+			auto target = frame_start + std::chrono::duration<double>(TARGET_FRAME_SECONDS);
+			std::this_thread::sleep_until(target);
+			frame_start = std::chrono::steady_clock::now();
 		}
 
 		total_ticks += 1;
@@ -96,6 +118,7 @@ void SNES::run() {
 	}
 
 	renderer->close_window();
+	spc_700->close_audio();
 	
 	auto end = std::chrono::high_resolution_clock::now();
 

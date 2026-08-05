@@ -92,50 +92,12 @@ public:
 	// Handles CPU ports!
 	Byte communication_read(SNESAddress addr) override {
 		// Multiplier
-		if (multiplier.half_cycles_since_init == 0) {
-			// Carry out multiplication here
-			if (!multiplier.completed) {
-				uint16_t result = multiplier.WRMPYA * multiplier.WRMPYB;
-				multiplier.RDMPYL = get_lo(result);
-				multiplier.RDMPYH = get_hi(result);
-				multiplier.completed = true;
-			}
-
-			if (addr.offset == RDMPYL_ADDRESS) { return multiplier.RDMPYL; }
-			if (addr.offset == RDMPYH_ADDRESS) { return multiplier.RDMPYH; }
-
-		}
+		if (addr.offset == RDMPYL_ADDRESS) { return multiplier.RDMPYL; }
+		if (addr.offset == RDMPYH_ADDRESS) { return multiplier.RDMPYH; }
+		
 		// Divisor
-
-		if (divisor.half_cycles_since_init == 0) {
-
-			// Carry out division here
-			if (!divisor.completed) {
-				uint16_t dividend_value = (divisor.WRDIVH << 8) | divisor.WRDIVL;
-				uint8_t divisor_value = divisor.WRDIVB;
-				uint16_t result = 0xFFFF;
-				uint16_t remainder = 0xFFFF;
-				if (divisor_value != 0) {
-					result = (unsigned int)(dividend_value) / (unsigned int)(divisor_value);
-					remainder = dividend_value % divisor_value;
-				}
-
-				divisor.RDDIVL = get_lo(result);
-				divisor.RDDIVH = get_hi(result);
-
-				multiplier.RDMPYL = get_lo(remainder);
-				multiplier.RDMPYH = get_hi(remainder);
-
-				divisor.completed = true;
-			}
-
-			if (addr.offset == RDDIVL_ADDRESS) { return divisor.RDDIVL; }
-			if (addr.offset == RDDIVH_ADDRESS) { return divisor.RDDIVH; }
-
-			if (addr.offset == RDMPYL_ADDRESS) { return multiplier.RDMPYL; }
-			if (addr.offset == RDMPYH_ADDRESS) { return multiplier.RDMPYH; }
-
-		}
+		if (addr.offset == RDDIVL_ADDRESS) { return divisor.RDDIVL; }
+		if (addr.offset == RDDIVH_ADDRESS) { return divisor.RDDIVH; }
 
 		// Interrupt handling
 		if (addr.offset == RDNMI_ADDRESS) {
@@ -177,8 +139,12 @@ public:
 		if (addr.offset == WRMPYB_ADDRESS) { multiplier.WRMPYB = value; }
 			
 		if (addr.offset == WRMPYB_ADDRESS) {
+			uint16_t result = multiplier.WRMPYA * multiplier.WRMPYB;
+			multiplier.RDMPYL = get_lo(result);
+			multiplier.RDMPYH = get_hi(result);
+
 			multiplier.half_cycles_since_init = MULTIPLIER_HALF_CYCLES;
-			multiplier.completed = false;
+			multiplier.completed = true;
 		}
 
 		// Divisor
@@ -187,8 +153,22 @@ public:
 		if (addr.offset == WRDIVB_ADDRESS) { divisor.WRDIVB = value; }
 
 		if (addr.offset == WRDIVB_ADDRESS) {
+			uint16_t dividend_value = (divisor.WRDIVH << 8) | divisor.WRDIVL;
+			uint8_t divisor_value = divisor.WRDIVB;
+			uint16_t result = 0xFFFF;
+			uint16_t remainder = 0xFFFF;
+			if (divisor_value != 0) {
+				result = (unsigned int)(dividend_value) / (unsigned int)(divisor_value);
+				remainder = dividend_value % divisor_value;
+			}
+
+			divisor.RDDIVL = get_lo(result);
+			divisor.RDDIVH = get_hi(result);
+			multiplier.RDMPYL = get_lo(remainder);
+			multiplier.RDMPYH = get_hi(remainder);
+
 			divisor.half_cycles_since_init = DIVISOR_HALF_CYCLES;
-			divisor.completed = false;
+			divisor.completed = true;
 		}
 
 		// Interrupts
@@ -253,6 +233,10 @@ public:
 	void apply_invariants() override;
 
 	void poll_interrupts() override;
+
+	bool interrupt_pending() {
+	    return nmi_line || (irq_line && !get_flag_I());
+	}
 
 	bool get_flag_N() { return (regs.P >> 7) & 0b1; }
 	bool get_flag_V() { return (regs.P >> 6) & 0b1; }
@@ -362,4 +346,6 @@ private:
 	Byte prev_opcode = 0;
 
 	bool new_operand = false;
+
+	int executed = 0;
 };

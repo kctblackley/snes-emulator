@@ -61,16 +61,19 @@ void SPC700::run_half_cycle() {
 }
 
 void SPC700::accumulate(CycleCount delta) {
-	accumulated_cycles += (double)delta;
+	accumulated_cycles += delta;
 	while (accumulated_cycles > SPC_700_CYCLE_CONSTANT) {
 		if constexpr (SHOW_LOGS) {
 			if (instruction_cycle == 0) {
-				std::cout << "INSTRUCTION SPC700 PC=" << std::hex << (int)(regs.PC) << 
+				std::cout << "SPC700 PC=" << std::hex << (int)(regs.PC) << 
 				             "OPCODE=" << std::hex << (int)(BufferOpCode) << std::endl;
-				std::cout << "PC=" << std::hex << regs.PC
-				    << " Y=" << std::hex << (int)regs.Y
-				    << " P=" << std::hex << (int)regs.P
-				    << "\n";
+				std::cout << " A=" << std::hex << (int)regs.A
+						  << " X=" << std::hex << (int)regs.X
+				          << " Y=" << std::hex << (int)regs.Y
+				          << " P=" << std::hex << (int)regs.P
+				          << "PC=" << std::hex << regs.PC
+						  
+				          << "\n";
 			}
 		}
 		tick_component();
@@ -78,14 +81,21 @@ void SPC700::accumulate(CycleCount delta) {
 	}
 }
 
-void SPC700::tick_component() { // when the component is ticked, it does a half tick in actuality
-	tick_timer(0, 128);
-	tick_timer(1, 128);
-	tick_timer(2, 16);
-	tick++;
-	if constexpr (!HALF_CYCLES) {
-		run_half_cycle();
+void SPC700::accumulate_dsp(CycleCount delta) {
+	dsp_accumulated_cycles += delta;
+	while (dsp_accumulated_cycles > SDSP_CYCLE_CONSTANT) {
+		sdsp_ticks_this_frame++;
+		bus->tick_sdsp();
+		dsp_accumulated_cycles -= SDSP_CYCLE_CONSTANT;
 	}
+}
+
+void SPC700::tick_component() { // when the component is ticked, it does a half tick in actuality
+	tick_timer(0, 128 /* 512 */);
+	tick_timer(1, 128 /* 512 */);
+	tick_timer(2, 16 /* 64 */);
+	tick++;
+	run_half_cycle();
 	run_half_cycle();
 }
 
@@ -99,6 +109,8 @@ void SPC700::reset() { // RUN IPL ROM HERE! MEMORY MAP THE IPL ROM!
 	accumulated_cycles = 0;
 	BufferOpCode = read(regs.PC);
 	write(0xF0, 0x0A);
+	spc_to_cpu_ports[0] = 0xAA;
+	spc_to_cpu_ports[1] = 0xBB;
 }
 
 void SPC700::initialise() {

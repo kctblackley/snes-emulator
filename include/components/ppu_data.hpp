@@ -204,9 +204,6 @@ struct BG {
 	Address tilemap_vram_address = 0x00;
 	Address word_address = 0x00;
 
-	Byte bgofs_latch = 0x00;
-	Byte bghofs_latch = 0x00;
-
 	Word bghofs = 0x00;
 	Word bgvofs = 0x00;
 

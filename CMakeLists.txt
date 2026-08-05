@@ -54,6 +54,9 @@ set(SNES_OPT_FLAGS
     -fomit-frame-pointer
     -fstrict-aliasing
     -fno-semantic-interposition
+    -fno-rtti
+    -fmerge-all-constants
+    -fno-plt
 )
 
 target_compile_options(snes_emulator PRIVATE

@@ -325,12 +325,39 @@ public:
 		    SDL_CloseJoystick(joystick);
 		    joystick = nullptr;
 		}
+
+		if (texture) {
+			SDL_DestroyTexture(texture);
+			texture = nullptr;
+		}
+		if (renderer) {
+			SDL_DestroyRenderer(renderer);
+			renderer = nullptr;
+		}
 		SDL_DestroyWindow(window);
+		window = nullptr;
+
 		if constexpr (DEBUG_WINDOW) {
+			if (bg1_tex) { SDL_DestroyTexture(bg1_tex); bg1_tex = nullptr; }
+			if (bg2_tex) { SDL_DestroyTexture(bg2_tex); bg2_tex = nullptr; }
+			if (bg3_tex) { SDL_DestroyTexture(bg3_tex); bg3_tex = nullptr; }
+			if (bg4_tex) { SDL_DestroyTexture(bg4_tex); bg4_tex = nullptr; }
+			if (obj_tex) { SDL_DestroyTexture(obj_tex); obj_tex = nullptr; }
+			if (debug_renderer) { SDL_DestroyRenderer(debug_renderer); debug_renderer = nullptr; }
 			SDL_DestroyWindow(debug_window);
+			debug_window = nullptr;
+		}
+
+		if (oam_texture) {
+			SDL_DestroyTexture(oam_texture);
+			oam_texture = nullptr;
+		}
+		if (oam_renderer) {
+			SDL_DestroyRenderer(oam_renderer);
+			oam_renderer = nullptr;
 		}
 		SDL_DestroyWindow(oam_window);
-		SDL_Quit();
+		oam_window = nullptr;
 		closed = true;
 	}
 

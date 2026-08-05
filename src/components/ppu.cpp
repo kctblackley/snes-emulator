@@ -4,9 +4,6 @@
 #include <iostream>
 #include <algorithm>
 
-// Register handling defined in header
-// This just contains code related to the rendering itself
-
 constexpr int DOTS_PER_LINE = 1364;
 constexpr int HBLANK_DOTS = 1096;
 constexpr Address HVBJOY = 0x4212;
@@ -342,45 +339,19 @@ void PPU::render_bg_scanline(BG& bg) {
 	}
 }
 
-/*
-void PPU::render_bg_scanline(BG& bg) {
-	Pixel fetched_pixel;
-
-	int i = 0;
-	for (int dot = 0; dot < 512; dot++) {
-
-		if (!hires_mode && (dot & 1)) {
-			bg.main_scanline[i]  = fetched_pixel;
-			bg.sub_scanline[i++] = fetched_pixel;
-			continue;
-		}
-
-		uint16_t screen_x = hires_mode ? dot : (dot >> 1);
-		if (bg_mode == 7) {
-			fetched_pixel = fetch_mode7_pixel(bg, screen_x);
-		} else {
-			fetched_pixel = fetch_bg_pixel(bg, screen_x);
-		}
-
-		fetched_pixel.colour_math = bg.enable_colour_math;
-
-		bg.main_scanline[i]  = fetched_pixel;
-		bg.sub_scanline[i++] = fetched_pixel;
-	}
-
-	if (bg.windows_on_subscreen) {
-		window_mask(bg.sub_scanline, bg.window1_enabled, bg.window2_enabled, bg.window1_inverted, bg.window2_inverted, bg.mask_logic, bg.enable_colour_math);
-	}
-	if (bg.windows_on_main_screen) {
-		window_mask(bg.main_scanline, bg.window1_enabled, bg.window2_enabled, bg.window1_inverted, bg.window2_inverted, bg.mask_logic, bg.enable_colour_math);
-	}
-}*/
-
 void PPU::fetch_objects() {
 
 	object_buffer.clear();
+	range_over = false;
 
-	for (int i = 0; i < 128 && object_buffer.size() < MAX_OBJECTS; i++) {
+	int first_object = 0;
+
+	if (oam.priority_rotation) {
+		first_object = (oam.reload >> 1) & 0x7F;
+	}
+
+	for (int n = 0; n < 128 && object_buffer.size() < MAX_OBJECTS; n++) {
+		int i = (first_object + n) & 0x7F;
 		Word x_coordinate = oam.data[(4 * i) + 0];
 		Word y_coordinate = oam.data[(4 * i) + 1];
 		Word tile_number  = oam.data[(4 * i) + 2];
@@ -447,7 +418,10 @@ void PPU::fetch_objects() {
 			obj.render_width = render_width;
 			obj.render_height = render_height;
 			obj.line_in_sprite = line_in_sprite;
-
+			if (object_buffer.size() >= MAX_OBJECTS) {
+				range_over = true;
+				break;
+			}
 			object_buffer.push_back(obj);
 		} 
 	}
@@ -722,7 +696,7 @@ void PPU::clear_framebuffer(std::vector<uint32_t>& f) {
 }
 
 void PPU::add_to_framebuffer(std::vector<uint32_t>& f, std::array<Pixel, 512>& line) {
-	int idx1 = screen_width * (2 * vcounter);
+	int idx1 = screen_width * (2 * (vcounter - 1));
 
 	for (int i = 0; i < screen_width; i++) {
 		f[idx1 + i] = convert_to_rgba(line[i].colour);
@@ -829,8 +803,8 @@ void PPU::render_scanline() {
 	std::array<Pixel, 512> final_scanline;
 	composite(final_scanline);
 	
-	int idx1 = screen_width * (2 * vcounter);
-	int idx2 = screen_width * ((2 * vcounter) + 1);
+	int idx1 = screen_width * (2 * (vcounter - 1));
+	int idx2 = screen_width * ((2 * (vcounter - 1)) + 1);
 	
 	if (forced_blank) {
 		for (int i = 0; i < screen_width; i++) {
@@ -903,8 +877,10 @@ void PPU::enter_vblank() {
 		cpu->set_hvbjoy_flag(0b1 << 7, true);
 	}
 	
-	oam.oamadd = oam.reload << 1;
-
+	if (!forced_blank) {
+		oam.oamadd = oam.reload << 1;
+	}
+	
 	call_nmi();
 }
 
@@ -948,7 +924,8 @@ void PPU::update_vblank() {
 
 void PPU::end_scanline() {
 	vcounter += 1;
-	if (vcounter < (overscan_mode ? overscan_vcount : no_overscan_vcount)) {
+	int visible_lines = overscan_mode ? overscan_vcount : no_overscan_vcount;
+	if (vcounter >= 1 && vcounter <= visible_lines) {
 		render_scanline();
 	}
 	update_vblank();
@@ -970,17 +947,17 @@ void PPU::tick_component() {
 
 	update_hblank();
 
-	if (irq_mode == 1 && (int)(hcounter / 4) == h_time_target) {
-		call_irq();
-	}
-	if (irq_mode == 2 && vcounter == v_time_target && (int)(hcounter / 4) == 0) {
-		call_irq();
-	}
-	if (irq_mode == 3 && vcounter == v_time_target && (int)(hcounter / 4) == h_time_target) {
-		call_irq();
-	}
+	bool condition_now =
+	    (irq_mode == 1 && hcounter == 4 * h_time_target) ||
+	    (irq_mode == 2 && vcounter == v_time_target && hcounter == 0) ||
+	    (irq_mode == 3 && vcounter == v_time_target && hcounter == 4 * h_time_target);
 
-	cycle += PPU_CYCLE;
+	if (condition_now && !irq_condition_met) {
+	    call_irq();
+	}
+	irq_condition_met = condition_now;
+
+	cycle += 1;
 };
 
 void PPU::connect_dma_controller(DMAController* dma_controller) {
