@@ -68,7 +68,7 @@ void Voice::decode_brr_block() {
 
 		sample = std::clamp(sample, -32768, 32767);
 		sample = sample & ~1;
-
+		
 		decoded_samples[i] = sample;
 		prev2 = prev1;
 		prev1 = sample;
@@ -101,6 +101,16 @@ void Voice::advance_brr_address() {
 	}
 }
 
+Sample Voice::gauss_interpolate() {
+	int i = (pitch_counter >> 4) & 0xFF;
+	Sample out = (gauss_table[0xFF - i] * gauss.oldest) >> 10;
+	out += (gauss_table[0x1FF - i] * gauss.older) >> 10;
+	out += (gauss_table[0x100 + i] * gauss.old) >> 10;
+	out += (gauss_table[0x000 + i] * gauss.newest) >> 10;
+	out = out >> 1;
+	return out;
+};
+
 void Voice::tick() {
 	if (!active) {
 		current_sample = 0;
@@ -125,9 +135,14 @@ void Voice::tick() {
 			decode_brr_block();
 			sample_index = 0;
 		}
-	}
 
-	current_sample = decoded_samples[sample_index];
+		gauss.oldest   = gauss.older;
+		gauss.older    = gauss.old;
+		gauss.old      = gauss.newest;
+		gauss.newest   = decoded_samples[sample_index];
+	}
+	
+	current_sample = gauss_interpolate();
 
 	return;
 }

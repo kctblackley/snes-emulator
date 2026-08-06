@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "stereo_sample.hpp"
+#include "gauss_table.hpp"
 #include "audio_buffer.hpp"
 #include <cmath>
 #include <numbers>
@@ -16,11 +17,25 @@ enum class EnvelopeState {
 	DIRECT
 };
 
+struct Gauss {
+	Sample newest = 0;
+	Sample old    = 0;
+	Sample older  = 0;
+	Sample oldest = 0;
+};
+
 class APUBus;
 
 class Voice {
 public:
 	Voice() {}
+
+	void reset_gauss() {
+		gauss.newest = 0;
+		gauss.old    = 0;
+		gauss.older  = 0;
+		gauss.oldest = 0;
+	}
 
 	Byte read(Byte reg) {
 		switch (reg) {
@@ -80,6 +95,8 @@ public:
 		prev1 = 0;
 		prev2 = 0;
 
+		reset_gauss();
+
 		pitch_counter = 0;
 
 		active = true;
@@ -125,6 +142,8 @@ public:
 	void connect_voice_to_sdsp(APUBus* bus) {
 		this->bus = bus;
 	}
+
+	Sample gauss_interpolate();
 
 	void tick();
 	Byte mem_read(Word address);
@@ -197,6 +216,8 @@ private:
 
 	bool loop_flag = false;
 	bool end_flag = false;
+
+	Gauss gauss;
 };
 
 class SDSP {
